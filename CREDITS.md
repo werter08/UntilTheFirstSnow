@@ -6,7 +6,7 @@ No generative AI was used for art or audio.
 
 ## Art
 
-Hands (all poses, grey and beige sweaters) — drawn by the team. Some sweater variants are exact palette swaps of the originals.
+Hands (all poses, grey and beige sweaters), window frame, curtains, curtain rod, window sill and their shadows — drawn by the team. Some sweater variants are exact palette swaps of the originals.
 
 | Asset | Author | Licence | Used for |
 |---|---|---|---|
