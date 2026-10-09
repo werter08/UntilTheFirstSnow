@@ -201,8 +201,8 @@ MonoBehaviour:
   fillTolerance: 0.25
   speedForFullFlow: 8
   flowSmoothing: 4
-  bandMin: 0.25
-  bandMax: 0.6
+  bandMin: 0.12
+  bandMax: 0.55
   pourRadius: 1.4
   bandWeight: 0.6
   minFillToFinish: 0.1

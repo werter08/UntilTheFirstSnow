@@ -1,0 +1,149 @@
+using System.Collections;
+using System.Linq;
+using Courtyard.Core;
+using Courtyard.Kitchen;
+using Courtyard.Minigames;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace Courtyard.Tests
+{
+    /// <summary>How a careful player plays each minigame; every helper asserts the step finishes with good quality.</summary>
+    public abstract class StepPlayers : KitchenPlaytest
+    {
+        protected IEnumerator PlayKettleBoil(float stopAt = 93f, float minQuality = 0.9f)
+        {
+            yield return AdvanceTo<KettleBoilStep>();
+            var step = Object.FindAnyObjectByType<KettleBoilStep>();
+            var switchT = Counter.KettleSwitch.transform;
+            yield return Click(switchT);
+            Assert.That(GetField<object>(step, "_state").ToString(), Is.EqualTo("Heating"), "Kettle switch click did not start heating.");
+
+            var deadline = Time.realtimeSinceStartup + 20f;
+            while (GetField<float>(step, "_heat") < stopAt && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(GetField<float>(Counter.KettleView, "_boil"), Is.EqualTo(1f), "Lid should rattle once the water boils.");
+            yield return Click(switchT);
+            yield return WaitForCompletion();
+            Assert.That(LastQuality, Is.GreaterThanOrEqualTo(minQuality), "KettleBoil quality");
+        }
+
+        protected IEnumerator PlayInstantCoffee()
+        {
+            yield return AdvanceTo<InstantCoffeeStep>();
+            var step = Object.FindAnyObjectByType<InstantCoffeeStep>();
+            var spoon = step.transform.Find("Spoon");
+            var jar = step.transform.Find("Jar");
+            for (var i = 0; i < 2; i++)
+            {
+                yield return Drag(spoon.position, jar.position, Counter.Mug.transform.position + Vector3.up * 0.2f);
+                yield return Wait(0.5f);
+            }
+
+            Assert.That(GetField<int>(step, "_spoons"), Is.EqualTo(2), "Two spoons should have landed in the mug.");
+            yield return Press(Counter.KettleTarget.transform.position);
+            var deadline = Time.realtimeSinceStartup + 15f;
+            while (Counter.MugLevel < 0.85f && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return ReleaseMouse();
+            yield return WaitForCompletion();
+            Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.85f), "InstantCoffee quality");
+        }
+
+        protected IEnumerator PlayGrindBeans()
+        {
+            yield return AdvanceTo<GrindBeansStep>();
+            var step = Object.FindAnyObjectByType<GrindBeansStep>();
+            var meter = GetField<SpriteBar>(step, "meter");
+            var axle = Counter.GrinderArm.position;
+            var knob = Counter.GrinderHandle.transform.position;
+            var radius = Vector2.Distance(axle, knob);
+            var angle = Mathf.Atan2(knob.y - axle.y, knob.x - axle.x);
+
+            yield return Press(knob);
+            var deadline = Time.realtimeSinceStartup + 25f;
+            while (meter.Value < 0.55f && Time.realtimeSinceStartup < deadline)
+            {
+                angle += 0.25f;
+                Move(Mouse.position, ToScreen(axle + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle)) * radius));
+                yield return null;
+            }
+
+            yield return ReleaseMouse();
+            yield return WaitForCompletion();
+            Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.8f), "GrindBeans quality");
+        }
+
+        protected IEnumerator PlayPourOver()
+        {
+            yield return AdvanceTo<PourOverStep>();
+            var centre = Counter.Dripper.position + Vector3.up * 0.4f;
+            yield return Press(centre);
+            var deadline = Time.realtimeSinceStartup + 25f;
+            var angle = 0f;
+            while (Counter.MugLevel < 0.8f && Time.realtimeSinceStartup < deadline)
+            {
+                angle += 7f * Time.deltaTime; // ~1.1 turn/s (game time) at 0.45 units ≈ 3 units/s: steady circles
+                Move(Mouse.position, ToScreen(centre + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle)) * 0.45f));
+                yield return null;
+            }
+
+            yield return ReleaseMouse();
+            yield return WaitForCompletion();
+            Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.6f), "PourOver quality");
+        }
+
+        protected IEnumerator PlayWaveBack()
+        {
+            yield return AdvanceTo<WaveBackStep>();
+            yield return Click(Counter.Mug.transform);
+            yield return WaitForCompletion();
+        }
+
+        protected IEnumerator PlaySteamMilk()
+        {
+            yield return AdvanceTo<SteamMilkStep>();
+            var step = Object.FindAnyObjectByType<SteamMilkStep>();
+            yield return Press(Counter.MilkJug.transform.position);
+            var deadline = Time.realtimeSinceStartup + 20f;
+            while (GetField<float>(step, "_temperature") < 64f && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return ReleaseMouse();
+            yield return WaitForCompletion();
+            Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.9f), "SteamMilk quality");
+        }
+
+        protected IEnumerator PlayPickToppings<T>(params Topping[] toppings) where T : MinigameStep
+        {
+            yield return AdvanceTo<PickToppingsStep>();
+            foreach (var topping in toppings)
+            {
+                var jar = Counter.ToppingJars.First(j => j.Topping == topping);
+                yield return Click(jar.transform);
+                Assert.That(jar.IsPicked, Is.True, $"{topping} should be picked after a click.");
+            }
+
+            yield return Click(Counter.Mug.transform);
+            yield return WaitForCompletion();
+        }
+
+        protected IEnumerator PlayChooseMug(bool hers = true)
+        {
+            yield return AdvanceTo<ChooseMugStep>();
+            var step = Object.FindAnyObjectByType<ChooseMugStep>();
+            var index = GetField<int>(step, "herMugIndex");
+            yield return Click(step.transform.Find(hers ? $"Mug{index}" : $"Mug{(index + 1) % 3}"));
+            yield return WaitForCompletion();
+        }
+
+        protected IEnumerator FinishDay(float timeoutSeconds = 40f)
+        {
+            var deadline = Time.realtimeSinceStartup + timeoutSeconds;
+            while (SceneManager.GetActiveScene().name != SceneNames.Ending && Time.realtimeSinceStartup < deadline)
+            {
+                yield return ClickScreen(new Vector2(Screen.width * 0.5f, Screen.height * 0.25f));
+                yield return Wait(0.2f);
+            }
+
+            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo(SceneNames.Ending), "Day did not finish.");
+        }
+    }
+}

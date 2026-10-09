@@ -25,8 +25,8 @@ namespace Courtyard.Minigames
         [Tooltip("Pointer speed (world units/s) that reads as full flow.")]
         [SerializeField, Min(0.1f)] private float speedForFullFlow = 8f;
         [SerializeField, Min(0.1f)] private float flowSmoothing = 4f;
-        [SerializeField, Range(0f, 1f)] private float bandMin = 0.25f;
-        [SerializeField, Range(0f, 1f)] private float bandMax = 0.6f;
+        [SerializeField, Range(0f, 1f)] private float bandMin = 0.12f;
+        [SerializeField, Range(0f, 1f)] private float bandMax = 0.55f;
         [Tooltip("Only pours while the pointer is this close to the dripper centre.")]
         [SerializeField, Min(0.1f)] private float pourRadius = 1.4f;
         [SerializeField, Range(0f, 1f)] private float bandWeight = 0.6f;
