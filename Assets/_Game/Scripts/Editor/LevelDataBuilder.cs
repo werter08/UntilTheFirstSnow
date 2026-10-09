@@ -124,6 +124,12 @@ namespace Courtyard.Editor
                     props.FindPropertyRelative("sweater").enumValueIndex = (int)spec.Props.sweater;
                     props.FindPropertyRelative("lampOff").boolValue = spec.Props.lampOff;
                     WriteDrinks(so.FindProperty("drinkResults"), spec.Drinks);
+                    var walkers = so.FindProperty("outroWalkers");
+                    var names = spec.Day == 20 ? new[] { "mug_his", "mug_hers" } : System.Array.Empty<string>();
+                    walkers.arraySize = names.Length;
+                    for (var i = 0; i < names.Length; i++)
+                        walkers.GetArrayElementAtIndex(i).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/Props/{names[i]}.png");
+                    so.FindProperty("finale").boolValue = spec.Day == 30;
                 });
             }
 

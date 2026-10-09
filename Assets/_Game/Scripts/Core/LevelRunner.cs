@@ -146,6 +146,7 @@ namespace Courtyard.Core
             if (drinks.Count > 0) counter.ShowServedDrink(drinks[drinks.Count - 1]);
             yield return fx.ShowDrinks(drinks, counter.Mug.transform.position + Vector3.up * drinkIconHeight, counter.MugSteam);
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
+            if (_level.Finale) yield return Finale();
 
             yield return fader.FadeOut(endColor, fadeDuration);
             yield return Outro();
@@ -155,6 +156,30 @@ namespace Courtyard.Core
                 SceneManager.LoadScene(SceneNames.Ending);
         }
 
+        [Header("Finale")]
+        [Tooltip("Where the camera drifts on the last day (the two mugs on the sill).")]
+        [SerializeField] private Transform finaleFocus;
+        [SerializeField, Min(0.5f)] private float finaleZoom = 2.6f;
+        [SerializeField, Min(0.1f)] private float finaleSeconds = 4f;
+        [SerializeField] private CanvasGroup hudGroup;
+
+        /// <summary>Last day: the HUD fades and the camera drifts to the two mugs on the snowy window sill.</summary>
+        private IEnumerator Finale()
+        {
+            if (finaleFocus == null) yield break;
+            var cam = worldCamera.transform;
+            var fromPos = cam.position;
+            var toPos = new Vector3(finaleFocus.position.x, finaleFocus.position.y + 0.6f, fromPos.z);
+            var fromSize = worldCamera.orthographicSize;
+            yield return Tweens.Run(finaleSeconds, t =>
+            {
+                cam.position = Vector3.Lerp(fromPos, toPos, t);
+                worldCamera.orthographicSize = Mathf.Lerp(fromSize, finaleZoom, t);
+                if (hudGroup != null) hudGroup.alpha = 1f - t;
+            });
+            yield return new WaitForSeconds(1.5f);
+        }
+
         /// <summary>Optional beat over black, e.g. Day 20's footsteps across the courtyard.</summary>
         private IEnumerator Outro()
         {
@@ -162,7 +187,10 @@ namespace Courtyard.Core
 
             if (_level.OutroClip != null) AudioSource.PlayClipAtPoint(_level.OutroClip, worldCamera.transform.position);
             else AudioManager.Play(SfxId.Footsteps);
-            yield return new WaitForSeconds(_level.OutroHoldSeconds);
+            if (_level.OutroWalkers != null && _level.OutroWalkers.Length > 0)
+                yield return fader.Walk(_level.OutroWalkers, _level.OutroHoldSeconds);
+            else
+                yield return new WaitForSeconds(_level.OutroHoldSeconds);
         }
 
         private void UpdateNudge()

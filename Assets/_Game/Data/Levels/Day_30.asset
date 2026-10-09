@@ -37,6 +37,7 @@ MonoBehaviour:
     scarf: 1
     blanket: 1
     plantStage: 3
+    lampOff: 0
     sweater: 1
     fridgeNotes: 3
   steps:
@@ -82,3 +83,5 @@ MonoBehaviour:
   ambience: {fileID: 0}
   outroClip: {fileID: 0}
   outroHoldSeconds: 0
+  outroWalkers: []
+  finale: 1

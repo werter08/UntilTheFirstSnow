@@ -130,7 +130,7 @@ namespace Courtyard.Kitchen
         {
             var props = level.Props;
             grinder.SetActive(props.grinder);
-            dripper.SetActive(props.grinder); // pour-over days are the days with real beans and a grinder
+            dripper.SetActive(HasStep<Minigames.PourOverStep>(level)); // only on days that actually pour over
             milkStation.SetActive(props.milk);
             toppingShelf.SetActive(props.toppings);
             var style = (int)props.brewMug;
@@ -248,6 +248,13 @@ namespace Courtyard.Kitchen
         public void SetMugGauge(bool visible)
         {
             if (mugGauge != null) mugGauge.SetActive(visible);
+        }
+
+        private static bool HasStep<T>(LevelDefinition level) where T : Minigames.MinigameStep
+        {
+            foreach (var step in level.Steps)
+                if (step is T) return true;
+            return false;
         }
 
         public void SetAllInteractable(bool value)

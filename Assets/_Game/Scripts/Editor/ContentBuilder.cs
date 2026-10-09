@@ -88,6 +88,42 @@ namespace Courtyard.Editor
             });
         }
 
+        /// <summary>Adds the outro 'walker' (two images that cross the black screen) to the ScreenFader prefab.</summary>
+        [MenuItem("Courtyard/Setup/Patch Fader Walker")]
+        public static void PatchFaderWalker()
+        {
+            var root = PrefabUtility.LoadPrefabContents(FaderPath);
+            try
+            {
+                if (root.transform.Find("Walker") == null)
+                {
+                    var walker = UiObject("Walker", root.transform);
+                    Place(walker, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(360f, 180f));
+                    var images = new Object[2];
+                    for (var i = 0; i < 2; i++)
+                    {
+                        var img = UiObject($"Mug{i}", walker);
+                        Place(img, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-85f + 170f * i, 0f), new Vector2(160f, 124f));
+                        var image = img.gameObject.AddComponent<Image>();
+                        image.raycastTarget = false;
+                        image.preserveAspect = true;
+                        images[i] = image;
+                    }
+
+                    walker.gameObject.SetActive(false);
+                    var fader = root.GetComponent<ScreenFader>();
+                    Wire(fader, "walker", walker);
+                    WireArray(fader, "walkerImages", images);
+                }
+
+                PrefabUtility.SaveAsPrefabAsset(root, FaderPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
         [MenuItem("Courtyard/Setup/Patch Levels (art manifest)")]
         public static void PatchLevelsForArtManifest() => LevelDataBuilder.PatchArtManifest();
 

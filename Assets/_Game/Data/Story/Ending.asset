@@ -18,4 +18,33 @@ MonoBehaviour:
     condition: 0
     style: 1
     speaker: 
-    text: Thank you for playing.
+    text: Until the First Snow
+  - trigger: 2
+    stepIndex: 0
+    condition: 0
+    style: 0
+    speaker: 
+    text: A small story about coffee, an autumn, and the window across the courtyard.
+  - trigger: 2
+    stepIndex: 0
+    condition: 0
+    style: 1
+    speaker: 
+    text: 'Made in 72 hours for Mini Jam 221: Autumn.
+
+      Limitation: Staying
+      Warm.'
+  - trigger: 2
+    stepIndex: 0
+    condition: 0
+    style: 1
+    speaker: 
+    text: 'Art: drawn by the team.
+
+      Decor: ODDBLOT (Basic Coffee Shop pack).'
+  - trigger: 2
+    stepIndex: 0
+    condition: 0
+    style: 0
+    speaker: 
+    text: Thank you for playing. Stay warm.

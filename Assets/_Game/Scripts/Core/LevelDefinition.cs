@@ -52,6 +52,12 @@ namespace Courtyard.Core
         [Tooltip("Played over black after the last line (Day 20: footsteps across the courtyard).")]
         [SerializeField] private AudioClip outroClip;
         [SerializeField, Min(0f)] private float outroHoldSeconds;
+        [Tooltip("Shown walking across the black outro (Day 20: his and her mugs).")]
+        [SerializeField] private Sprite[] outroWalkers;
+
+        [Header("Finale")]
+        [Tooltip("Last day: after the final lines the camera drifts to the window sill before the ending.")]
+        [SerializeField] private bool finale;
 
         public int DayNumber => dayNumber;
         public string ClockTime => clockTime;
@@ -74,6 +80,8 @@ namespace Courtyard.Core
         public IReadOnlyList<DrinkResult> DrinkResults => drinkResults;
         public AudioClip OutroClip => outroClip;
         public float OutroHoldSeconds => outroHoldSeconds;
+        public Sprite[] OutroWalkers => outroWalkers;
+        public bool Finale => finale;
 
         public List<StoryBeat> GetBeats(BeatTrigger trigger, int stepIndex = 0, bool goodResult = true) =>
             storyBeats.Where(b => b != null && b.Matches(trigger, stepIndex, goodResult)).ToList();

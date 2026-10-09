@@ -823,10 +823,85 @@ namespace Courtyard.Editor
                 Poke(note, note, swing: 8f, punch: 0f, sound: Audio.SfxId.PaperNote);
             }
 
+            ApplySoftParticles(kitchen, scene);
+            ApplyNeighbours(kitchen);
+            ApplyFinale(scene, kitchen);
+
             // Mira's window: poke it and (from Day 5) she waves back.
             var miraWindow = Find(kitchen, "MiraWindow");
             var miraFidget = Poke(miraWindow, miraWindow, swing: 0f, punch: 0f, sound: Audio.SfxId.UiClick);
             Wire(kitchen.GetComponent<KitchenDirector>(), "miraWindowFidget", miraFidget);
+        }
+
+        /// <summary>Snow and steam as soft round puffs (code-generated radial gradient) instead of squares.</summary>
+        private static void ApplySoftParticles(Transform kitchen, Scene scene)
+        {
+            var soft = AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png");
+            if (soft == null) return;
+            var systems = new[] { "Snow", "Steam", "SpoutSteam" }
+                .Select(n => scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ParticleSystem>(true)).FirstOrDefault(p => p.name == n))
+                .Where(p => p != null);
+            foreach (var system in systems)
+            {
+                var sheet = system.textureSheetAnimation;
+                sheet.enabled = true;
+                sheet.mode = ParticleSystemAnimationMode.Sprites;
+                while (sheet.spriteCount > 0) sheet.RemoveSprite(0);
+                sheet.AddSprite(soft);
+                var main = system.main;
+                if (system.name == "Snow") main.startSize = new ParticleSystem.MinMaxCurve(0.09f, 0.18f);
+                else main.startSize = new ParticleSystem.MinMaxCurve(0.25f, 0.4f);
+                EditorUtility.SetDirty(system);
+            }
+        }
+
+        /// <summary>A few windows across the courtyard whose lights go on and off.</summary>
+        private static void ApplyNeighbours(Transform kitchen)
+        {
+            var root = Find(kitchen, "NeighbourWindows", false) ?? Empty(kitchen, "NeighbourWindows", Vector2.zero);
+            var positions = new[] { new Vector2(2.25f, 2.75f), new Vector2(-0.35f, 2.75f), new Vector2(0.85f, 0.85f), new Vector2(2.25f, 0.85f) };
+            var square = AssetDatabase.LoadAssetAtPath<Sprite>(SquarePath);
+            var renderers = new Object[positions.Length];
+            for (var i = 0; i < positions.Length; i++)
+            {
+                var w = SpriteChild(root, $"Window{i}");
+                var r = w.GetComponent<SpriteRenderer>();
+                r.sprite = square;
+                r.drawMode = SpriteDrawMode.Sliced;
+                r.size = new Vector2(0.75f, 0.9f);
+                r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                w.localPosition = positions[i];
+                SetLayer(w, "Outside", 3);
+                renderers[i] = r;
+            }
+
+            WireArray(GetOrAdd<NeighbourWindows>(root), "windows", renderers);
+        }
+
+        /// <summary>Finale: camera focus on the sill mugs, and a HUD group that fades out.</summary>
+        private static void ApplyFinale(Scene scene, Transform kitchen)
+        {
+            var focus = Find(kitchen, "FinaleFocus", false) ?? Empty(kitchen, "FinaleFocus", Vector2.zero);
+            focus.localPosition = new Vector3(0f, -0.1f, 0f);
+
+            var canvas = scene.GetRootGameObjects().First(g => g.name == "Canvas").transform;
+            var hud = canvas.Find("HUD");
+            if (hud == null)
+            {
+                hud = UiObject("HUD", canvas);
+                Stretch((RectTransform)hud);
+                hud.SetSiblingIndex(1); // above the vignette, below story / fader / day card
+                hud.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
+                foreach (var name in new[] { "WarmthMeter_Him", "WarmthMeter_Mira", "Hint" })
+                {
+                    var t = canvas.Find(name);
+                    if (t != null) t.SetParent(hud, false);
+                }
+            }
+
+            var runner = scene.GetRootGameObjects().Select(g => g.GetComponent<LevelRunner>()).First(r => r != null);
+            Wire(runner, "finaleFocus", focus);
+            Wire(runner, "hudGroup", hud.GetComponent<CanvasGroup>());
         }
 
         private static void Motion(Transform target, float sway = 0f, float bob = 0f, float stretch = 0f, float speed = 0.6f, float wind = 1f)
