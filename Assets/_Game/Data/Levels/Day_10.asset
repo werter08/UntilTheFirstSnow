@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78eddf7c619aa4f4a8d3ed387409050b, type: 3}
+  m_Name: Day_10
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.LevelDefinition
+  dayNumber: 10
+  clockTime: 09:15
+  timeOfDay: 0
+  weather: 3
+  palette:
+    globalLightColor: {r: 1, g: 0.92, b: 0.78, a: 1}
+    globalLightIntensity: 1.1
+    lampColor: {r: 1, g: 0.82, b: 0.55, a: 1}
+    lampIntensity: 0.5
+    miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
+    vignetteTint: {r: 0, g: 0, b: 0, a: 0}
+  treeStage: 2
+  miraWindow: 1
+  props:
+    beans: 1
+    grinder: 1
+    milk: 1
+    cinnamon: 1
+    herMug: 0
+    scarf: 0
+    blanket: 0
+    plantStage: 1
+    fridgeNotes: 1
+  steps:
+  - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
+  - {fileID: 104158219434757867, guid: dccb5e1aee3234a4484f894ced79da0d, type: 3}
+  - {fileID: 6738547792549017874, guid: 61b9f335f46924425b3f7ffe28e6e34a, type: 3}
+  - {fileID: 5262487450328234932, guid: 8b01d6c73ddfa4e92b1fd201f6a01f3c, type: 3}
+  - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
+  - {fileID: 7175227584742457043, guid: cbeeab98e4bdc40cdbee94abbb2e6547, type: 3}
+  storyBeats:
+  - trigger: 0
+    stepIndex: 0
+    condition: 0
+    style: 0
+    speaker: 
+    text: Sunday. The light is different today.
+  - trigger: 1
+    stepIndex: 3
+    condition: 0
+    style: 2
+    speaker: Mira
+    text: "Hi\u2026 I'm Mira, from across. I ran out of coffee. Could I borrow some?"
+  - trigger: 1
+    stepIndex: 4
+    condition: 0
+    style: 2
+    speaker: Mira
+    text: "Something sweet\u2026 with cinnamon? Surprise me."
+  - trigger: 2
+    stepIndex: 0
+    condition: 1
+    style: 2
+    speaker: Mira
+    text: Okay. That's the best cup I've had this month.
+  - trigger: 2
+    stepIndex: 0
+    condition: 2
+    style: 2
+    speaker: Mira
+    text: "It's\u2026 nice. Thank you."
+  - trigger: 2
+    stepIndex: 0
+    condition: 0
+    style: 0
+    speaker: 
+    text: I think I'm smiling. Weird feeling.
+  twoMeters: 0
+  startWarmth: 70
+  drainPerSecond: 3
+  coldMultiplier: 1
+  warmthPerStep: 12
+  drinkWarmthBonus: 25
+  goodResultThreshold: 0.7
+  failText: "Too cold\u2026 let's try again."
+  ambience: {fileID: 0}

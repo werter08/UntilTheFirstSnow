@@ -1,4 +1,5 @@
 using System;
+using Courtyard.Core;
 using UnityEngine;
 
 namespace Courtyard.Minigames
@@ -11,11 +12,16 @@ namespace Courtyard.Minigames
     {
         [Tooltip("Shown at the top of the screen while this step runs.")]
         [SerializeField, TextArea] private string hintText;
+        [Tooltip("Unscored steps (story events like waving back) don't restore warmth or count toward the drink.")]
+        [SerializeField] private bool scored = true;
+        [SerializeField] private WarmthTarget warmthTarget = WarmthTarget.Both;
 
         /// <summary>Raised once with the result quality in [0, 1].</summary>
         public event Action<float> Completed;
 
         public string HintText => hintText;
+        public bool Scored => scored;
+        public WarmthTarget WarmthTarget => warmthTarget;
         public bool IsComplete { get; private set; }
 
         public abstract void Begin(MinigameContext ctx);

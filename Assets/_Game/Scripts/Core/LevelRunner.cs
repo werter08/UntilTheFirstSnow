@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Courtyard.Kitchen;
 using Courtyard.Minigames;
 using Courtyard.Story;
 using Courtyard.UI;
@@ -12,6 +13,7 @@ namespace Courtyard.Core
     /// <summary>
     /// Runs one day in the kitchen: story → minigame steps (warmth drains) → serve → ending beat → next level.
     /// Warmth only drains while a step is being played, never while story text is on screen.
+    /// Day 20 uses two meters (him, Mira); the level fails gently when either empties.
     /// </summary>
     public sealed class LevelRunner : MonoBehaviour
     {
@@ -20,6 +22,7 @@ namespace Courtyard.Core
 
         [Header("Scene refs")]
         [SerializeField] private Camera worldCamera;
+        [SerializeField] private KitchenDirector kitchen;
         [SerializeField] private Transform stepRoot;
         [SerializeField] private StoryPlayer story;
         [SerializeField] private HintView hint;
@@ -33,7 +36,7 @@ namespace Courtyard.Core
         [SerializeField] private Color failColor = new(0.55f, 0.7f, 0.9f);
         [SerializeField, Min(0f)] private float failHoldSeconds = 2.5f;
 
-        private readonly List<WarmthMeter> _meters = new();
+        private WarmthGroup _warmth;
         private LevelDefinition _level;
         private Coroutine _run;
         private MinigameStep _activeStep;
@@ -52,36 +55,27 @@ namespace Courtyard.Core
                 return;
             }
 
+            kitchen.Apply(_level);
             CreateMeters();
             _run = StartCoroutine(Run());
         }
 
         private void Update()
         {
-            if (!_draining) return;
-            foreach (var meter in _meters) meter.Tick(Time.deltaTime);
+            if (_draining) _warmth.Tick(Time.deltaTime);
         }
 
         private void OnDestroy()
         {
-            foreach (var meter in _meters) meter.Depleted -= OnMeterDepleted;
+            if (_warmth != null) _warmth.Depleted -= OnMeterDepleted;
         }
 
         private void CreateMeters()
         {
-            var count = _level.TwoMeters ? 2 : 1;
+            _warmth = new WarmthGroup(_level.TwoMeters ? 2 : 1, _level.StartWarmth, _level.EffectiveDrainPerSecond);
+            _warmth.Depleted += OnMeterDepleted;
             for (var i = 0; i < meterViews.Length; i++)
-            {
-                WarmthMeter meter = null;
-                if (i < count)
-                {
-                    meter = new WarmthMeter(_level.StartWarmth, _level.EffectiveDrainPerSecond);
-                    meter.Depleted += OnMeterDepleted;
-                    _meters.Add(meter);
-                }
-
-                meterViews[i].Bind(meter);
-            }
+                meterViews[i].Bind(i < _warmth.Meters.Count ? _warmth.Meters[i] : null);
         }
 
         private IEnumerator Run()
@@ -97,24 +91,30 @@ namespace Courtyard.Core
                 _activeStep = Instantiate(_level.Steps[i], stepRoot);
                 _activeStep.Completed += q => quality = q;
                 hint.Show(_activeStep.HintText);
-                _activeStep.Begin(new MinigameContext(_level, i, worldCamera));
+                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen));
 
                 _draining = true;
                 yield return new WaitUntil(() => quality >= 0f);
                 _draining = false;
 
                 hint.Hide();
-                Destroy(_activeStep.gameObject);
+                var step = _activeStep;
                 _activeStep = null;
+                Destroy(step.gameObject);
 
-                qualities.Add(quality);
-                RestoreAll(quality * _level.WarmthPerStep);
+                if (step.Scored)
+                {
+                    qualities.Add(quality);
+                    _warmth.Restore(step.WarmthTarget, quality * _level.WarmthPerStep);
+                }
+
                 yield return story.Play(_level.GetBeats(BeatTrigger.AfterStep, i, IsGood(quality)));
             }
 
             // Serve the drink.
-            RestoreAll(qualities.Average() * _level.DrinkWarmthBonus);
-            var lastGood = IsGood(qualities[qualities.Count - 1]);
+            var finalQuality = qualities.Count > 0 ? qualities.Average() : 1f;
+            _warmth.Restore(WarmthTarget.Both, finalQuality * _level.DrinkWarmthBonus);
+            var lastGood = qualities.Count == 0 || IsGood(qualities[qualities.Count - 1]);
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
 
             yield return fader.FadeOut(endColor, fadeDuration);
@@ -125,11 +125,6 @@ namespace Courtyard.Core
         }
 
         private bool IsGood(float quality) => quality >= _level.GoodResultThreshold;
-
-        private void RestoreAll(float amount)
-        {
-            foreach (var meter in _meters) meter.Restore(amount);
-        }
 
         private void OnMeterDepleted()
         {

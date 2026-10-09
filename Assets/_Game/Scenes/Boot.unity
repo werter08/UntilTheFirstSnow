@@ -449,6 +449,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Courtyard::Courtyard.Core.GameManager
   levels:
   - {fileID: 11400000, guid: 2552812200d2244abbc33e3af5b9475b, type: 2}
+  - {fileID: 11400000, guid: 92678b0a12f334f2ca2c2fdca5a65fa3, type: 2}
+  - {fileID: 11400000, guid: 25fb4d3d5daa743ff9cdffe51a6f6337, type: 2}
+  - {fileID: 11400000, guid: 91c6f38b8aa724ee79bf194d4009b23c, type: 2}
+  - {fileID: 11400000, guid: be4310f74d9fb4abc881f8a0a7b2d436, type: 2}
 --- !u!4 &834560758
 Transform:
   m_ObjectHideFlags: 0

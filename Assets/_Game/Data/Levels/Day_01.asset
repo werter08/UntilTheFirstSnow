@@ -17,10 +17,10 @@ MonoBehaviour:
   timeOfDay: 0
   weather: 1
   palette:
-    globalLightColor: {r: 1, g: 1, b: 1, a: 1}
+    globalLightColor: {r: 0.78, g: 0.82, b: 0.9, a: 1}
     globalLightIntensity: 1
-    lampColor: {r: 1, g: 1, b: 1, a: 1}
-    lampIntensity: 1
+    lampColor: {r: 0.85, g: 0.92, b: 1, a: 1}
+    lampIntensity: 0.6
     miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
     vignetteTint: {r: 0, g: 0, b: 0, a: 0}
   treeStage: 0
@@ -34,6 +34,7 @@ MonoBehaviour:
     scarf: 0
     blanket: 0
     plantStage: 0
+    fridgeNotes: 0
   steps:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
   - {fileID: 101021968709363197, guid: bca0533581c304f6fa91ef775294c5ec, type: 3}

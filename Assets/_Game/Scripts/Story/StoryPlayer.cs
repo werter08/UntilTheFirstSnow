@@ -4,6 +4,7 @@ using Courtyard.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Courtyard.Story
 {
@@ -13,12 +14,23 @@ namespace Courtyard.Story
     public sealed class StoryPlayer : MonoBehaviour
     {
         [SerializeField] private CanvasGroup box;
+        [SerializeField] private Image background;
         [SerializeField] private TMP_Text body;
         [SerializeField] private GameObject speakerRoot;
         [SerializeField] private TMP_Text speakerLabel;
         [SerializeField] private GameObject continueHint;
         [SerializeField, Min(1f)] private float charactersPerSecond = 40f;
         [SerializeField, Min(0f)] private float fadeDuration = 0.25f;
+
+        [Header("Style colours (background / text)")]
+        [SerializeField] private Color defaultBackground = new(0.1f, 0.1f, 0.12f, 0.88f);
+        [SerializeField] private Color defaultText = new(0.95f, 0.93f, 0.88f);
+        [Tooltip("Note beats look like a paper card.")]
+        [SerializeField] private Color noteBackground = new(0.96f, 0.93f, 0.82f, 0.97f);
+        [SerializeField] private Color noteText = new(0.2f, 0.17f, 0.14f);
+        [Tooltip("Phone beats look like a chat bubble.")]
+        [SerializeField] private Color phoneBackground = new(0.3f, 0.45f, 0.75f, 0.95f);
+        [SerializeField] private Color phoneText = Color.white;
 
         private void Awake()
         {
@@ -46,6 +58,7 @@ namespace Courtyard.Story
             speakerRoot.SetActive(isDialogue);
             speakerLabel.text = isDialogue ? beat.Speaker : string.Empty;
             body.fontStyle = beat.Style == BeatStyle.Thought ? FontStyles.Italic : FontStyles.Normal;
+            ApplyStyleColours(beat.Style);
             body.text = beat.Text;
             body.maxVisibleCharacters = 0;
             continueHint.SetActive(false);
@@ -73,6 +86,16 @@ namespace Courtyard.Story
             continueHint.SetActive(true);
             while (!PressedThisFrame()) yield return null;
             yield return null;
+        }
+
+        private void ApplyStyleColours(BeatStyle style)
+        {
+            (background.color, body.color) = style switch
+            {
+                BeatStyle.Note => (noteBackground, noteText),
+                BeatStyle.Phone => (phoneBackground, phoneText),
+                _ => (defaultBackground, defaultText),
+            };
         }
 
         private static bool PressedThisFrame() => Pointer.current != null && Pointer.current.press.wasPressedThisFrame;

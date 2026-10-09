@@ -14,5 +14,6 @@ namespace Courtyard.Core
         public bool scarf;
         public bool blanket;
         public PlantStage plantStage;
+        [UnityEngine.Range(0, 3)] public int fridgeNotes;
     }
 }

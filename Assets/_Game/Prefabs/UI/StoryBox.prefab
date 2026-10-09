@@ -592,9 +592,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Story.StoryPlayer
   box: {fileID: 3130148305790088736}
+  background: {fileID: 1278091776898649106}
   body: {fileID: 1675598571620552263}
   speakerRoot: {fileID: 7522230470940349972}
   speakerLabel: {fileID: 4413388362795769075}
   continueHint: {fileID: 8508172986959365161}
   charactersPerSecond: 40
   fadeDuration: 0.25
+  defaultBackground: {r: 0.1, g: 0.1, b: 0.12, a: 0.88}
+  defaultText: {r: 0.95, g: 0.93, b: 0.88, a: 1}
+  noteBackground: {r: 0.96, g: 0.93, b: 0.82, a: 0.97}
+  noteText: {r: 0.2, g: 0.17, b: 0.14, a: 1}
+  phoneBackground: {r: 0.3, g: 0.45, b: 0.75, a: 0.95}
+  phoneText: {r: 1, g: 1, b: 1, a: 1}

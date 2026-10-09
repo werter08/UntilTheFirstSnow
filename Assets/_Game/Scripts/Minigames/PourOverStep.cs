@@ -1,0 +1,118 @@
+using Courtyard.Core;
+using Courtyard.Kitchen;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace Courtyard.Minigames
+{
+    /// <summary>
+    /// Hold over the V60 to pour and move in slow circles. Flow follows how fast the pointer moves and must stay in a band.
+    /// Quality = share of pouring time in the band + how close the fill ends to the line.
+    /// </summary>
+    public sealed class PourOverStep : MinigameStep
+    {
+        [Header("Scene refs")]
+        [SerializeField] private PointerTarget pourZone;
+        [SerializeField] private Transform dripperCenter;
+        [Tooltip("Follows the pointer while pouring.")]
+        [SerializeField] private Transform kettle;
+        [SerializeField] private SpriteRenderer stream;
+        [SerializeField] private SpriteBar fill;
+        [SerializeField] private Transform fillLine;
+        [SerializeField] private SpriteBar flowMeter;
+        [SerializeField] private SpriteRenderer flowBand;
+
+        [Header("Tuning")]
+        [SerializeField, Min(0.01f)] private float fillPerSecond = 0.12f;
+        [SerializeField, Range(0f, 1f)] private float targetFill = 0.8f;
+        [SerializeField, Min(0.01f)] private float fillTolerance = 0.25f;
+        [Tooltip("Pointer speed (world units/s) that reads as full flow.")]
+        [SerializeField, Min(0.1f)] private float speedForFullFlow = 8f;
+        [SerializeField, Min(0.1f)] private float flowSmoothing = 4f;
+        [SerializeField, Range(0f, 1f)] private float bandMin = 0.25f;
+        [SerializeField, Range(0f, 1f)] private float bandMax = 0.6f;
+        [Tooltip("Only pours while the pointer is this close to the dripper centre.")]
+        [SerializeField, Min(0.1f)] private float pourRadius = 1.4f;
+        [SerializeField, Range(0f, 1f)] private float bandWeight = 0.6f;
+        [SerializeField, Range(0f, 1f)] private float minFillToFinish = 0.1f;
+
+        private Camera _camera;
+        private Vector3 _kettleRest;
+        private Vector2 _lastPointer;
+        private float _flow;
+        private float _pourTime;
+        private float _bandTime;
+
+        public override void Begin(MinigameContext ctx)
+        {
+            _camera = ctx.WorldCamera;
+            _kettleRest = kettle.position;
+            pourZone.Pressed += OnPressed;
+            pourZone.Released += OnReleased;
+
+            fill.SetValue(0f);
+            flowMeter.SetValue(0f);
+            stream.enabled = false;
+            fillLine.localPosition = new Vector3(fillLine.localPosition.x, targetFill * fill.MaxHeight, 0f);
+
+            var height = flowMeter.MaxHeight;
+            flowBand.size = new Vector2(flowBand.size.x, (bandMax - bandMin) * height);
+            flowBand.transform.localPosition = new Vector3(0f, (bandMin + bandMax) * 0.5f * height, 0f);
+        }
+
+        private void OnDestroy()
+        {
+            if (pourZone == null) return;
+            pourZone.Pressed -= OnPressed;
+            pourZone.Released -= OnReleased;
+        }
+
+        private void OnPressed() => _lastPointer = PointerWorld();
+
+        private void OnReleased()
+        {
+            kettle.position = _kettleRest;
+            stream.enabled = false;
+            if (!IsComplete && fill.Value >= minFillToFinish) Finish();
+        }
+
+        private void Update()
+        {
+            if (IsComplete || !pourZone.IsHeld) return;
+
+            var pointer = PointerWorld();
+            var speed = (pointer - _lastPointer).magnitude / Mathf.Max(Time.deltaTime, 0.0001f);
+            _lastPointer = pointer;
+            _flow = Mathf.Lerp(_flow, Mathf.Clamp01(speed / speedForFullFlow), 1f - Mathf.Exp(-flowSmoothing * Time.deltaTime));
+            flowMeter.SetValue(_flow);
+
+            kettle.position = new Vector3(pointer.x, pointer.y, kettle.position.z);
+            var overDripper = Vector2.Distance(pointer, dripperCenter.position) <= pourRadius;
+            stream.enabled = overDripper;
+            if (!overDripper) return;
+
+            _pourTime += Time.deltaTime;
+            if (_flow >= bandMin && _flow <= bandMax) _bandTime += Time.deltaTime;
+
+            fill.SetValue(fill.Value + fillPerSecond * Time.deltaTime);
+            if (fill.Value >= 1f) Finish();
+        }
+
+        private Vector2 PointerWorld()
+        {
+            var screen = Pointer.current != null ? Pointer.current.position.ReadValue() : Vector2.zero;
+            return _camera.ScreenToWorldPoint(screen);
+        }
+
+        private void Finish()
+        {
+            pourZone.Interactable = false;
+            stream.enabled = false;
+            kettle.position = _kettleRest;
+
+            var bandScore = _pourTime > 0f ? _bandTime / _pourTime : 0f;
+            var fillScore = Mathf.Clamp01(1f - Mathf.Abs(fill.Value - targetFill) / fillTolerance);
+            Complete(bandWeight * bandScore + (1f - bandWeight) * fillScore);
+        }
+    }
+}

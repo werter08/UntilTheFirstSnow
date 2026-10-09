@@ -1,4 +1,5 @@
 using Courtyard.Core;
+using Courtyard.Kitchen;
 using UnityEngine;
 
 namespace Courtyard.Minigames
@@ -6,15 +7,17 @@ namespace Courtyard.Minigames
     /// <summary>What a step needs to know about the level it runs in.</summary>
     public sealed class MinigameContext
     {
-        public MinigameContext(LevelDefinition level, int stepIndex, Camera worldCamera)
+        public MinigameContext(LevelDefinition level, int stepIndex, Camera worldCamera, KitchenDirector kitchen)
         {
             Level = level;
             StepIndex = stepIndex;
             WorldCamera = worldCamera;
+            Kitchen = kitchen;
         }
 
         public LevelDefinition Level { get; }
         public int StepIndex { get; }
         public Camera WorldCamera { get; }
+        public KitchenDirector Kitchen { get; }
     }
 }
