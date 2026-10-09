@@ -67,7 +67,7 @@ Result: **17/17 PlayMode and 27/27 EditMode pass.** Run them from the Test Runne
 2. **Remaining placeholder art:** courtyard + tree, Mira's window and silhouette, Mira at the door (Day 10), fridge
    notes, honey and salt jars, mug rack, scarf and blanket (Day 30), weather particles (rain/leaves are squares).
 3. **Hover highlight:** tools could lift slightly under the cursor (the open hand already appears).
-4. **"Click" hint in the story box** is small and static — a gentle pulse would help first-time players.
+4. ~~"Click" hint in the story box is small and static~~ — done: it now pulses once the line is typed.
 5. **Settings:** mute / volume toggle and a fullscreen button on the itch page.
 6. **Optional minigame variety** (if the steps still feel alike after audio): stir the drink with a spoon (circular
    drag with a "smoothness" meter), pour milk art on Day 30 (draw a heart).

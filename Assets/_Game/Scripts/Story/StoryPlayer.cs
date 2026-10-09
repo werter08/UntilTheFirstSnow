@@ -86,7 +86,17 @@ namespace Courtyard.Story
             }
 
             continueHint.SetActive(true);
-            while (!PressedThisFrame()) yield return null;
+            var hintText = continueHint.GetComponent<TMP_Text>();
+            var hintColour = hintText != null ? hintText.color : Color.white;
+            while (!PressedThisFrame())
+            {
+                // Gentle pulse so first-time players notice they can click on.
+                if (hintText != null)
+                    hintText.color = new Color(hintColour.r, hintColour.g, hintColour.b, 0.35f + 0.45f * (0.5f + 0.5f * Mathf.Sin(Time.time * 3f)));
+                yield return null;
+            }
+
+            if (hintText != null) hintText.color = hintColour;
             yield return null;
         }
 
