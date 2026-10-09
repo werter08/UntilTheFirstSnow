@@ -27,7 +27,9 @@ namespace Courtyard.Minigames
 
         private void OnDestroy()
         {
-            if (_ctx != null) _ctx.Counter.Mug.Clicked -= OnClicked;
+            if (_ctx == null) return;
+            _ctx.Counter.Mug.Clicked -= OnClicked;
+            _ctx.Hands.Detach();
         }
 
         private void OnClicked()
@@ -40,11 +42,13 @@ namespace Courtyard.Minigames
         private IEnumerator WaveBack()
         {
             var mug = _ctx.Counter.Mug.transform;
+            _ctx.Hands.Attach(mug, HandPose.RaiseMug);
             var start = mug.localPosition;
             var end = start + Vector3.up * raiseHeight;
             yield return Tweens.Run(raiseSeconds, t => mug.localPosition = Vector3.Lerp(start, end, t));
             yield return new WaitForSeconds(holdSeconds);
             yield return Tweens.Run(raiseSeconds, t => mug.localPosition = Vector3.Lerp(end, start, t));
+            _ctx.Hands.Detach();
 
             _ctx.Kitchen.SetMiraWindow(_windowBefore == MiraWindowState.Waving ? MiraWindowState.LitWarmSilhouette : _windowBefore);
             Complete(1f);

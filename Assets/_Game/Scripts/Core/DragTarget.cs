@@ -9,14 +9,17 @@ namespace Courtyard.Core
     /// Needs a Collider2D and a Physics2DRaycaster on the camera.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
-    public sealed class DragTarget : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public sealed class DragTarget : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler,
+        IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private bool interactable = true;
+        [Tooltip("Hand drawing shown while this target is dragged.")]
+        [SerializeField] private HandPose handPose = HandPose.Pinch;
 
         private Collider2D _collider;
 
         /// <summary>Raised for any target when a drag starts / ends (used by the hands view).</summary>
-        public static event Action<Transform> AnyDragStarted;
+        public static event Action<Transform, HandPose> AnyDragStarted;
         public static event Action<Transform> AnyDragEnded;
 
         public event Action<Vector2> DragStarted;
@@ -42,7 +45,7 @@ namespace Courtyard.Core
             if (!interactable || eventData.button != PointerEventData.InputButton.Left) return;
             IsDragging = true;
             DragStarted?.Invoke(ToWorld(eventData));
-            AnyDragStarted?.Invoke(transform);
+            AnyDragStarted?.Invoke(transform, handPose);
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -57,6 +60,13 @@ namespace Courtyard.Core
             DragEnded?.Invoke(ToWorld(eventData));
             AnyDragEnded?.Invoke(transform);
         }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (interactable) PointerTarget.RaiseHoverStarted(transform);
+        }
+
+        public void OnPointerExit(PointerEventData eventData) => PointerTarget.RaiseHoverEnded(transform);
 
         private static Vector2 ToWorld(PointerEventData eventData)
         {

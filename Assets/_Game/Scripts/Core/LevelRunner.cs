@@ -26,6 +26,7 @@ namespace Courtyard.Core
         [SerializeField] private KitchenDirector kitchen;
         [SerializeField] private CounterStation counter;
         [SerializeField] private FeedbackFx fx;
+        [SerializeField] private HandsView hands;
         [SerializeField] private Transform stepRoot;
         [SerializeField] private StoryPlayer story;
         [SerializeField] private HintView hint;
@@ -62,6 +63,7 @@ namespace Courtyard.Core
 
             kitchen.Apply(_level);
             counter.Prepare(_level);
+            hands.SetSweater(_level.Props.sweater);
             CreateMeters();
             _run = StartCoroutine(Run());
         }
@@ -102,7 +104,7 @@ namespace Courtyard.Core
                 _activeStep.Completed += q => quality = q;
                 hint.Show(_activeStep.HintText);
                 counter.SetAllInteractable(false);
-                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx));
+                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands));
 
                 _draining = true;
                 yield return new WaitUntil(() => quality >= 0f);

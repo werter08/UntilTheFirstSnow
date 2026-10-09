@@ -301,6 +301,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Core.PointerTarget
   interactable: 1
+  handPose: 1
 --- !u!1 &6636952437643517090
 GameObject:
   m_ObjectHideFlags: 0
@@ -453,6 +454,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Core.PointerTarget
   interactable: 1
+  handPose: 1
 --- !u!1 &8433270012847786718
 GameObject:
   m_ObjectHideFlags: 0
@@ -606,3 +608,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Core.PointerTarget
   interactable: 1
+  handPose: 1

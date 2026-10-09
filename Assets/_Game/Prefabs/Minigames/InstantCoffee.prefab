@@ -355,6 +355,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Core.DragTarget
   interactable: 1
+  handPose: 2
 --- !u!1 &7013317974362269869
 GameObject:
   m_ObjectHideFlags: 0

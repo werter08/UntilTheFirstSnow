@@ -8,15 +8,23 @@ namespace Courtyard.Core
     /// Click / press-and-hold target for world sprites. Needs a Collider2D and a Physics2DRaycaster on the camera.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
-    public sealed class PointerTarget : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler
+    public sealed class PointerTarget : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler,
+        IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private bool interactable = true;
+        [Tooltip("Hand drawing shown while this target is pressed.")]
+        [SerializeField] private HandPose handPose = HandPose.Point;
 
         private Collider2D _collider;
 
-        /// <summary>Raised for any target when it is pressed / released (used by the hands view).</summary>
-        public static event Action<Transform> AnyPressed;
+        /// <summary>Raised for any target when it is pressed / released / hovered (used by the hands view).</summary>
+        public static event Action<Transform, HandPose> AnyPressed;
         public static event Action<Transform> AnyReleased;
+        public static event Action<Transform> AnyHoverStarted;
+        public static event Action<Transform> AnyHoverEnded;
+
+        internal static void RaiseHoverStarted(Transform target) => AnyHoverStarted?.Invoke(target);
+        internal static void RaiseHoverEnded(Transform target) => AnyHoverEnded?.Invoke(target);
 
         public event Action Pressed;
         public event Action Released;
@@ -31,6 +39,7 @@ namespace Courtyard.Core
                 interactable = value;
                 if (_collider == null) _collider = GetComponent<Collider2D>();
                 _collider.enabled = value;
+                if (!value) AnyHoverEnded?.Invoke(transform);
             }
         }
 
@@ -41,7 +50,7 @@ namespace Courtyard.Core
             if (!interactable || eventData.button != PointerEventData.InputButton.Left) return;
             IsHeld = true;
             Pressed?.Invoke();
-            AnyPressed?.Invoke(transform);
+            AnyPressed?.Invoke(transform, handPose);
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -52,6 +61,13 @@ namespace Courtyard.Core
             AnyReleased?.Invoke(transform);
         }
 
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (interactable) AnyHoverStarted?.Invoke(transform);
+        }
+
+        public void OnPointerExit(PointerEventData eventData) => AnyHoverEnded?.Invoke(transform);
+
         public void OnPointerClick(PointerEventData eventData)
         {
             if (!interactable || eventData.button != PointerEventData.InputButton.Left) return;
@@ -60,6 +76,7 @@ namespace Courtyard.Core
 
         private void OnDisable()
         {
+            AnyHoverEnded?.Invoke(transform);
             if (!IsHeld) return;
             IsHeld = false;
             Released?.Invoke();

@@ -18,6 +18,8 @@ namespace Courtyard.Core
         public bool scarf;
         public bool blanket;
         public PlantStage plantStage;
+        [UnityEngine.Tooltip("Sleeve colour of the clerk's hands.")]
+        public Sweater sweater;
         [UnityEngine.Range(0, 3)] public int fridgeNotes;
     }
 }

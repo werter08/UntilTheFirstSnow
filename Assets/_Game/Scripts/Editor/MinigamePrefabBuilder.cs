@@ -110,6 +110,7 @@ namespace Courtyard.Editor
             var zone = Empty(root.transform, "PourZone", new Vector2(CounterLayout.MugX, -1.0f));
             zone.gameObject.AddComponent<BoxCollider2D>().size = new Vector2(3.4f, 3.4f);
             var pourZone = zone.gameObject.AddComponent<PointerTarget>();
+            WireEnum(pourZone, "handPose", HandPose.Grip);
 
             var flow = Bar(root.transform, "FlowMeter", new Vector2(CounterLayout.MugX + 1.3f, CounterLayout.Top), 0.4f,
                 CounterLayout.GaugeHeight, Water, Gray(0.2f), 0);

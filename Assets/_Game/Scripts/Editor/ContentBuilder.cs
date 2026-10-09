@@ -182,7 +182,7 @@ namespace Courtyard.Editor
             var counter = CounterLayout.Build(director.transform);
             BuildMugSteam(counter);
             var fx = BuildFeedbackFx();
-            BuildHands(camera);
+            var hands = BuildHands(camera);
             var stepRoot = new GameObject("StepRoot").transform;
 
             var canvas = CreateCanvas();
@@ -206,6 +206,7 @@ namespace Courtyard.Editor
             WireArray(runner, "meterViews", new Object[] { meterHim, meterMira });
             Wire(runner, "fader", fader);
             Wire(runner, "fx", fx);
+            Wire(runner, "hands", hands);
             Wire(runner, "dayCard", dayCard);
             Wire(runner, "vignette", vignette);
         }
@@ -240,17 +241,45 @@ namespace Courtyard.Editor
             return fx;
         }
 
-        /// <summary>Placeholder hand (a skin-coloured box) until the hand-drawn sprites are in.</summary>
-        private static void BuildHands(Camera camera)
+        /// <summary>The clerk's hand: hand-drawn pose sprites (HandArt), or a placeholder box if they are missing.</summary>
+        private static HandsView BuildHands(Camera camera)
         {
             var root = new GameObject("Hands");
-            var hand = Box(root.transform, "Hand", Vector2.zero, new Vector2(0.7f, 0.8f), new Color(0.93f, 0.78f, 0.66f), 40, false, "Foreground");
-            Box(hand.transform, "Sleeve", new Vector2(0.25f, -0.6f), new Vector2(0.6f, 0.5f), new Color(0.35f, 0.38f, 0.45f), 39, false, "Foreground");
+            var poses = ((HandPose[])System.Enum.GetValues(typeof(HandPose)))
+                .Select(p => (pose: p, grey: HandArt.Load(p, Sweater.Grey), beige: HandArt.Load(p, Sweater.Beige)))
+                .ToArray();
+            SpriteRenderer hand;
+            var first = poses.FirstOrDefault(p => p.grey != null).grey;
+            if (first != null)
+            {
+                hand = Empty(root.transform, "Hand", Vector2.zero).gameObject.AddComponent<SpriteRenderer>();
+                hand.sprite = first;
+                hand.sortingLayerName = "Foreground";
+                hand.sortingOrder = 40;
+            }
+            else
+            {
+                hand = Box(root.transform, "Hand", Vector2.zero, new Vector2(0.7f, 0.8f), new Color(0.93f, 0.78f, 0.66f), 40, false, "Foreground");
+            }
+
             foreach (var renderer in root.GetComponentsInChildren<SpriteRenderer>())
                 renderer.color = new Color(renderer.color.r, renderer.color.g, renderer.color.b, 0f); // HandsView fades it in
             var view = root.AddComponent<HandsView>();
             Wire(view, "worldCamera", camera);
             Wire(view, "hand", hand);
+            Edit(view, so =>
+            {
+                var array = Property(so, "poses");
+                array.arraySize = poses.Length;
+                for (var i = 0; i < poses.Length; i++)
+                {
+                    var element = array.GetArrayElementAtIndex(i);
+                    element.FindPropertyRelative("pose").enumValueIndex = (int)poses[i].pose;
+                    element.FindPropertyRelative("grey").objectReferenceValue = poses[i].grey;
+                    element.FindPropertyRelative("beige").objectReferenceValue = poses[i].beige;
+                }
+            });
+            return view;
         }
 
         private static WarmthVignette BuildVignette(RectTransform canvas)

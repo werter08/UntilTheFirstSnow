@@ -36,6 +36,7 @@ MonoBehaviour:
     scarf: 0
     blanket: 0
     plantStage: 0
+    sweater: 0
     fridgeNotes: 0
   steps:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}

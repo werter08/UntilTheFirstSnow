@@ -138,6 +138,7 @@ namespace Courtyard.Editor
             props.FindPropertyRelative("blanket").boolValue = value.blanket;
             props.FindPropertyRelative("plantStage").enumValueIndex = (int)value.plantStage;
             props.FindPropertyRelative("fridgeNotes").intValue = value.fridgeNotes;
+            props.FindPropertyRelative("sweater").enumValueIndex = (int)value.sweater;
         }
 
         private static void AddBeat(SerializedProperty list, Beat beat)
@@ -217,7 +218,7 @@ namespace Courtyard.Editor
                 Day = 10, Clock = "09:15", Time = TimeOfDay.Morning, Weather = Weather.Leaves, Tree = TreeStage.Golden,
                 Window = MiraWindowState.LitWarm,
                 Palette = Palette(new Color(1f, 0.92f, 0.78f), 1.1f, new Color(1f, 0.82f, 0.55f), 0.5f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewInHerMug = true, plantStage = PlantStage.Recovering, fridgeNotes = 1 },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewInHerMug = true, plantStage = PlantStage.Recovering, fridgeNotes = 1, sweater = Sweater.Beige },
                 // MiraVisit (knock at the door) sits between PourOver and SteamMilk so her lines follow the brief's order.
                 Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.MiraVisit, P.SteamMilk, P.GuessHerDrink },
                 Beats = new[]
@@ -237,7 +238,7 @@ namespace Courtyard.Editor
                 Day = 20, Clock = "23:40", Time = TimeOfDay.Night, Weather = Weather.Wind, Tree = TreeStage.HalfBare,
                 Window = MiraWindowState.NoteOnGlass,
                 Palette = Palette(new Color(0.45f, 0.5f, 0.75f), 0.7f, new Color(1f, 0.75f, 0.45f), 1f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, plantStage = PlantStage.Healthy, fridgeNotes = 2 },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
                 Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.SteamMilk, P.ChooseMug },
                 Beats = new[]
                 {
@@ -257,7 +258,7 @@ namespace Courtyard.Editor
                 Day = 30, Clock = "17:00", Time = TimeOfDay.Evening, Weather = Weather.Snow, Tree = TreeStage.BareSnow,
                 Window = MiraWindowState.Empty,
                 Palette = Palette(new Color(1f, 0.85f, 0.7f), 0.95f, new Color(1f, 0.72f, 0.42f), 1.1f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewInHerMug = true, herMug = true, scarf = true, blanket = true, plantStage = PlantStage.Blooming, fridgeNotes = 3 },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewInHerMug = true, herMug = true, scarf = true, blanket = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
                 Steps = new[] { P.KettleBoil, P.SteamMilk, P.HerDrinkFromMemory },
                 Beats = new[]
                 {

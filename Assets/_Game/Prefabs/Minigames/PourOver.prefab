@@ -481,3 +481,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Core.PointerTarget
   interactable: 1
+  handPose: 3

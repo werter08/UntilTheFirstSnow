@@ -7,7 +7,7 @@ namespace Courtyard.Minigames
     /// <summary>What a step needs to know about the level it runs in.</summary>
     public sealed class MinigameContext
     {
-        public MinigameContext(LevelDefinition level, int stepIndex, Camera worldCamera, KitchenDirector kitchen, CounterStation counter, FeedbackFx fx)
+        public MinigameContext(LevelDefinition level, int stepIndex, Camera worldCamera, KitchenDirector kitchen, CounterStation counter, FeedbackFx fx, HandsView hands)
         {
             Level = level;
             StepIndex = stepIndex;
@@ -15,6 +15,7 @@ namespace Courtyard.Minigames
             Kitchen = kitchen;
             Counter = counter;
             Fx = fx;
+            Hands = hands;
         }
 
         public LevelDefinition Level { get; }
@@ -23,5 +24,6 @@ namespace Courtyard.Minigames
         public KitchenDirector Kitchen { get; }
         public CounterStation Counter { get; }
         public FeedbackFx Fx { get; }
+        public HandsView Hands { get; }
     }
 }
