@@ -16,6 +16,10 @@ namespace Courtyard.Editor
     {
         private const string OddblotFolder = "Assets/_Game/Art/Sprites/Decor/ODDBLOT/";
         private const string WindowFolder = "Assets/_Game/Art/Sprites/Window/";
+        private const string KitchenFolder = "Assets/_Game/Art/Sprites/Kitchen/";
+
+        // Tabletop: its back edge sits a little above the tools' feet so they stand on the surface; fills to the screen bottom.
+        private static readonly Rect TableRect = Rect.MinMaxRect(-9.8f, -5.45f, 9.8f, -2.45f);
 
         // Window layout (world units). The frame art sets the size; everything else hangs off it.
         private static readonly Vector2 WindowCenter = new(0f, 1.75f);
@@ -29,6 +33,7 @@ namespace Courtyard.Editor
         {
             ConfigureImports(OddblotFolder);
             ConfigureImports(WindowFolder);
+            ConfigureImports(KitchenFolder);
             EditScene(BuildScript.Scenes[1], ApplyToKitchen);
             AssetDatabase.SaveAssets();
         }
@@ -37,6 +42,7 @@ namespace Courtyard.Editor
         {
             var kitchen = scene.GetRootGameObjects().First(g => g.name == "Kitchen").transform;
             ApplyWindow(kitchen);
+            ApplyTable(kitchen);
 
             // Ceiling: hanging bulb; the lamp light sits on the bulb.
             if (Fit(kitchen, "CeilingLamp", "Oddblot_light", new Vector2(0f, 5.05f), 1.6f, "Wall", 13))
@@ -131,6 +137,25 @@ namespace Courtyard.Editor
             EnsureSprite(kitchen, "CurtainRod");
             Fit(kitchen, "CurtainRod", "Window_Rod", new Vector2(0f, top + 0.22f), 0.25f, "Wall", 12, WindowFolder);
             ShadowOf(kitchen, Find(kitchen, "CurtainRod"), "CurtainRodShadow", "Window_RodShadow", 7);
+        }
+
+        /// <summary>Hand-drawn tabletop stretched across the counter (replaces the counter box and its edge strip).</summary>
+        private static void ApplyTable(Transform kitchen)
+        {
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(KitchenFolder + "Counter_Table.png");
+            if (sprite == null) return;
+
+            var counter = Find(kitchen, "Counter");
+            var renderer = counter.GetComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.color = Color.white;
+            SetLayer(counter, "Counter", 0);
+
+            var size = sprite.bounds.size;
+            counter.localScale = new Vector3(TableRect.width / size.x, TableRect.height / size.y, 1f);
+            counter.localPosition = TableRect.center - (Vector2)sprite.bounds.center * new Vector2(counter.localScale.x, counter.localScale.y);
+            Find(kitchen, "CounterEdge").gameObject.SetActive(false);
         }
 
         /// <summary>Soft drop shadow: same size as <paramref name="caster"/>, nudged down-right, drawn behind it.</summary>
