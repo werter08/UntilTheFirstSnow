@@ -45,6 +45,9 @@ namespace Courtyard.Kitchen
         [Header("Wall")]
         [SerializeField] private TMP_Text calendarDay;
         [SerializeField] private TMP_Text clockTime;
+        [Tooltip("Optional drawn clock hands (pivot at the clock centre); set from the level's clock time.")]
+        [SerializeField] private Transform clockHourHand;
+        [SerializeField] private Transform clockMinuteHand;
 
         [Header("Props")]
         [SerializeField] private GameObject beans;
@@ -89,6 +92,7 @@ namespace Courtyard.Kitchen
 
             calendarDay.text = level.DayNumber.ToString();
             clockTime.text = level.ClockTime;
+            SetClockHands(level.ClockTime);
 
             var props = level.Props;
             beans.SetActive(props.beans);
@@ -162,6 +166,16 @@ namespace Courtyard.Kitchen
                 preset.system.Simulate(5f, true, true); // start mid-weather, not with an empty sky
                 preset.system.Play(true);
             }
+        }
+
+        private void SetClockHands(string time)
+        {
+            if (clockHourHand == null || clockMinuteHand == null) return;
+            var parts = time.Split(':');
+            if (parts.Length != 2 || !int.TryParse(parts[0], out var hours) || !int.TryParse(parts[1], out var minutes)) return;
+
+            clockHourHand.localRotation = Quaternion.Euler(0f, 0f, -((hours % 12) + minutes / 60f) * 30f);
+            clockMinuteHand.localRotation = Quaternion.Euler(0f, 0f, -minutes * 6f);
         }
 
         private static Color PickColor(Color[] colors, int index) =>

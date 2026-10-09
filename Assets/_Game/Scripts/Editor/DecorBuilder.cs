@@ -58,8 +58,23 @@ namespace Courtyard.Editor
         private static readonly Color WallColour = new(0.86f, 0.83f, 0.8f);
 
         [MenuItem("Courtyard/Setup/Apply Pack Decor")]
+        /// <summary>
+        /// Final import settings for every art folder. Run before anything stores sprite references: re-importing a
+        /// texture with different settings can give its sprite a new ID and break earlier references.
+        /// </summary>
+        public static void ConfigureArtImports()
+        {
+            ConfigureImports(OddblotFolder);
+            ConfigureImports(WindowFolder);
+            ConfigureImports(KitchenFolder);
+            ConfigureImports(KettleFolder);
+            ConfigureImports(PropsFolder);
+            ConfigureImports(DrinksFolder);
+        }
+
         public static void Apply()
         {
+            ConfigureArtImports();
             ArtManifestBuilder.EnsureSortingLayers();
             _layout = ArtManifestBuilder.LoadOrCreateLayout();
             _sleeves = SleeveBuilder.BuildLibrary();
@@ -89,6 +104,8 @@ namespace Courtyard.Editor
             ApplyMugs(kitchen);
             ApplyGrinder(kitchen);
             ApplyMilk(kitchen);
+            ApplyJars(kitchen);
+            ApplyClock(kitchen);
             ArtManifestBuilder.Apply(scene, kitchen, _layout); // manifest zones, layers and file slots win
             SleeveBuilder.WireScene(scene, _sleeves);
 
@@ -546,6 +563,69 @@ namespace Courtyard.Editor
                 PlaceAtScreenScale(blob, foam, new Vector2(x + JugBodyOffset, rim), "Props", 6);
                 Wire(counter, "milkFoamBlob", blob);
             }
+        }
+
+        private const float ToppingJarScale = 0.75f; // drawn jars are taller than the jar slots on the counter
+
+        /// <summary>Drawn jars: cinnamon shaker and cocoa among the topping jars, cinnamon also as a counter prop.</summary>
+        private static void ApplyJars(Transform kitchen)
+        {
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
+            var art = new System.Collections.Generic.Dictionary<string, Sprite>
+            {
+                ["Cinnamon"] = Load("jar_cinnamon"),
+                ["Cocoa"] = Load("jar_cocoa"),
+            };
+
+            var toppings = Find(Find(kitchen, "Counter Tools"), "Toppings");
+            foreach (var (jarName, sprite) in art)
+            {
+                if (sprite == null) continue;
+                var jar = Find(toppings, jarName);
+                var x = jar.localPosition.x;
+                var height = sprite.bounds.size.y * ToppingJarScale;
+                PlaceAtScreenScale(jar, sprite, new Vector2(x, CounterLayout.Top + height * 0.5f), "Props", 1);
+                jar.localScale = new Vector3(ToppingJarScale, ToppingJarScale, 1f);
+                var collider = jar.GetComponent<BoxCollider2D>();
+                collider.size = sprite.bounds.size;
+                collider.offset = sprite.bounds.center;
+                // Children (label, picked marker) are in the jar's local space: undo the scale for them.
+                Find(jar, "Label").localPosition = new Vector3(0f, (sprite.bounds.extents.y + 0.25f) , 0f);
+                Find(jar, "Label").localScale = Vector3.one / ToppingJarScale;
+                Find(jar, "Picked").localPosition = new Vector3(0f, -sprite.bounds.extents.y - 0.12f, 0f);
+                Find(jar, "Picked").localScale = Vector3.one / ToppingJarScale;
+            }
+
+            var cinnamon = Load("jar_cinnamon");
+            if (cinnamon != null)
+            {
+                var prop = Find(kitchen, "CinnamonJar");
+                PlaceAtScreenScale(prop, cinnamon, prop.localPosition, "Props", 1);
+                prop.localScale = new Vector3(0.7f, 0.7f, 1f);
+            }
+        }
+
+        /// <summary>Drawn wall clock above the shelf; the KitchenDirector turns the hands to the day's time.</summary>
+        private static void ApplyClock(Transform kitchen)
+        {
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
+            var face = Load("clock_face");
+            if (face == null) return;
+            SetPivot(PropsFolder + "clock_hour.png", new Vector2(0.5f, 0.12f));
+            SetPivot(PropsFolder + "clock_minute.png", new Vector2(0.5f, 0.1f));
+
+            var clock = Find(kitchen, "Clock");
+            PlaceAtScreenScale(clock, face, clock.localPosition, "WallProps", 1);
+            Find(kitchen, "ClockTime").gameObject.SetActive(false);
+
+            var hour = SpriteChild(clock, "HourHand");
+            PlaceAtScreenScale(hour, Load("clock_hour"), (Vector2)face.bounds.center, "WallProps", 2);
+            var minute = SpriteChild(clock, "MinuteHand");
+            PlaceAtScreenScale(minute, Load("clock_minute"), (Vector2)face.bounds.center, "WallProps", 3);
+
+            var director = kitchen.GetComponent<KitchenDirector>();
+            Wire(director, "clockHourHand", hour);
+            Wire(director, "clockMinuteHand", minute);
         }
 
         private static void FitMug(Transform target, Sprite sprite, Vector2 centre, float scale, string layer = "Wall", int order = 2)

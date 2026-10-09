@@ -6,7 +6,7 @@ No generative AI was used for art or audio.
 
 ## Art
 
-Hands (all poses, grey and beige sweaters), window frame, curtains, curtain rod, window sill and their shadows, counter (tabletop and drawers), wall with tiled backsplash, fridge with magnets and shopping list, electric kettle (parts, base, switch, hand-held pour poses), mugs (chipped, his, hers, two decoys), drink icons, V60 dripper, hand grinder, milk jug, frother and milk foam — drawn by the team. Some sweater variants are exact palette swaps of the originals.
+Hands (all poses, grey and beige sweaters), window frame, curtains, curtain rod, window sill and their shadows, counter (tabletop and drawers), wall with tiled backsplash, fridge with magnets and shopping list, electric kettle (parts, base, switch, hand-held pour poses), mugs (chipped, his, hers, two decoys), drink icons, V60 dripper, hand grinder, milk jug, frother and milk foam, jars (instant, cocoa, cinnamon), wall clock — drawn by the team. Some sweater variants are exact palette swaps of the originals.
 
 | Asset | Author | Licence | Used for |
 |---|---|---|---|

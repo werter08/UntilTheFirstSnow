@@ -43,6 +43,7 @@ namespace Courtyard.Editor
         [UnityEditor.MenuItem("Courtyard/Setup/Patch Art Prefabs")]
         public static void PatchKettlePrefabs()
         {
+            DecorBuilder.ConfigureArtImports(); // sprites must have their final IDs before prefabs reference them
             PatchChooseMug();
             PatchZones();
             Patch(Folder + KettleBoil + ".prefab", root =>
@@ -129,6 +130,25 @@ namespace Courtyard.Editor
                 var thermometer = root.transform.Find("Thermometer");
                 thermometer.localPosition = new Vector3(CounterLayout.MilkX - 0.9f, thermometer.localPosition.y, 0f);
             });
+
+            // Day 1: the drawn instant coffee jar the spoon scoops from.
+            var instantJar = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/Props/jar_instant.png");
+            if (instantJar != null)
+            {
+                Patch(Folder + InstantCoffee + ".prefab", root =>
+                {
+                    var jar = root.transform.Find("Jar");
+                    var renderer = jar.GetComponent<SpriteRenderer>();
+                    renderer.sprite = instantJar;
+                    renderer.drawMode = SpriteDrawMode.Simple;
+                    renderer.color = Color.white;
+                    jar.localScale = Vector3.one;
+                    jar.localPosition = new Vector3(jar.localPosition.x, CounterLayout.Top + instantJar.bounds.extents.y, 0f);
+                    var collider = jar.GetComponent<BoxCollider2D>();
+                    collider.size = instantJar.bounds.size;
+                    collider.offset = instantJar.bounds.center;
+                });
+            }
 
             // The spoon is held in front of everything on the counter.
             Patch(Folder + InstantCoffee + ".prefab", root =>
