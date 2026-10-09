@@ -42,6 +42,7 @@ namespace Courtyard.Editor
         {
             var kitchen = scene.GetRootGameObjects().First(g => g.name == "Kitchen").transform;
             ApplyWindow(kitchen);
+            ApplyWallBackground(kitchen);
             ApplyTable(kitchen);
 
             // Ceiling: hanging bulb; the lamp light sits on the bulb.
@@ -137,6 +138,24 @@ namespace Courtyard.Editor
             EnsureSprite(kitchen, "CurtainRod");
             Fit(kitchen, "CurtainRod", "Window_Rod", new Vector2(0f, top + 0.22f), 0.25f, "Wall", 12, WindowFolder);
             ShadowOf(kitchen, Find(kitchen, "CurtainRod"), "CurtainRodShadow", "Window_RodShadow", 7);
+        }
+
+        /// <summary>Full-screen wall with the tiled backsplash, drawn at 1920×1080 (one pixel = 0.01 unit).</summary>
+        private static void ApplyWallBackground(Transform kitchen)
+        {
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(KitchenFolder + "Wall_Background.png");
+            if (sprite == null) return;
+
+            var wall = Find(kitchen, "Wall");
+            var renderer = wall.GetComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.color = Color.white;
+            SetLayer(wall, "Wall", 0);
+
+            var size = sprite.bounds.size;
+            wall.localScale = new Vector3(19.2f / size.x, 10.8f / size.y, 1f);
+            wall.localPosition = Vector3.zero;
         }
 
         /// <summary>Hand-drawn tabletop stretched across the counter (replaces the counter box and its edge strip).</summary>
