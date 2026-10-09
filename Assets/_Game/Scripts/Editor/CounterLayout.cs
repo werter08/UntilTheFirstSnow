@@ -19,7 +19,7 @@ namespace Courtyard.Editor
         public const float GrinderX = -4.3f;
         public const float MugX = -0.8f;
         public const float MilkX = 2.3f;
-        public const float ServeX = 5.3f; // the counter ends at the fridge (x = 6.8)
+        public const float ServeX = 5.1f; // the counter ends at the fridge (x = 6.8)
 
         public static readonly Color HerMugColor = new(0.93f, 0.9f, 0.82f);
         private static readonly Color Leaf = new(0.95f, 0.55f, 0.2f);

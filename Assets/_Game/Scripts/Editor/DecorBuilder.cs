@@ -18,9 +18,16 @@ namespace Courtyard.Editor
         private const string WindowFolder = "Assets/_Game/Art/Sprites/Window/";
         private const string KitchenFolder = "Assets/_Game/Art/Sprites/Kitchen/";
 
-        // Counter (top + drawer fronts): back edge a little above the tools' feet so they stand on the surface;
-        // ends at the fridge (x = 6.8) and runs just past the screen bottom.
-        private static readonly Rect TableRect = Rect.MinMaxRect(-9.7f, -5.75f, 6.8f, -2.45f);
+        // Counter (top + drawer fronts) as in the layout mockup: back edge at y ≈ -1.47, drawers to the screen bottom,
+        // right end hidden behind the fridge. Uniform scale (the art is ~4.16:1).
+        private static readonly Rect TableRect = Rect.MinMaxRect(-9.7f, -5.5f, 6.9f, -1.47f);
+
+        // Counter tools and minigame gauges were laid out for a counter top at y = -2.75; lift them onto the new surface.
+        private const float CounterLift = 0.85f;
+
+        // Fridge stands in front of the counter, on the floor; the drawing's body outline starts 48 px in from its left edge.
+        private const float FridgeBodyLeft = 6.67f;
+        private const float FridgeOutlineInset = 0.48f;
 
         // Window layout (world units). The frame art sets the size; everything else hangs off it.
         private static readonly Vector2 WindowCenter = new(0f, 1.75f);
@@ -45,6 +52,7 @@ namespace Courtyard.Editor
             ApplyWindow(kitchen);
             ApplyWallBackground(kitchen);
             ApplyTable(kitchen);
+            ApplyFridge(kitchen);
 
             // Ceiling: hanging bulb; the lamp light sits on the bulb.
             if (Fit(kitchen, "CeilingLamp", "Oddblot_light", new Vector2(0f, 5.05f), 1.6f, "Wall", 13))
@@ -55,10 +63,11 @@ namespace Courtyard.Editor
                 Find(kitchen, "InstantCoffeeJar").gameObject.SetActive(false);
 
             // Bag of real beans from Day 5 ("Bought real beans today") stands at the left end of the counter.
-            Fit(kitchen, "BeansJar", "Oddblot_deco", new Vector2(-8.85f, -2.2f), 1.15f, "Props", 1);
-            Find(kitchen, "CinnamonJar").localPosition = new Vector3(-8.1f, -2.4f, 0f);
+            Fit(kitchen, "BeansJar", "Oddblot_deco", new Vector2(-8.85f, -2.2f + CounterLift), 1.15f, "Props", 1);
+            Find(kitchen, "CinnamonJar").localPosition = new Vector3(-8.1f, -2.4f + CounterLift, 0f);
             SetLayer(Find(kitchen, "CinnamonJar"), "Props", 1);
-            Find(kitchen, "Scarf").localPosition = new Vector3(8.25f, -1.3f, 0f);
+            // Day 30: her scarf lies on the front of the counter, between the kettle and the grinder.
+            Find(kitchen, "Scarf").localPosition = new Vector3(-5.7f, -2.75f, 0f);
 
             // Window sill: flower in a glass (tinted per PlantStage by the KitchenDirector).
             if (Fit(kitchen, "Plant", "Oddblot_tbldeco2", new Vector2(1.4f, -0.12f), 1f, "Wall", 12))
@@ -159,6 +168,72 @@ namespace Courtyard.Editor
             wall.localPosition = Vector3.zero;
         }
 
+        /// <summary>
+        /// Fridge drawn at screen scale (1 px = 0.01 unit), standing on the floor with its left edge where the counter ends.
+        /// A shopping list hangs on the freezer door; Mira's notes (Day 10+) are held by magnets.
+        /// </summary>
+        private static void ApplyFridge(Transform kitchen)
+        {
+            var fridgeSprite = LoadKitchen("Fridge");
+            if (fridgeSprite == null) return;
+
+            // In front of the counter: Counter layer, above the tabletop.
+            var fridge = Find(kitchen, "Fridge");
+            PlaceAtScreenScale(fridge, fridgeSprite, Vector2.zero, "Counter", 20);
+            var size = fridgeSprite.bounds.size;
+            fridge.localPosition = new Vector3(FridgeBodyLeft - FridgeOutlineInset + size.x * 0.5f, -5.4f + size.y * 0.5f, 0f);
+
+            // The new drawing already has the handles, magnets and shopping list.
+            var list = Find(kitchen, "ShoppingList", false);
+            if (list != null) list.gameObject.SetActive(false);
+
+            // Mira's notes (Day 10+) on the empty lower door, each held by a magnet.
+            var notePositions = new[] { new Vector2(7.7f, -1.3f), new Vector2(8.75f, -1.9f), new Vector2(7.95f, -2.7f) };
+            var magnets = new[] { "Magnet_Yellow", "Magnet_Blue", "Magnet_Orange" };
+            for (var i = 0; i < notePositions.Length; i++)
+            {
+                var note = Find(kitchen, $"FridgeNote{i}");
+                note.localPosition = notePositions[i];
+                SetLayer(note, "Counter", 21);
+                AddMagnet(note, magnets[i], 0.25f);
+                SetLayer(note.Find("Magnet"), "Counter", 22);
+            }
+        }
+
+        private static Sprite LoadKitchen(string spriteName) =>
+            AssetDatabase.LoadAssetAtPath<Sprite>(KitchenFolder + spriteName + ".png");
+
+        /// <summary>Art drawn for a 1920×1080 screen: unscaled at 100 px per unit.</summary>
+        private static void PlaceAtScreenScale(Transform target, Sprite sprite, Vector2 position, string layer, int order)
+        {
+            var renderer = target.GetComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.color = Color.white;
+            SetLayer(target, layer, order);
+            target.localScale = Vector3.one;
+            target.localPosition = position;
+        }
+
+        /// <summary>A magnet on the top edge of a note; parented to it so it hides with the note.</summary>
+        private static void AddMagnet(Transform note, string spriteName, float offsetY)
+        {
+            var sprite = LoadKitchen(spriteName);
+            if (sprite == null) return;
+
+            var magnet = note.Find("Magnet");
+            if (magnet == null)
+            {
+                magnet = new GameObject("Magnet").transform;
+                magnet.SetParent(note, false);
+                magnet.gameObject.AddComponent<SpriteRenderer>();
+            }
+
+            var noteScale = note.lossyScale;
+            PlaceAtScreenScale(magnet, sprite, new Vector2(0f, offsetY / noteScale.y), "Wall", 4);
+            magnet.localScale = new Vector3(1f / noteScale.x, 1f / noteScale.y, 1f);
+        }
+
         /// <summary>Hand-drawn tabletop stretched across the counter (replaces the counter box and its edge strip).</summary>
         private static void ApplyTable(Transform kitchen)
         {
@@ -176,6 +251,10 @@ namespace Courtyard.Editor
             counter.localScale = new Vector3(TableRect.width / size.x, TableRect.height / size.y, 1f);
             counter.localPosition = TableRect.center - (Vector2)sprite.bounds.center * new Vector2(counter.localScale.x, counter.localScale.y);
             Find(kitchen, "CounterEdge").gameObject.SetActive(false);
+
+            Find(kitchen, "Counter Tools").localPosition = new Vector3(0f, CounterLift, 0f);
+            var stepRoot = kitchen.gameObject.scene.GetRootGameObjects().FirstOrDefault(g => g.name == "StepRoot");
+            if (stepRoot != null) stepRoot.transform.position = new Vector3(0f, CounterLift, 0f);
         }
 
         /// <summary>Soft drop shadow: same size as <paramref name="caster"/>, nudged down-right, drawn behind it.</summary>
