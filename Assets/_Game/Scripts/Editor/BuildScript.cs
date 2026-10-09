@@ -20,7 +20,7 @@ namespace Courtyard.Editor
         };
 
         private const string WebGLOutput = "Builds/WebGL";
-        private const string MacOutput = "Builds/Mac/AcrossTheCourtyard.app";
+        private const string MacOutput = "Builds/Mac/UntilTheFirstSnow.app";
 
         [MenuItem("Courtyard/Build/WebGL")]
         public static void BuildWebGL()
@@ -32,12 +32,12 @@ namespace Courtyard.Editor
         [MenuItem("Courtyard/Build/macOS")]
         public static void BuildMac() => Build(BuildTarget.StandaloneOSX, MacOutput);
 
-        /// <summary>itch.io-friendly settings: gzip with decompression fallback, minimal template.</summary>
+        /// <summary>itch.io-friendly settings: gzip with decompression fallback, project template (Minimal with the exact game title).</summary>
         public static void ConfigureWebGL()
         {
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
             PlayerSettings.WebGL.decompressionFallback = true;
-            PlayerSettings.WebGL.template = "APPLICATION:Minimal";
+            PlayerSettings.WebGL.template = "PROJECT:Courtyard";
         }
 
         private static void Build(BuildTarget target, string outputPath)

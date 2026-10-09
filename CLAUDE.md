@@ -1,4 +1,8 @@
-# CLAUDE.md — "Across the Courtyard" (Mini Jam 221: Autumn)
+# CLAUDE.md — "Until the First Snow" (Mini Jam 221: Autumn)
+
+**Game title:** *Until the First Snow* (use this exact title on the title screen, in Player Settings → Product Name, in the WebGL page title and on itch.io). Code namespace stays `Courtyard`.
+**Tagline (itch.io short description):** *a cozy lofi story about coffee and love*
+**itch.io genre:** Simulation · **Tags:** cozy, lofi, romance, story-rich, relaxing, short, 2d, autumn, coffee, wholesome
 
 Project brief and working rules for Claude Code. Read this whole file before doing any work.
 
@@ -70,7 +74,7 @@ export PROJ="$(pwd)"
 
 **WebGL settings for itch.io:**
 - Publishing Settings → Compression Format **Gzip** with **Decompression Fallback ON** (or Compression **Disabled**). Avoids server-header errors on itch.io.
-- Template: Minimal. Canvas 1280×720 on itch.io, with a fullscreen button.
+- Template: `Assets/WebGLTemplates/Courtyard` (copy of Minimal; page title = Product Name). Canvas 1280×720 on itch.io, with a fullscreen button.
 - Browsers block audio until the first click, so the Boot scene shows a **"click to start"** title screen before any audio plays.
 
 ## 3. The kitchen (single scene, reused for all 5 days)

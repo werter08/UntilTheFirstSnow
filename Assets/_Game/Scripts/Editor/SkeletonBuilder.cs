@@ -356,7 +356,7 @@ namespace Courtyard.Editor
             CreateCamera(new Color(0.12f, 0.13f, 0.18f));
             var canvas = CreateCanvas();
 
-            var title = Label(canvas, "Title", "Across the Courtyard", 96f, TextAlignmentOptions.Center, new Color(0.98f, 0.9f, 0.75f));
+            var title = Label(canvas, "Title", "Until the First Snow", 96f, TextAlignmentOptions.Center, new Color(0.98f, 0.9f, 0.75f));
             Place(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 80f), new Vector2(1600f, 160f));
 
             var prompt = Label(canvas, "Prompt", "click to start", 40f, TextAlignmentOptions.Center, Color.white);
