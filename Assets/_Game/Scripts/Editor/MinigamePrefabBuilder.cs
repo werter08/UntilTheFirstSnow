@@ -118,9 +118,14 @@ namespace Courtyard.Editor
                 back.localPosition = new Vector3(x, back.localPosition.y, 0f);
             });
 
-            // Milk thermometer on the left of the jug, clear of the topping jars.
+            // Milk thermometer on the left of the jug, clear of the topping jars; drawn jug untinted (pale red when squealing).
             Patch(Folder + SteamMilk + ".prefab", root =>
             {
+                Edit(root.GetComponent<SteamMilkStep>(), so =>
+                {
+                    so.FindProperty("jugColor").colorValue = Color.white;
+                    so.FindProperty("squealColor").colorValue = new Color(1f, 0.78f, 0.75f);
+                });
                 var thermometer = root.transform.Find("Thermometer");
                 thermometer.localPosition = new Vector3(CounterLayout.MilkX - 0.9f, thermometer.localPosition.y, 0f);
             });

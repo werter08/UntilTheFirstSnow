@@ -150,8 +150,8 @@ MonoBehaviour:
   heatPerSecond: 13
   qualityFalloff: 18
   minHeatingToFinish: 5
-  jugColor: {r: 0.8, g: 0.82, b: 0.85, a: 1}
-  squealColor: {r: 1, g: 0.55, b: 0.5, a: 1}
+  jugColor: {r: 1, g: 1, b: 1, a: 1}
+  squealColor: {r: 1, g: 0.78, b: 0.75, a: 1}
 --- !u!1 &6907516859651134100
 GameObject:
   m_ObjectHideFlags: 0

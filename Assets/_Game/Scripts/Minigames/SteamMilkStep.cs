@@ -68,10 +68,15 @@ namespace Courtyard.Minigames
             if (_temperature >= maxTemperature) Finish();
         }
 
-        private void OnPressed() => AudioManager.StartLoop(SfxId.Steam);
-
-        private static void StopSounds()
+        private void OnPressed()
         {
+            AudioManager.StartLoop(SfxId.Steam);
+            _counter.SetFrothing(true);
+        }
+
+        private void StopSounds()
+        {
+            if (_counter != null) _counter.SetFrothing(false);
             AudioManager.StopLoop(SfxId.Steam);
             AudioManager.StopLoop(SfxId.Squeal);
         }
@@ -98,7 +103,7 @@ namespace Courtyard.Minigames
         private void UpdateVisuals()
         {
             needle.localPosition = new Vector3(0f, ToScaleY(_temperature), 0f);
-            _counter.MilkFoam.SetValue(Mathf.InverseLerp(startTemperature, maxTemperature, _temperature));
+            _counter.SetMilkFoam(Mathf.InverseLerp(startTemperature, maxTemperature, _temperature));
             var squealing = _temperature > bandMax;
             _counter.MilkJugBody.color = squealing ? squealColor : jugColor;
             if (squealing && _counter.MilkJug.IsHeld) AudioManager.StartLoop(SfxId.Squeal);

@@ -54,11 +54,26 @@ namespace Courtyard.Kitchen
         [SerializeField] private SpriteRenderer milkJugBody;
         [SerializeField] private SpriteBar milkFoam;
 
+        [Header("Milk art (optional)")]
+        [Tooltip("Hand frother over the jug; shakes while frothing.")]
+        [SerializeField] private Transform frother;
+        [SerializeField] private SpriteRenderer frotherButton;
+        [Tooltip("Foam that rises from the jug's rim; swells into a spill when overheated.")]
+        [SerializeField] private Transform milkFoamBlob;
+        [SerializeField] private float foamMinScale = 0.15f;
+        [SerializeField] private float foamMaxScale = 0.95f;
+        [SerializeField, Min(0f)] private float frothJitter = 0.025f;
+        [SerializeField] private Color buttonIdle = Color.white;
+        [SerializeField] private Color buttonOn = new(1f, 0.8f, 0.55f);
+
         [Header("Toppings")]
         [SerializeField] private GameObject toppingShelf;
         [SerializeField] private ToppingJar[] toppingJars;
 
         private Vector3 _kettleRest;
+        private Vector3 _frotherRest;
+        private Vector3 _foamBase;
+        private bool _frothing;
 
         public Transform Kettle => kettle;
         public Vector3 KettleRest => _kettleRest;
@@ -85,12 +100,24 @@ namespace Courtyard.Kitchen
 
         public bool HasDrink => mugFill.Value > 0.05f || mugFoam.activeSelf;
 
-        private void Awake() => _kettleRest = kettle.position;
+        private void Awake()
+        {
+            _kettleRest = kettle.position;
+            if (frother != null) _frotherRest = frother.localPosition;
+            if (milkFoamBlob != null) _foamBase = milkFoamBlob.localPosition;
+        }
 
         private void Update()
         {
             var emission = mugSteam.emission;
             emission.enabled = HasDrink;
+
+            if (frother != null)
+            {
+                frother.localPosition = _frothing
+                    ? _frotherRest + (Vector3)(Random.insideUnitCircle * frothJitter)
+                    : _frotherRest;
+            }
         }
 
         /// <summary>Shows the tools this day uses and puts everything back to a clean, inactive state.</summary>
@@ -114,7 +141,8 @@ namespace Courtyard.Kitchen
             mugFill.SetValue(0f);
             mugFillLine.gameObject.SetActive(false);
             mugFoam.SetActive(false);
-            milkFoam.SetValue(0f);
+            SetMilkFoam(0f);
+            SetFrothing(false);
             foreach (var marker in spoonMarkers) marker.enabled = false;
             foreach (var jar in toppingJars) jar.SetPicked(false);
 
@@ -127,6 +155,28 @@ namespace Courtyard.Kitchen
         {
             var index = (int)zone;
             return zoneShift != null && index < zoneShift.Length ? zoneShift[index] : Vector2.zero;
+        }
+
+        /// <summary>Foam level 0..1: the drawn foam rises from the rim (or the placeholder bar fills).</summary>
+        public void SetMilkFoam(float level)
+        {
+            if (milkFoamBlob == null)
+            {
+                milkFoam.SetValue(level);
+                return;
+            }
+
+            milkFoamBlob.gameObject.SetActive(level > 0.02f);
+            var scale = Mathf.Lerp(foamMinScale, foamMaxScale, Mathf.Clamp01(level));
+            milkFoamBlob.localScale = new Vector3(scale, scale, 1f);
+            var half = milkFoamBlob.GetComponent<SpriteRenderer>().sprite.bounds.extents.y;
+            milkFoamBlob.localPosition = _foamBase + Vector3.up * (half * scale * 0.55f);
+        }
+
+        public void SetFrothing(bool frothing)
+        {
+            _frothing = frothing;
+            if (frotherButton != null) frotherButton.color = frothing ? buttonOn : buttonIdle;
         }
 
         /// <summary>Ground coffee in the V60 (after grinding).</summary>

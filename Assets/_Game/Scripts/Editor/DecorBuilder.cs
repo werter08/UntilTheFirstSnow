@@ -88,6 +88,7 @@ namespace Courtyard.Editor
             ApplyKettle(kitchen);
             ApplyMugs(kitchen);
             ApplyGrinder(kitchen);
+            ApplyMilk(kitchen);
             ArtManifestBuilder.Apply(scene, kitchen, _layout); // manifest zones, layers and file slots win
             SleeveBuilder.WireScene(scene, _sleeves);
 
@@ -453,6 +454,59 @@ namespace Courtyard.Editor
             knob.localPosition = new Vector3(GrinderHandleReach, 0f, 0f);
             knob.GetComponent<SpriteRenderer>().enabled = false;
             knob.GetComponent<BoxCollider2D>().size = new Vector2(0.7f, 0.7f);
+        }
+
+        private const float JugBodyOffset = -0.115f; // jug body centre vs sprite centre (handle on the right)
+
+        /// <summary>
+        /// Milk jug with a hand frother standing in it (whisk drawn behind the jug so only the part above the rim
+        /// shows) and the foam blob on the rim. Authored at the milk zone; the manifest pass moves the group.
+        /// </summary>
+        private static void ApplyMilk(Transform kitchen)
+        {
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
+            var jugSprite = Load("milk_jug");
+            if (jugSprite == null) return;
+
+            var tools = Find(kitchen, "Counter Tools");
+            var counter = tools.GetComponent<CounterStation>();
+            var station = Find(tools, "MilkStation");
+            var top = CounterLayout.Top;
+            var x = CounterLayout.MilkX;
+
+            var jug = Find(station, "Jug");
+            PlaceAtScreenScale(jug, jugSprite, new Vector2(x, top + jugSprite.bounds.extents.y), "Props", 3);
+            var collider = jug.GetComponent<BoxCollider2D>();
+            collider.size = new Vector2(1.4f, 3.4f); // jug + frother
+            collider.offset = new Vector2(-0.1f, 0.95f);
+            Find(station, "Wand").gameObject.SetActive(false);
+
+            var whisk = Load("frother_whisk");
+            var body = Load("frother_body");
+            var button = Load("frother_button");
+            if (whisk != null && body != null && button != null)
+            {
+                var whiskBottom = top + 0.3f;
+                var whiskCentre = whiskBottom + whisk.bounds.extents.y;
+                var bodyCentre = whiskBottom + whisk.bounds.size.y + body.bounds.extents.y - 0.05f;
+                var frother = Child(station, "Frother");
+                frother.localPosition = new Vector3(x + JugBodyOffset, bodyCentre, 0f);
+                PlaceAtScreenScale(SpriteChild(frother, "Whisk"), whisk, new Vector2(0f, whiskCentre - bodyCentre), "Props", 2);
+                PlaceAtScreenScale(SpriteChild(frother, "Body"), body, Vector2.zero, "Props", 4);
+                var buttonY = body.bounds.extents.y + button.bounds.extents.y + 0.02f;
+                PlaceAtScreenScale(SpriteChild(frother, "Button"), button, new Vector2(0f, buttonY), "Props", 5);
+                Wire(counter, "frother", frother);
+                Wire(counter, "frotherButton", Find(frother, "Button").GetComponent<SpriteRenderer>());
+            }
+
+            var foam = Load("milk_foam");
+            if (foam != null)
+            {
+                var blob = SpriteChild(station, "MilkFoamBlob");
+                var rim = top + jugSprite.bounds.size.y - 0.05f;
+                PlaceAtScreenScale(blob, foam, new Vector2(x + JugBodyOffset, rim), "Props", 6);
+                Wire(counter, "milkFoamBlob", blob);
+            }
         }
 
         private static void FitMug(Transform target, Sprite sprite, Vector2 centre, float scale, string layer = "Wall", int order = 2)
