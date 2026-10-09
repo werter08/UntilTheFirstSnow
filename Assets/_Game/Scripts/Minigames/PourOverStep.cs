@@ -51,11 +51,9 @@ namespace Courtyard.Minigames
             pourZone.Pressed += OnPressed;
             pourZone.Released += OnReleased;
 
-            _counter.MugFill.Fill.color = coffeeColor;
+            _counter.SetMugDrink(MugDrink.Black, coffeeColor);
             _counter.SetMugGauge(true);
-            var line = _counter.MugFillLine;
-            line.gameObject.SetActive(true);
-            line.localPosition = new Vector3(line.localPosition.x, targetFill * _counter.MugFill.MaxHeight, 0f);
+            _counter.ShowFillLine(targetFill);
 
             flowMeter.SetValue(0f);
             var height = flowMeter.MaxHeight;
@@ -73,7 +71,7 @@ namespace Courtyard.Minigames
 
             if (_counter == null) return;
             ReturnKettle();
-            _counter.MugFillLine.gameObject.SetActive(false);
+            _counter.HideFillLine();
             _counter.SetMugGauge(false);
         }
 
@@ -98,7 +96,7 @@ namespace Courtyard.Minigames
         private void OnReleased()
         {
             ReturnKettle();
-            if (!IsComplete && _counter.MugFill.Value >= minFillToFinish) Finish();
+            if (!IsComplete && _counter.MugLevel >= minFillToFinish) Finish();
         }
 
         private void Update()
@@ -121,9 +119,8 @@ namespace Courtyard.Minigames
             _pourTime += Time.deltaTime;
             if (_flow >= bandMin && _flow <= bandMax) _bandTime += Time.deltaTime;
 
-            var fill = _counter.MugFill;
-            fill.SetValue(fill.Value + fillPerSecond * Time.deltaTime);
-            if (fill.Value >= 1f) Finish();
+            _counter.SetMugLevel(_counter.MugLevel + fillPerSecond * Time.deltaTime);
+            if (_counter.MugLevel >= 1f) Finish();
         }
 
         private Vector2 PointerWorld()
@@ -157,7 +154,7 @@ namespace Courtyard.Minigames
             ReturnKettle();
 
             var bandScore = _pourTime > 0f ? _bandTime / _pourTime : 0f;
-            var fillScore = Mathf.Clamp01(1f - Mathf.Abs(_counter.MugFill.Value - targetFill) / fillTolerance);
+            var fillScore = Mathf.Clamp01(1f - Mathf.Abs(_counter.MugLevel - targetFill) / fillTolerance);
             Complete(bandWeight * bandScore + (1f - bandWeight) * fillScore);
         }
     }

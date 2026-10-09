@@ -61,11 +61,8 @@ namespace Courtyard.Minigames
             _counter.KettleTarget.Released += OnKettleReleased;
             _counter.KettleTarget.Interactable = true;
 
-            var fill = _counter.MugFill;
             _counter.SetMugGauge(true);
-            var line = _counter.MugFillLine;
-            line.gameObject.SetActive(true);
-            line.localPosition = new Vector3(line.localPosition.x, targetFill * fill.MaxHeight, 0f);
+            _counter.ShowFillLine(targetFill);
             spoonLoad.enabled = false;
             RefreshSpoonMarkers();
             RefreshKettle();
@@ -84,7 +81,7 @@ namespace Courtyard.Minigames
             _counter.KettleTarget.Pressed -= OnKettlePressed;
             _counter.KettleTarget.Released -= OnKettleReleased;
             _counter.KettleBody.color = kettleIdleColor;
-            _counter.MugFillLine.gameObject.SetActive(false);
+            _counter.HideFillLine();
             _counter.SetMugGauge(false);
             _counter.KettleView.SetPouring(false);
             _counter.Kettle.position = _counter.KettleRest;
@@ -95,9 +92,8 @@ namespace Courtyard.Minigames
         {
             if (!_pouring || IsComplete) return;
 
-            var fill = _counter.MugFill;
-            fill.SetValue(fill.Value + pourPerSecond * Time.deltaTime);
-            if (fill.Value >= 1f) Finish();
+            _counter.SetMugLevel(_counter.MugLevel + pourPerSecond * Time.deltaTime);
+            if (_counter.MugLevel >= 1f) Finish();
         }
 
         private void OnSpoonDragStarted(Vector2 world)
@@ -145,7 +141,7 @@ namespace Courtyard.Minigames
             _counter.KettleView.SetPouring(true);
             MoveKettle((Vector2)_counter.Mug.transform.position + pourOffsetFromMug);
             spoon.Interactable = false;
-            _counter.MugFill.Fill.color = Color.Lerp(waterColor, coffeeColor, Mathf.Clamp01((float)_spoons / targetSpoons));
+            _counter.SetMugDrink(MugDrink.Instant, Color.Lerp(waterColor, coffeeColor, Mathf.Clamp01((float)_spoons / targetSpoons)));
         }
 
         private void OnKettleReleased()
@@ -153,7 +149,7 @@ namespace Courtyard.Minigames
             _pouring = false;
             AudioManager.StopLoop(SfxId.Pour);
             ReturnKettle();
-            if (_pourStarted && _counter.MugFill.Value > 0f) Finish();
+            if (_pourStarted && _counter.MugLevel > 0f) Finish();
         }
 
         private void Finish()
@@ -165,7 +161,7 @@ namespace Courtyard.Minigames
             ReturnKettle();
 
             var spoonScore = _spoons == targetSpoons ? 1f : wrongSpoonScore;
-            var fillScore = 1f - Mathf.Abs(_counter.MugFill.Value - targetFill) / fillTolerance;
+            var fillScore = 1f - Mathf.Abs(_counter.MugLevel - targetFill) / fillTolerance;
             Complete(spoonWeight * spoonScore + (1f - spoonWeight) * Mathf.Clamp01(fillScore));
         }
 
@@ -184,12 +180,7 @@ namespace Courtyard.Minigames
             _kettleMove = StartCoroutine(Tweens.Run(kettleMoveSeconds, t => kettle.position = Vector3.Lerp(from, target, t)));
         }
 
-        private void RefreshSpoonMarkers()
-        {
-            var markers = _counter.SpoonMarkers;
-            for (var i = 0; i < markers.Length; i++)
-                markers[i].enabled = i < _spoons;
-        }
+        private void RefreshSpoonMarkers() => _counter.ShowSpoons(_spoons);
 
         private void RefreshKettle() => _counter.KettleBody.color = _spoons > 0 ? kettleReadyColor : kettleIdleColor;
     }

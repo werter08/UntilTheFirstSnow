@@ -379,29 +379,68 @@ namespace Courtyard.Editor
                     PlaceAtScreenScale(SpriteChild(v60, "Shadow"), shadowSprite, new Vector2(-0.07f, -v60Empty.bounds.extents.y + 0.02f), "Props", 3);
             }
 
-            // Fill gauge beside the mug (shown only while pouring).
-            var halfWidth = chipped.bounds.extents.x;
-            var gauge = Child(mug, "Gauge");
-            gauge.localPosition = new Vector3(halfWidth + 0.25f, -0.55f, 0f);
-            var back = SpriteChild(gauge, "Back");
-            var backRenderer = back.GetComponent<SpriteRenderer>();
-            backRenderer.sprite = Square;
-            backRenderer.drawMode = SpriteDrawMode.Sliced;
-            backRenderer.size = new Vector2(0.22f, 1.1f);
-            backRenderer.color = new Color(0.15f, 0.13f, 0.12f, 0.75f);
-            back.localPosition = new Vector3(0f, 0.55f, 0f);
-            SetLayer(back, "Props", 1);
+            // The drink is shown inside the mug: a drink tile over the top of the mug body (the tiles are exactly the
+            // body's width), revealed from the bottom up by a mask as the mug fills. Measured on the mug art:
+            // body top 3 px below the sprite top, body centre 23.5 px left of the sprite centre (handle on the right).
+            var bodyTop = chipped.bounds.max.y - 0.03f;
+            const float bodyCentreX = -0.235f;
+            const float region = 0.66f;
+            var regionCentre = new Vector2(bodyCentreX, bodyTop - region * 0.5f);
+
+            var oldGauge = mug.Find("Gauge");
             var fill = Find(mug, "Fill");
-            fill.SetParent(gauge, false);
-            fill.localPosition = Vector3.zero;
+            fill.SetParent(mug, false);
+            if (oldGauge != null) Object.DestroyImmediate(oldGauge.gameObject);
+            Wire(counter, "mugGauge", (Object)null);
+
+            // The placeholder bar keeps the fill value for the minigames but no longer draws.
+            fill.localPosition = regionCentre - new Vector2(0f, region * 0.5f);
             var bar = fill.GetComponent<SpriteBar>();
-            Wire(bar, "width", 0.16f);
-            SetLayer(Find(fill, "Liquid"), "Props", 2);
+            Wire(bar, "width", 1.1f);
+            Wire(bar, "maxHeight", region);
+            Find(fill, "Liquid").GetComponent<SpriteRenderer>().sprite = null;
             var line = Find(fill, "FillLine").GetComponent<SpriteRenderer>();
-            line.size = new Vector2(0.32f, 0.05f);
-            Wire(counter, "mugGauge", gauge.gameObject);
+            line.size = new Vector2(1.12f, 0.045f);
+            line.color = new Color(1f, 1f, 1f, 0.9f);
+            SetLayer(line.transform, "Props", 4);
+
+            var contents = Child(mug, "Contents");
+            contents.localPosition = regionCentre;
+            var liquid = SpriteChild(contents, "Liquid");
+            var liquidRenderer = liquid.GetComponent<SpriteRenderer>();
+            liquidRenderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_instant.png");
+            liquidRenderer.drawMode = SpriteDrawMode.Simple;
+            liquidRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            liquid.localPosition = Vector3.zero;
+            liquid.localScale = Vector3.one;
+            SetLayer(liquid, "Props", 2);
+            var maskTransform = Child(contents, "Mask");
+            var mask = maskTransform.GetComponent<SpriteMask>();
+            if (mask == null) mask = maskTransform.gameObject.AddComponent<SpriteMask>();
+            mask.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(SquarePath); // decor pass runs without the content build
+            mask.isCustomRangeActive = true; // only the drink, never the weather / courtyard masks
+            mask.frontSortingLayerID = SortingLayer.NameToID("Props");
+            mask.frontSortingOrder = 3;
+            mask.backSortingLayerID = SortingLayer.NameToID("Props");
+            mask.backSortingOrder = 1;
+            var mugContents = GetOrAdd<MugContents>(contents);
+            Wire(mugContents, "liquid", liquidRenderer);
+            Wire(mugContents, "mask", mask);
+            Wire(mugContents, "regionHeight", region);
+            Wire(mugContents, "regionWidth", 1.2f);
+            Wire(counter, "mugContents", mugContents);
+            Edit(counter, so =>
+            {
+                var drinks = Property(so, "mugDrinkSprites");
+                drinks.arraySize = 3;
+                drinks.GetArrayElementAtIndex((int)MugDrink.Instant).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_instant.png");
+                drinks.GetArrayElementAtIndex((int)MugDrink.Black).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_pourover.png");
+                drinks.GetArrayElementAtIndex((int)MugDrink.Latte).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_latte.png");
+            });
+
+            // Spoonfuls of instant coffee now show as grounds inside the mug (CounterStation.ShowSpoons).
             for (var i = 0; i < 3; i++)
-                Find(mug, $"SpoonMarker{i}").localPosition = new Vector3(halfWidth + 0.6f, -0.45f + 0.28f * i, 0f);
+                Find(mug, $"SpoonMarker{i}").GetComponent<SpriteRenderer>().enabled = false;
 
             // Spare mugs on the wall rack.
             FitMug(Find(kitchen, "ChippedMug"), Load("mug_decoy_2"), new Vector2(4.9f, 0.99f), 0.4f);

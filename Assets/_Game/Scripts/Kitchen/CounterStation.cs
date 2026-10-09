@@ -38,8 +38,12 @@ namespace Courtyard.Kitchen
         [SerializeField] private Sprite dripperGrounds;
         [Tooltip("Mug art per MugStyle (Chipped, His, Hers). Empty = keep the placeholder.")]
         [SerializeField] private Sprite[] mugSprites;
-        [Tooltip("Fill gauge next to the mug (side-view mugs don't show their contents); shown only while pouring.")]
+        [Tooltip("Optional: fill gauge beside the mug (unused once MugContents shows the drink inside).")]
         [SerializeField] private GameObject mugGauge;
+        [Tooltip("Drink shown inside the mug (art). Empty = the placeholder fill bar.")]
+        [SerializeField] private MugContents mugContents;
+        [Tooltip("Drink tiles per MugDrink (Instant, Black, Latte).")]
+        [SerializeField] private Sprite[] mugDrinkSprites;
 
         [Tooltip("Steam above the mug while there is a hot drink in it.")]
         [SerializeField] private ParticleSystem mugSteam;
@@ -74,6 +78,7 @@ namespace Courtyard.Kitchen
         private Vector3 _frotherRest;
         private Vector3 _foamBase;
         private bool _frothing;
+        private float _groundsLevel;
 
         public Transform Kettle => kettle;
         public Vector3 KettleRest => _kettleRest;
@@ -88,7 +93,7 @@ namespace Courtyard.Kitchen
         public PointerTarget Mug => mug;
         public bool IsOverMug(Vector2 world) =>
             mugBody.bounds.Contains(new Vector3(world.x, world.y, mugBody.bounds.center.z));
-        public SpriteBar MugFill => mugFill;
+        public float MugLevel => mugFill.Value;
         public Transform MugFillLine => mugFillLine;
         public GameObject MugFoam => mugFoam;
         public SpriteRenderer[] SpoonMarkers => spoonMarkers;
@@ -133,6 +138,8 @@ namespace Courtyard.Kitchen
             if (hasArt) mugBody.sprite = mugSprites[style];
             mugLeafPrint.SetActive(!hasArt && props.brewMug == MugStyle.Hers);
             SetMugGauge(false);
+            SetMugLevel(0f);
+            SetMugDrink(MugDrink.Instant, Color.white);
             SetDripperGrounds(false);
 
             kettle.position = _kettleRest;
@@ -156,6 +163,57 @@ namespace Courtyard.Kitchen
             var index = (int)zone;
             return zoneShift != null && index < zoneShift.Length ? zoneShift[index] : Vector2.zero;
         }
+
+        /// <summary>Mug fill 0..1 (drives the drink inside the mug, or the placeholder bar).</summary>
+        public void SetMugLevel(float level)
+        {
+            mugFill.SetValue(level);
+            if (level <= 0f) _groundsLevel = 0f;
+            if (mugContents != null) mugContents.SetLevel(Mathf.Max(level, _groundsLevel));
+        }
+
+        /// <summary>Spoonfuls of instant coffee in the empty mug: grounds inside the mug (or the placeholder dots).</summary>
+        public void ShowSpoons(int spoons)
+        {
+            if (mugContents == null)
+            {
+                for (var i = 0; i < spoonMarkers.Length; i++) spoonMarkers[i].enabled = i < spoons;
+                return;
+            }
+
+            _groundsLevel = Mathf.Min(0.24f, spoons * 0.08f);
+            if (MugLevel <= 0f)
+            {
+                SetMugDrink(MugDrink.Instant, mugFill.Fill.color);
+                mugContents.SetLevel(_groundsLevel);
+            }
+        }
+
+        /// <summary>What's in the mug; <paramref name="placeholderColour"/> tints the placeholder bar when there's no art.</summary>
+        public void SetMugDrink(MugDrink drink, Color placeholderColour)
+        {
+            var index = (int)drink;
+            if (mugContents != null && mugDrinkSprites != null && index < mugDrinkSprites.Length)
+                mugContents.SetSprite(mugDrinkSprites[index]);
+            mugFill.Fill.color = placeholderColour;
+        }
+
+        /// <summary>The served drink (e.g. cinnamon latte) shown inside a full mug.</summary>
+        public void ShowServedDrink(Sprite drink)
+        {
+            if (mugContents == null || drink == null) return;
+            mugContents.SetSprite(drink);
+            mugContents.SetLevel(1f);
+        }
+
+        /// <summary>Target line drawn across the mug at <paramref name="level"/> (0..1).</summary>
+        public void ShowFillLine(float level)
+        {
+            mugFillLine.gameObject.SetActive(true);
+            mugFillLine.localPosition = new Vector3(mugFillLine.localPosition.x, level * mugFill.MaxHeight, 0f);
+        }
+
+        public void HideFillLine() => mugFillLine.gameObject.SetActive(false);
 
         /// <summary>Foam level 0..1: the drawn foam rises from the rim (or the placeholder bar fills).</summary>
         public void SetMilkFoam(float level)

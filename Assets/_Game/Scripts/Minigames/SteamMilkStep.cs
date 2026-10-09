@@ -91,6 +91,8 @@ namespace Courtyard.Minigames
         {
             _counter.MilkJug.Interactable = false;
             _counter.MugFoam.SetActive(true);
+            _counter.SetMugDrink(MugDrink.Latte, Color.white);
+            if (_counter.MugLevel < 0.85f) _counter.SetMugLevel(0.85f); // the milk tops the mug up
             StopSounds();
             _fx.Punch(_counter.MilkJugBody.transform);
             var centre = (bandMin + bandMax) * 0.5f;
