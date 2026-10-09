@@ -18,8 +18,9 @@ namespace Courtyard.Editor
         private const string WindowFolder = "Assets/_Game/Art/Sprites/Window/";
         private const string KitchenFolder = "Assets/_Game/Art/Sprites/Kitchen/";
 
-        // Tabletop: its back edge sits a little above the tools' feet so they stand on the surface; fills to the screen bottom.
-        private static readonly Rect TableRect = Rect.MinMaxRect(-9.8f, -5.45f, 9.8f, -2.45f);
+        // Counter (top + drawer fronts): back edge a little above the tools' feet so they stand on the surface;
+        // ends at the fridge (x = 6.8) and runs just past the screen bottom.
+        private static readonly Rect TableRect = Rect.MinMaxRect(-9.7f, -5.75f, 6.8f, -2.45f);
 
         // Window layout (world units). The frame art sets the size; everything else hangs off it.
         private static readonly Vector2 WindowCenter = new(0f, 1.75f);
@@ -83,7 +84,7 @@ namespace Courtyard.Editor
                 picture.gameObject.AddComponent<SpriteRenderer>();
             }
 
-            Fit(kitchen, "WallPicture", "Oddblot_walldeco", new Vector2(5.9f, 3.2f), 1.8f, "Wall", 1);
+            Fit(kitchen, "WallPicture", "Oddblot_walldeco", new Vector2(-5f, 2.55f), 1.25f, "Wall", 1);
         }
 
         /// <summary>

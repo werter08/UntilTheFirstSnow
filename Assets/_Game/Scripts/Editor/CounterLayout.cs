@@ -18,8 +18,8 @@ namespace Courtyard.Editor
         public const float KettleX = -7f;
         public const float GrinderX = -4.3f;
         public const float MugX = -0.8f;
-        public const float MilkX = 2.6f;
-        public const float ServeX = 6f;
+        public const float MilkX = 2.3f;
+        public const float ServeX = 5.3f; // the counter ends at the fridge (x = 6.8)
 
         public static readonly Color HerMugColor = new(0.93f, 0.9f, 0.82f);
         private static readonly Color Leaf = new(0.95f, 0.55f, 0.2f);
@@ -92,7 +92,7 @@ namespace Courtyard.Editor
             };
             var jars = toppings.Select((t, i) =>
             {
-                var body = Box(shelf, t.Item1.ToString(), new Vector2(ServeX - 1.3f + 0.85f * i, -2.3f), new Vector2(0.7f, 0.9f), t.Item2, 1, true);
+                var body = Box(shelf, t.Item1.ToString(), new Vector2(ServeX - 1.1f + 0.75f * i, -2.3f), new Vector2(0.65f, 0.9f), t.Item2, 1, true);
                 WorldText(body.transform, "Label", new Vector2(0f, 0.75f), t.Item1.ToString(), 1.6f, Gray(0.15f), "Props", 2);
                 var picked = Box(body.transform, "Picked", new Vector2(0f, -0.58f), new Vector2(0.8f, 0.14f), Leaf, 2);
                 var target = Pose(body.gameObject.AddComponent<PointerTarget>(), HandPose.Pinch);

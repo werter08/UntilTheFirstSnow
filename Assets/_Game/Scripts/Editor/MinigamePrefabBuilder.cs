@@ -127,7 +127,7 @@ namespace Courtyard.Editor
         {
             var root = new GameObject(SteamMilk);
             var step = root.AddComponent<SteamMilkStep>();
-            var (band, needle) = Thermometer(root.transform, new Vector2(CounterLayout.MilkX + 1.0f, CounterLayout.Top));
+            var (band, needle) = Thermometer(root.transform, new Vector2(CounterLayout.MilkX + 0.9f, CounterLayout.Top));
 
             Wire(step, "hintText", "Hold the milk jug to steam it. Let go in the green.");
             Wire(step, "needle", needle);
@@ -145,7 +145,7 @@ namespace Courtyard.Editor
             var mugs = new Object[colors.Length];
             for (var i = 0; i < colors.Length; i++)
             {
-                var mug = Box(root.transform, $"Mug{i}", new Vector2(CounterLayout.ServeX - 1.2f + 1.2f * i, -2.15f), new Vector2(0.9f, 1.1f), colors[i], 0, true);
+                var mug = Box(root.transform, $"Mug{i}", new Vector2(CounterLayout.ServeX - 1f + 1f * i, -2.15f), new Vector2(0.9f, 1.1f), colors[i], 0, true);
                 mugs[i] = mug.gameObject.AddComponent<PointerTarget>();
             }
 

@@ -188,7 +188,7 @@ namespace Courtyard.Editor
             var canvas = CreateCanvas();
             var vignette = BuildVignette(canvas);
             var meterHim = BuildMeterView(canvas, "WarmthMeter_Him", "You", new Vector2(40f, -40f));
-            var meterMira = BuildMeterView(canvas, "WarmthMeter_Mira", "Mira", new Vector2(40f, -100f));
+            var meterMira = BuildMeterView(canvas, "WarmthMeter_Mira", "Mira", new Vector2(40f, -108f));
             var hint = BuildHint(canvas);
             var story = ((GameObject)PrefabUtility.InstantiatePrefab(storyBoxPrefab, canvas)).GetComponent<StoryPlayer>();
             var fader = ((GameObject)PrefabUtility.InstantiatePrefab(faderPrefab, canvas)).GetComponent<ScreenFader>();
@@ -368,20 +368,22 @@ namespace Courtyard.Editor
             Box(root, "InstantCoffeeJar", new Vector2(-6.2f, 1.65f), new Vector2(0.6f, 0.75f), new Color(0.3f, 0.2f, 0.15f), 2, false, "Wall");
             var beans = Box(root, "BeansJar", new Vector2(-7.2f, 1.7f), new Vector2(0.6f, 0.85f), new Color(0.45f, 0.3f, 0.2f), 2, false, "Wall");
             var cinnamon = Box(root, "CinnamonJar", new Vector2(-8.2f, 1.6f), new Vector2(0.5f, 0.65f), new Color(0.65f, 0.35f, 0.2f), 2, false, "Wall");
-            Box(root, "Clock", new Vector2(-8.1f, 3.7f), new Vector2(1.3f, 1.1f), paper, 1, false, "Wall");
-            var clock = WorldText(root, "ClockTime", new Vector2(-8.1f, 3.7f), "00:00", 4f, Gray(0.15f), "Wall", 2);
-            Box(root, "Calendar", new Vector2(-6.2f, 3.4f), new Vector2(1.5f, 1.8f), paper, 1, false, "Wall");
-            Box(root, "CalendarHeader", new Vector2(-6.2f, 4.1f), new Vector2(1.5f, 0.4f), new Color(0.8f, 0.3f, 0.25f), 2, false, "Wall");
-            var calendar = WorldText(root, "CalendarDay", new Vector2(-6.2f, 3.2f), "1", 9f, Gray(0.15f), "Wall", 2);
+            // Wall objects (not UI): clock above the left shelf, calendar right of the window. The top-left corner stays free for the warmth meters.
+            Box(root, "Clock", new Vector2(-7.3f, 3.15f), new Vector2(1.2f, 1f), paper, 1, false, "Wall");
+            var clock = WorldText(root, "ClockTime", new Vector2(-7.3f, 3.15f), "00:00", 3.6f, Gray(0.15f), "Wall", 2);
+            Box(root, "Calendar", new Vector2(5.3f, 2.85f), new Vector2(1.4f, 1.7f), paper, 1, false, "Wall");
+            Box(root, "CalendarHeader", new Vector2(5.3f, 3.5f), new Vector2(1.4f, 0.4f), new Color(0.8f, 0.3f, 0.25f), 2, false, "Wall");
+            var calendar = WorldText(root, "CalendarDay", new Vector2(5.3f, 2.65f), "1", 8.5f, Gray(0.15f), "Wall", 2);
 
             // Right wall: fridge with notes, mug rack
-            Box(root, "Fridge", new Vector2(8.9f, 0.6f), new Vector2(1.6f, 6.8f), Gray(0.93f), 1, false, "Wall");
-            var notes = new[] { new Vector2(8.7f, 2.6f), new Vector2(9.1f, 1.8f), new Vector2(8.7f, 1f) }
+            // Fridge stands on the floor (to the bottom of the screen); the tabletop ends at its left edge (x = 6.8).
+            Box(root, "Fridge", new Vector2(8.2f, -0.6f), new Vector2(2.8f, 9.6f), Gray(0.93f), 1, false, "Wall");
+            var notes = new[] { new Vector2(7.6f, 2.6f), new Vector2(8.5f, 1.8f), new Vector2(7.8f, 1f) }
                 .Select((p, i) => (Object)Box(root, $"FridgeNote{i}", p, new Vector2(0.55f, 0.55f), new Color(1f, 0.9f, 0.5f), 2, false, "Wall").gameObject)
                 .ToArray();
-            Box(root, "MugRack", new Vector2(6.6f, 0.9f), new Vector2(1.8f, 0.1f), wood, 1, false, "Wall");
-            Box(root, "ChippedMug", new Vector2(6.1f, 1.3f), new Vector2(0.55f, 0.65f), new Color(0.55f, 0.65f, 0.75f), 2, false, "Wall");
-            var herMug = Box(root, "HerMug", new Vector2(7f, 1.3f), new Vector2(0.55f, 0.65f), new Color(0.93f, 0.9f, 0.82f), 2, false, "Wall");
+            Box(root, "MugRack", new Vector2(5.3f, 0.75f), new Vector2(1.6f, 0.1f), wood, 1, false, "Wall");
+            Box(root, "ChippedMug", new Vector2(4.9f, 1.15f), new Vector2(0.55f, 0.65f), new Color(0.55f, 0.65f, 0.75f), 2, false, "Wall");
+            var herMug = Box(root, "HerMug", new Vector2(5.7f, 1.15f), new Vector2(0.55f, 0.65f), new Color(0.93f, 0.9f, 0.82f), 2, false, "Wall");
             Box(herMug.transform, "LeafPrint", new Vector2(0.08f, 0.05f), new Vector2(0.18f, 0.18f), new Color(0.95f, 0.55f, 0.2f), 3, false, "Wall")
                 .transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
 
@@ -511,7 +513,8 @@ namespace Courtyard.Editor
         private static HintView BuildHint(RectTransform canvas)
         {
             var root = UiObject("Hint", canvas);
-            Place(root, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(1300f, 70f));
+            // Bottom centre over the drawer fronts; never on screen together with the story box.
+            Place(root, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1300f, 70f));
             var group = root.gameObject.AddComponent<CanvasGroup>();
             group.alpha = 0f;
             group.blocksRaycasts = false;
