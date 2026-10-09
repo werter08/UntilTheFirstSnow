@@ -363,6 +363,20 @@ namespace Courtyard.Editor
                 array.GetArrayElementAtIndex((int)MugStyle.Hers).objectReferenceValue = Load("mug_hers");
             });
 
+            // V60 art (placed on the mug by the manifest pass) and its little shadow on the rim.
+            var v60Empty = Load("v60_empty");
+            if (v60Empty != null)
+            {
+                var v60 = Find(tools, "V60");
+                PlaceAtScreenScale(v60, v60Empty, v60.localPosition, "Props", 4);
+                Wire(counter, "dripperRenderer", v60.GetComponent<SpriteRenderer>());
+                Wire(counter, "dripperEmpty", v60Empty);
+                Wire(counter, "dripperGrounds", Load("v60_grounds"));
+                var shadowSprite = Load("v60_shadow");
+                if (shadowSprite != null)
+                    PlaceAtScreenScale(SpriteChild(v60, "Shadow"), shadowSprite, new Vector2(-0.07f, -v60Empty.bounds.extents.y + 0.02f), "Props", 3);
+            }
+
             // Fill gauge beside the mug (shown only while pouring).
             var halfWidth = chipped.bounds.extents.x;
             var gauge = Child(mug, "Gauge");

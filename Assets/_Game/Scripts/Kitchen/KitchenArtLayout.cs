@@ -26,6 +26,10 @@ namespace Courtyard.Kitchen
         [Tooltip("The mug (main focus) stands a little closer to the player.")]
         public float mugBottomY = 840f;
 
+        [Header("Brew zone")]
+        [Tooltip("V60 centre relative to the mug sprite's centre (px): its cone sits on the mug body, not the handle.")]
+        public Vector2 dripperOnMugPx = new(-16.5f, 111f);
+
         [Header("Window")]
         [Tooltip("Window opening for the SpriteMask (x, y, width, height).")]
         public Rect windowOpening = new(660f, 110f, 600f, 450f);

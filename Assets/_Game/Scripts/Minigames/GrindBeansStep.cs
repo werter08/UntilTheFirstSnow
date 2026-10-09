@@ -86,6 +86,7 @@ namespace Courtyard.Minigames
         private void Finish()
         {
             _counter.GrinderHandle.Interactable = false;
+            _counter.SetDripperGrounds(true);
             AudioManager.StopLoop(SfxId.Grind);
             Complete(1f - Mathf.Abs(meter.Value - targetLevel) / qualityFalloff);
         }

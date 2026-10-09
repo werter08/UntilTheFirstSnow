@@ -32,6 +32,10 @@ namespace Courtyard.Kitchen
         [SerializeField] private SpriteRenderer[] spoonMarkers;
         [SerializeField] private GameObject mugLeafPrint;
         [SerializeField] private GameObject dripper;
+        [Tooltip("V60 art: empty, and with ground coffee (after GrindBeans). Empty = keep the placeholder.")]
+        [SerializeField] private SpriteRenderer dripperRenderer;
+        [SerializeField] private Sprite dripperEmpty;
+        [SerializeField] private Sprite dripperGrounds;
         [Tooltip("Mug art per MugStyle (Chipped, His, Hers). Empty = keep the placeholder.")]
         [SerializeField] private Sprite[] mugSprites;
         [Tooltip("Fill gauge next to the mug (side-view mugs don't show their contents); shown only while pouring.")]
@@ -102,6 +106,7 @@ namespace Courtyard.Kitchen
             if (hasArt) mugBody.sprite = mugSprites[style];
             mugLeafPrint.SetActive(!hasArt && props.brewMug == MugStyle.Hers);
             SetMugGauge(false);
+            SetDripperGrounds(false);
 
             kettle.position = _kettleRest;
             kettleStream.enabled = false;
@@ -122,6 +127,13 @@ namespace Courtyard.Kitchen
         {
             var index = (int)zone;
             return zoneShift != null && index < zoneShift.Length ? zoneShift[index] : Vector2.zero;
+        }
+
+        /// <summary>Ground coffee in the V60 (after grinding).</summary>
+        public void SetDripperGrounds(bool hasGrounds)
+        {
+            var sprite = hasGrounds ? dripperGrounds : dripperEmpty;
+            if (dripperRenderer != null && sprite != null) dripperRenderer.sprite = sprite;
         }
 
         /// <summary>Shows the fill gauge (and its target line) while a pouring step runs.</summary>
