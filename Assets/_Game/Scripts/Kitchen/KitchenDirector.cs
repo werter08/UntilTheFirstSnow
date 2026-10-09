@@ -68,6 +68,8 @@ namespace Courtyard.Kitchen
         {
             new(0.55f, 0.5f, 0.3f), new(0.5f, 0.62f, 0.32f), new(0.35f, 0.65f, 0.35f), new(0.95f, 0.55f, 0.65f),
         };
+        [Tooltip("Optional drawn plant per PlantStage (Wilted, Recovering, Healthy, Blooming); replaces the tint.")]
+        [SerializeField] private Sprite[] plantStageSprites;
         [SerializeField] private GameObject[] fridgeNotes;
         [Tooltip("Day 30: his and her mugs side by side on the window sill.")]
         [SerializeField] private GameObject sillMugs;
@@ -108,7 +110,17 @@ namespace Courtyard.Kitchen
             herMug.SetActive(props.herMug);
             scarf.SetActive(props.scarf);
             blanket.SetActive(props.blanket);
-            plant.color = PickColor(plantStageColors, (int)props.plantStage);
+            var stage = (int)props.plantStage;
+            var drawn = plantStageSprites != null && stage < plantStageSprites.Length ? plantStageSprites[stage] : null;
+            if (drawn != null)
+            {
+                plant.sprite = drawn;
+                plant.color = Color.white;
+            }
+            else
+            {
+                plant.color = PickColor(plantStageColors, stage);
+            }
             for (var i = 0; i < fridgeNotes.Length; i++)
                 fridgeNotes[i].SetActive(i < props.fridgeNotes);
             if (sillMugs != null) sillMugs.SetActive(props.mugsOnSill);

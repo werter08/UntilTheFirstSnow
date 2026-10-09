@@ -110,6 +110,7 @@ namespace Courtyard.Editor
             ApplyClock(kitchen);
             ApplyCalendar(kitchen);
             ApplyLamp(kitchen);
+            ApplyPlant(kitchen);
             ArtManifestBuilder.Apply(scene, kitchen, _layout); // manifest zones, layers and file slots win
             SleeveBuilder.WireScene(scene, _sleeves);
 
@@ -131,7 +132,8 @@ namespace Courtyard.Editor
             Find(kitchen, "Scarf").localPosition = new Vector3(-5.7f, -2.75f, 0f);
 
             // Window sill: flower in a glass (tinted per PlantStage by the KitchenDirector).
-            if (Fit(kitchen, "Plant", "Oddblot_tbldeco2", new Vector2(1.4f, -0.12f), 1f, "Wall", 12))
+            if (AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "plant_wilted.png") == null
+                && Fit(kitchen, "Plant", "Oddblot_tbldeco2", new Vector2(1.4f, -0.12f), 1f, "Wall", 12))
             {
                 Find(kitchen, "PlantPot").gameObject.SetActive(false);
                 Edit(kitchen.GetComponent<KitchenDirector>(), so =>
@@ -691,6 +693,31 @@ namespace Courtyard.Editor
             Wire(director, "lampOnSprite", lit);
             Wire(director, "lampOffSprite", Load("lamp_off"));
             Wire(director, "lampGlow", glow.GetComponent<SpriteRenderer>());
+        }
+
+        private const float SillTopY = -0.56f;
+        private const float PlantX = 2.15f;
+
+        /// <summary>Drawn plant on the window sill, one drawing per stage (wilted → green → blooming), pot on the sill.</summary>
+        private static void ApplyPlant(Transform kitchen)
+        {
+            var paths = new[] { "plant_wilted", "plant_green", "plant_bloom" }.Select(n => PropsFolder + n + ".png").ToArray();
+            if (AssetDatabase.LoadAssetAtPath<Sprite>(paths[0]) == null) return;
+            foreach (var path in paths) SetPivot(path, new Vector2(0.5f, 0.017f)); // pot bottom: stages swap in place
+
+            Sprite Load(int i) => AssetDatabase.LoadAssetAtPath<Sprite>(paths[i]);
+            var plant = Find(kitchen, "Plant");
+            PlaceAtScreenScale(plant, Load(0), new Vector2(PlantX, SillTopY), "WindowFrame", 12);
+            var pot = Find(kitchen, "PlantPot", false);
+            if (pot != null) pot.gameObject.SetActive(false);
+
+            Edit(kitchen.GetComponent<KitchenDirector>(), so =>
+            {
+                var array = Property(so, "plantStageSprites");
+                var byStage = new[] { Load(0), Load(1), Load(1), Load(2) }; // Wilted, Recovering, Healthy, Blooming
+                array.arraySize = byStage.Length;
+                for (var i = 0; i < byStage.Length; i++) array.GetArrayElementAtIndex(i).objectReferenceValue = byStage[i];
+            });
         }
 
         private static void FitMug(Transform target, Sprite sprite, Vector2 centre, float scale, string layer = "Wall", int order = 2)

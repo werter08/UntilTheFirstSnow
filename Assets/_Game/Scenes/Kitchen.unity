@@ -20658,6 +20658,11 @@ MonoBehaviour:
   - {r: 0.88, g: 0.84, b: 0.74, a: 1}
   - {r: 1, g: 1, b: 1, a: 1}
   - {r: 1, g: 0.93, b: 0.95, a: 1}
+  plantStageSprites:
+  - {fileID: 21300000, guid: b6b1e9590f2414e25a4d5339bebabe38, type: 3}
+  - {fileID: 21300000, guid: 2a1980ba04c2445ac96dd4b06eaf4592, type: 3}
+  - {fileID: 21300000, guid: 2a1980ba04c2445ac96dd4b06eaf4592, type: 3}
+  - {fileID: 21300000, guid: 7b78aa5f23e294017b9a5745928b69b8, type: 3}
   fridgeNotes:
   - {fileID: 1644253398}
   - {fileID: 418934770}
@@ -33556,8 +33561,8 @@ Transform:
   m_GameObject: {fileID: 1941199857}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.4, y: -0.12, z: 0}
-  m_LocalScale: {x: 0.10351967, y: 0.10351967, z: 1}
+  m_LocalPosition: {x: 2.15, y: -0.56, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1524385089}
@@ -33607,11 +33612,11 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 405905959
-  m_SortingLayer: 1
+  m_SortingLayerID: 650408689
+  m_SortingLayer: 6
   m_SortingOrder: 12
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 64f0fd8cfb6e74bf1b2f5f6470c5373d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b6b1e9590f2414e25a4d5339bebabe38, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
