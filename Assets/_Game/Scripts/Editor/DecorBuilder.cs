@@ -111,6 +111,7 @@ namespace Courtyard.Editor
             ApplyCalendar(kitchen);
             ApplyLamp(kitchen);
             ApplyPlant(kitchen);
+            ApplyLife(scene, kitchen);
             ArtManifestBuilder.Apply(scene, kitchen, _layout); // manifest zones, layers and file slots win
             SleeveBuilder.WireScene(scene, _sleeves);
 
@@ -643,13 +644,16 @@ namespace Courtyard.Editor
             var sheet = Load("calendar");
             if (sheet == null) return;
 
+            // World positions: these may sit under the CalendarGroup hanger (ApplyLife).
             var centre = KitchenArtLayout.ToWorld(_layout.calendarCentre);
-            PlaceAtScreenScale(Find(kitchen, "Calendar"), sheet, centre, "WallProps", 1);
+            var calendarSheet = Find(kitchen, "Calendar");
+            PlaceAtScreenScale(calendarSheet, sheet, Vector2.zero, "WallProps", 1);
+            calendarSheet.position = centre;
             Find(kitchen, "CalendarHeader").gameObject.SetActive(false);
 
             var numberPos = centre + new Vector2(_layout.calendarNumberOffsetPx.x, -_layout.calendarNumberOffsetPx.y) / KitchenArtLayout.PixelsPerUnit;
             var number = Find(kitchen, "CalendarDay");
-            number.localPosition = numberPos;
+            number.position = numberPos;
             var text = number.GetComponent<TMPro.TextMeshPro>();
             text.color = new Color(0.17f, 0.14f, 0.13f);
             text.fontSize = 7.5f;
@@ -660,7 +664,8 @@ namespace Courtyard.Editor
             {
                 var ring = Find(kitchen, "CalendarCircle", false) ?? Empty(kitchen, "CalendarCircle", Vector2.zero);
                 if (ring.GetComponent<SpriteRenderer>() == null) ring.gameObject.AddComponent<SpriteRenderer>();
-                PlaceAtScreenScale(ring, circle, numberPos, "WallProps", 3);
+                PlaceAtScreenScale(ring, circle, Vector2.zero, "WallProps", 3);
+                ring.position = numberPos;
             }
         }
 
@@ -677,15 +682,18 @@ namespace Courtyard.Editor
             // The cropped drawing starts at the frame top (the cord), so place its top at the frame top.
             var frameTop = KitchenArtLayout.ToWorldY(_layout.lampFrameCentre.y - _layout.lampFrameSize.y * 0.5f);
             var centre = new Vector2(KitchenArtLayout.ToWorldX(_layout.lampFrameCentre.x), frameTop - lit.bounds.extents.y);
+            // World positions: these may sit under the LampPivot hanger (ApplyLife).
             var lamp = Find(kitchen, "CeilingLamp");
-            PlaceAtScreenScale(lamp, lit, centre, "WallProps", 2);
+            PlaceAtScreenScale(lamp, lit, Vector2.zero, "WallProps", 2);
+            lamp.position = centre;
 
             var bulb = new Vector2(centre.x, centre.y - lit.bounds.extents.y + 0.14f);
-            Find(kitchen, "LampLight").localPosition = bulb;
+            Find(kitchen, "LampLight").position = bulb;
 
             var glow = Find(kitchen, "LampGlow", false) ?? Empty(kitchen, "LampGlow", Vector2.zero);
             if (glow.GetComponent<SpriteRenderer>() == null) glow.gameObject.AddComponent<SpriteRenderer>();
-            PlaceAtScreenScale(glow, AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png"), bulb, "WallProps", 0);
+            PlaceAtScreenScale(glow, AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png"), Vector2.zero, "WallProps", 0);
+            glow.position = bulb;
             glow.localScale = new Vector3(1.6f, 1.6f, 1f);
 
             var director = kitchen.GetComponent<KitchenDirector>();
@@ -718,6 +726,151 @@ namespace Courtyard.Editor
                 array.arraySize = byStage.Length;
                 for (var i = 0; i < byStage.Length; i++) array.GetArrayElementAtIndex(i).objectReferenceValue = byStage[i];
             });
+        }
+
+        /// <summary>
+        /// Life in the kitchen: particle emitter for juice bursts, gentle ambient motion, and clickable details
+        /// (fidgets) that swing / punch / puff when poked. Idempotent.
+        /// </summary>
+        private static void ApplyLife(Scene scene, Transform kitchen)
+        {
+            // Particle bursts (sparkles, dust, splashes, sprinkles).
+            var fx = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<FeedbackFx>(true)).First(f => f != null);
+            var burstT = Find(fx.transform, "Burst", false);
+            if (burstT == null)
+            {
+                var system = Particles(fx.transform, "Burst", Vector2.zero, 0.01f, Vector2.zero, Color.white, 0.08f, 0.6f, 0f, "FX", 20);
+                var main = system.main;
+                main.playOnAwake = true;
+                main.maxParticles = 600;
+                var velocity = system.velocityOverLifetime;
+                velocity.enabled = false;
+                var colour = system.colorOverLifetime;
+                colour.enabled = true;
+                var fade = new Gradient();
+                fade.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                    new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 0.6f), new GradientAlphaKey(0f, 1f) });
+                colour.color = fade;
+                burstT = system.transform;
+            }
+            Wire(fx, "burst", burstT.GetComponent<ParticleSystem>());
+
+            // Topping sprinkle colours.
+            var sprinkles = new System.Collections.Generic.Dictionary<string, Color>
+            {
+                ["Cinnamon"] = new(0.65f, 0.35f, 0.2f), ["Honey"] = new(0.95f, 0.7f, 0.2f),
+                ["Cocoa"] = new(0.35f, 0.22f, 0.15f), ["Salt"] = new(0.95f, 0.95f, 0.97f),
+            };
+            foreach (var jar in Find(kitchen, "Counter Tools").GetComponentsInChildren<ToppingJar>(true))
+                if (sprinkles.TryGetValue(jar.name, out var c)) Edit(jar, so => so.FindProperty("sprinkleColour").colorValue = c);
+
+            // Lamp hangs from its cord: everything that should swing goes under a pivot at the cord's top.
+            var lamp = Find(kitchen, "CeilingLamp");
+            var lampPivot = Find(kitchen, "LampPivot", false);
+            if (lampPivot == null)
+            {
+                var top = lamp.GetComponent<SpriteRenderer>().bounds.max.y;
+                lampPivot = Empty(kitchen, "LampPivot", new Vector2(lamp.position.x, top));
+                foreach (var name in new[] { "CeilingLamp", "LampLight", "LampGlow" })
+                {
+                    var t = Find(kitchen, name, false);
+                    if (t != null) t.SetParent(lampPivot, true);
+                }
+            }
+            Motion(lampPivot, sway: 1.2f, speed: 0.45f, wind: 0.6f);
+            Poke(lamp, lampPivot, swing: 9f, punch: 0f, sound: Audio.SfxId.UiClick);
+
+            // Calendar: sheet, number and ring move together.
+            var calendarGroup = Find(kitchen, "CalendarGroup", false);
+            var calendar = Find(kitchen, "Calendar");
+            if (calendarGroup == null)
+            {
+                var top = calendar.GetComponent<SpriteRenderer>().bounds.max.y;
+                calendarGroup = Empty(kitchen, "CalendarGroup", new Vector2(calendar.position.x, top));
+                foreach (var name in new[] { "Calendar", "CalendarDay", "CalendarCircle", "CalendarHeader" })
+                {
+                    var t = Find(kitchen, name, false);
+                    if (t != null) t.SetParent(calendarGroup, true);
+                }
+            }
+            Poke(calendar, calendarGroup, swing: 5f, punch: 0f, sound: Audio.SfxId.PaperNote);
+
+            // Window: curtains breathe (more on windy days), plant sways, Mira's silhouette moves a little.
+            foreach (var curtain in new[] { "CurtainLeft", "CurtainRight" })
+            {
+                var t = Find(kitchen, curtain, false);
+                if (t == null) continue;
+                Motion(t, sway: 0.35f, stretch: 0.012f, speed: 0.5f, wind: 1f);
+                Poke(t, t, swing: 2.5f, punch: 0f, sound: Audio.SfxId.UiClick);
+            }
+
+            var plant = Find(kitchen, "Plant");
+            Motion(plant, sway: 1.8f, speed: 0.7f, wind: 0.7f);
+            Poke(plant, plant, swing: 12f, punch: 0.2f, sound: Audio.SfxId.UiClick, particles: 6, colour: new Color(0.45f, 0.65f, 0.3f));
+            Motion(Find(kitchen, "Silhouette"), bob: 0.02f, speed: 0.35f, wind: 0f);
+
+            // Wall and fridge details.
+            Poke(Find(kitchen, "Clock"), Find(kitchen, "Clock"), swing: 4f, punch: 0.15f, sound: Audio.SfxId.UiClick);
+            Poke(Find(kitchen, "WallPicture"), Find(kitchen, "WallPicture"), swing: 7f, punch: 0f, sound: Audio.SfxId.UiClick);
+            Poke(Find(kitchen, "Shelf"), Find(kitchen, "Shelf"), swing: 0f, punch: 0.12f, sound: Audio.SfxId.MugClink);
+            Poke(Find(kitchen, "ChippedMug"), Find(kitchen, "ChippedMug"), swing: 0f, punch: 0.3f, sound: Audio.SfxId.MugClink);
+            Poke(Find(kitchen, "HerMug"), Find(kitchen, "HerMug"), swing: 0f, punch: 0.3f, sound: Audio.SfxId.MugClink);
+            Poke(Find(kitchen, "BeansJar"), Find(kitchen, "BeansJar"), swing: 0f, punch: 0.35f, sound: Audio.SfxId.Spoon,
+                particles: 4, colour: new Color(0.35f, 0.22f, 0.15f));
+            for (var i = 0; i < 3; i++)
+            {
+                var note = Find(kitchen, $"FridgeNote{i}");
+                Poke(note, note, swing: 8f, punch: 0f, sound: Audio.SfxId.PaperNote);
+            }
+
+            // Mira's window: poke it and (from Day 5) she waves back.
+            var miraWindow = Find(kitchen, "MiraWindow");
+            var miraFidget = Poke(miraWindow, miraWindow, swing: 0f, punch: 0f, sound: Audio.SfxId.UiClick);
+            Wire(kitchen.GetComponent<KitchenDirector>(), "miraWindowFidget", miraFidget);
+        }
+
+        private static void Motion(Transform target, float sway = 0f, float bob = 0f, float stretch = 0f, float speed = 0.6f, float wind = 1f)
+        {
+            if (target == null) return;
+            var motion = GetOrAdd<AmbientMotion>(target);
+            Edit(motion, so =>
+            {
+                so.FindProperty("swayDegrees").floatValue = sway;
+                so.FindProperty("bob").floatValue = bob;
+                so.FindProperty("stretch").floatValue = stretch;
+                so.FindProperty("speed").floatValue = speed;
+                so.FindProperty("windResponse").floatValue = wind;
+            });
+        }
+
+        /// <summary>Makes a sprite clickable: collider from its sprite, PointerTarget (hand on hover) and a Fidget.</summary>
+        private static Fidget Poke(Transform target, Transform visual, float swing, float punch, Audio.SfxId sound,
+            int particles = 0, Color colour = default)
+        {
+            if (target == null) return null;
+            var renderer = target.GetComponent<SpriteRenderer>();
+            var collider = target.GetComponent<BoxCollider2D>();
+            if (collider == null) collider = target.gameObject.AddComponent<BoxCollider2D>();
+            if (renderer != null && renderer.sprite != null)
+            {
+                var b = renderer.sprite.bounds;
+                collider.size = renderer.drawMode == SpriteDrawMode.Simple ? (Vector2)b.size : renderer.size;
+                collider.offset = renderer.drawMode == SpriteDrawMode.Simple ? (Vector2)b.center : Vector2.zero;
+            }
+
+            var pointer = GetOrAdd<PointerTarget>(target);
+            WireEnum(pointer, "handPose", HandPose.Point);
+            var fidget = GetOrAdd<Fidget>(target);
+            Edit(fidget, so =>
+            {
+                so.FindProperty("visual").objectReferenceValue = visual;
+                so.FindProperty("swingDegrees").floatValue = swing;
+                so.FindProperty("punch").floatValue = punch;
+                so.FindProperty("sound").enumValueIndex = (int)sound;
+                so.FindProperty("particles").intValue = particles;
+                so.FindProperty("particleColour").colorValue = colour;
+            });
+            return fidget;
         }
 
         private static void FitMug(Transform target, Sprite sprite, Vector2 centre, float scale, string layer = "Wall", int order = 2)
@@ -871,7 +1024,7 @@ namespace Courtyard.Editor
             SetLayer(target, layer, order);
 
             var collider = target.GetComponent<BoxCollider2D>();
-            if (collider != null) Object.DestroyImmediate(collider);
+            if (collider != null && target.GetComponent<PointerTarget>() == null) Object.DestroyImmediate(collider); // keep clickable details
 
             var vertices = sprite.vertices;
             var min = new Vector2(vertices.Min(v => v.x), vertices.Min(v => v.y));

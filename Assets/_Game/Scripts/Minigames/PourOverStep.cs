@@ -38,6 +38,8 @@ namespace Courtyard.Minigames
         [SerializeField] private Color coffeeColor = new(0.35f, 0.2f, 0.1f);
 
         private CounterStation _counter;
+        private FeedbackFx _fx;
+        private float _splashTimer;
         private Camera _camera;
         private Vector2 _lastPointer;
         private float _flow;
@@ -47,7 +49,9 @@ namespace Courtyard.Minigames
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
+            _fx = ctx.Fx;
             _camera = ctx.WorldCamera;
+            NudgeTarget = _counter.Dripper;
             pourZone.Pressed += OnPressed;
             pourZone.Released += OnReleased;
 
@@ -120,6 +124,13 @@ namespace Courtyard.Minigames
             if (_flow >= bandMin && _flow <= bandMax) _bandTime += Time.deltaTime;
 
             _counter.SetMugLevel(_counter.MugLevel + fillPerSecond * Time.deltaTime);
+            _splashTimer -= Time.deltaTime;
+            if (_splashTimer <= 0f && _fx != null)
+            {
+                _splashTimer = 0.15f;
+                _fx.Burst(_counter.Mug.transform.position + Vector3.up * 0.6f, coffeeColor, 2, 0.7f, 0.05f, 1.2f);
+            }
+
             if (_counter.MugLevel >= 1f) Finish();
         }
 

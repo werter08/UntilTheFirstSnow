@@ -24,6 +24,11 @@ namespace Courtyard.Kitchen
         [SerializeField] private float popupRise = 0.9f;
         [SerializeField, Min(0.01f)] private float popupSeconds = 1f;
 
+        [Header("Particle bursts")]
+        [Tooltip("World-space emitter used for sparkles, dust, splashes and sprinkles (emission off; we Emit()).")]
+        [SerializeField] private ParticleSystem burst;
+        [SerializeField] private Color perfectSparkle = new(1f, 0.85f, 0.4f);
+
         [Header("Served drink")]
         [SerializeField] private string drinkSortingLayer = "Foreground";
         [SerializeField] private int drinkSortingOrder = 70;
@@ -56,6 +61,7 @@ namespace Courtyard.Kitchen
         {
             if (quality < perfectThreshold) return;
             Popup(perfectText, worldPosition);
+            Burst(worldPosition, perfectSparkle, 18, 2.2f, 0.12f, -0.2f);
             AudioManager.Play(SfxId.Perfect);
         }
 
@@ -93,6 +99,28 @@ namespace Courtyard.Kitchen
                 foreach (var r in renderers) r.color = new Color(1f, 1f, 1f, 1f - t);
             });
             foreach (var r in renderers) Destroy(r.gameObject);
+        }
+
+        /// <summary>A puff of little squares: sparkles, coffee dust, droplets, sprinkles.</summary>
+        public void Burst(Vector3 worldPosition, Color colour, int count, float speed = 1.4f, float size = 0.08f, float gravity = 0.6f)
+        {
+            if (burst == null) return;
+            for (var i = 0; i < count; i++)
+            {
+                var direction = Random.insideUnitCircle.normalized;
+                var parameters = new ParticleSystem.EmitParams
+                {
+                    position = worldPosition + (Vector3)(Random.insideUnitCircle * 0.08f),
+                    velocity = new Vector3(direction.x, Mathf.Abs(direction.y) + 0.3f, 0f) * speed * Random.Range(0.5f, 1f),
+                    startColor = colour,
+                    startSize = size * Random.Range(0.6f, 1.2f),
+                    startLifetime = Random.Range(0.4f, 0.8f),
+                    rotation = Random.Range(0f, 360f),
+                };
+                var main = burst.main;
+                main.gravityModifier = gravity;
+                burst.Emit(parameters, 1);
+            }
         }
 
         public void Popup(string text, Vector3 worldPosition)

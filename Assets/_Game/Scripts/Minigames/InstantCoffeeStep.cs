@@ -25,6 +25,8 @@ namespace Courtyard.Minigames
         [Tooltip("Fill distance from the line at which the fill score reaches 0.")]
         [SerializeField, Min(0.01f)] private float fillTolerance = 0.3f;
         [SerializeField, Range(0f, 1f)] private float spoonWeight = 0.5f;
+        [Tooltip("Letting go of the kettle below this fill doesn't end the step (a quick tap just pours a splash).")]
+        [SerializeField, Range(0f, 1f)] private float minFillToFinish = 0.15f;
 
         [SerializeField, Min(0f)] private float spoonReturnSeconds = 0.2f;
         [Tooltip("Where the kettle's spout goes while pouring, relative to the mug.")]
@@ -42,6 +44,7 @@ namespace Courtyard.Minigames
         private FeedbackFx _fx;
         private Coroutine _spoonReturn;
         private Coroutine _kettleMove;
+        private float _splashTimer;
         private Vector3 _spoonRest;
         private Vector2 _grabOffset;
         private bool _spoonLoaded;
@@ -64,6 +67,7 @@ namespace Courtyard.Minigames
             _counter.SetMugGauge(true);
             _counter.ShowFillLine(targetFill);
             spoonLoad.enabled = false;
+            NudgeTarget = spoon.transform;
             RefreshSpoonMarkers();
             RefreshKettle();
         }
@@ -93,6 +97,13 @@ namespace Courtyard.Minigames
             if (!_pouring || IsComplete) return;
 
             _counter.SetMugLevel(_counter.MugLevel + pourPerSecond * Time.deltaTime);
+            _splashTimer -= Time.deltaTime;
+            if (_splashTimer <= 0f)
+            {
+                _splashTimer = 0.12f;
+                _fx.Burst(_counter.Mug.transform.position + Vector3.up * 0.6f, waterColor, 2, 0.8f, 0.05f, 1.2f);
+            }
+
             if (_counter.MugLevel >= 1f) Finish();
         }
 
@@ -111,6 +122,7 @@ namespace Courtyard.Minigames
                 spoonLoad.enabled = true;
                 AudioManager.Play(SfxId.Spoon);
                 _fx.Punch(jar.transform, 0.6f);
+                _fx.Burst(world, coffeeColor, 4, 0.7f, 0.05f);
             }
         }
 
@@ -125,6 +137,8 @@ namespace Courtyard.Minigames
                 RefreshKettle();
                 AudioManager.Play(SfxId.Spoon);
                 _fx.Punch(_counter.Mug.transform);
+                _fx.Burst(_counter.Mug.transform.position + Vector3.up * 0.6f, coffeeColor, 8, 0.9f, 0.06f);
+                if (_spoons >= targetSpoons) NudgeTarget = _counter.KettleTarget.transform;
             }
 
             var from = spoon.transform.position;
@@ -149,7 +163,8 @@ namespace Courtyard.Minigames
             _pouring = false;
             AudioManager.StopLoop(SfxId.Pour);
             ReturnKettle();
-            if (_pourStarted && _counter.MugLevel > 0f) Finish();
+            if (_pourStarted && _counter.MugLevel >= minFillToFinish) Finish();
+            else ReturnKettle();
         }
 
         private void Finish()

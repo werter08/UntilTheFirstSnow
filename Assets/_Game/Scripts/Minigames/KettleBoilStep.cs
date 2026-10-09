@@ -38,6 +38,7 @@ namespace Courtyard.Minigames
             _counter.KettleSwitch.Clicked += OnSwitchClicked;
             _counter.KettleSwitch.Interactable = true;
             _counter.KettleView.SetHeating(false);
+            NudgeTarget = _counter.SwitchLight.transform;
         }
 
         private void OnDestroy()

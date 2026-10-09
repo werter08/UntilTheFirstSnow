@@ -7,6 +7,7 @@ using Courtyard.Minigames;
 using Courtyard.Story;
 using Courtyard.UI;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 namespace Courtyard.Core
@@ -41,6 +42,10 @@ namespace Courtyard.Core
         [SerializeField] private Color endColor = Color.black;
         [SerializeField] private Color failColor = new(0.55f, 0.7f, 0.9f);
         [SerializeField, Min(0f)] private float failHoldSeconds = 2.5f;
+        [Header("Idle nudge (no text): the right tool bounces if the player does nothing for a while")]
+        [SerializeField, Min(1f)] private float nudgeAfterSeconds = 7f;
+        [SerializeField, Min(0.5f)] private float nudgeRepeatSeconds = 4f;
+
         [Tooltip("Served drink icon height above the mug centre (art manifest: 140 px).")]
         [SerializeField] private float drinkIconHeight = 1.4f;
 
@@ -49,6 +54,7 @@ namespace Courtyard.Core
         private Coroutine _run;
         private MinigameStep _activeStep;
         private bool _draining;
+        private float _idle;
         private bool _failed;
 
         private void Start()
@@ -73,6 +79,7 @@ namespace Courtyard.Core
         private void Update()
         {
             if (_draining) _warmth.Tick(Time.deltaTime);
+            UpdateNudge();
             if (_warmth != null) AudioManager.SetWarmth(vignette.Coldest);
         }
 
@@ -156,6 +163,21 @@ namespace Courtyard.Core
             if (_level.OutroClip != null) AudioSource.PlayClipAtPoint(_level.OutroClip, worldCamera.transform.position);
             else AudioManager.Play(SfxId.Footsteps);
             yield return new WaitForSeconds(_level.OutroHoldSeconds);
+        }
+
+        private void UpdateNudge()
+        {
+            var pressing = Pointer.current != null && Pointer.current.press.isPressed;
+            if (_activeStep == null || pressing)
+            {
+                _idle = 0f;
+                return;
+            }
+
+            _idle += Time.deltaTime;
+            if (_idle < nudgeAfterSeconds || _activeStep.NudgeTarget == null) return;
+            fx.Punch(_activeStep.NudgeTarget, 0.8f);
+            _idle = nudgeAfterSeconds - nudgeRepeatSeconds;
         }
 
         private bool IsGood(float quality) => quality >= _level.GoodResultThreshold;

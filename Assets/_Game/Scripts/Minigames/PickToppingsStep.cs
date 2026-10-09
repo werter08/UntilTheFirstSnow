@@ -50,6 +50,7 @@ namespace Courtyard.Minigames
 
             AudioManager.Play(SfxId.Topping);
             _fx.Punch(jar.transform, 0.7f);
+            if (!_picked.Contains(jar.Topping)) _fx.Burst(jar.transform.position + Vector3.up * 0.5f, jar.SprinkleColour, 8, 1f, 0.05f);
             if (_picked.Remove(jar.Topping))
                 jar.SetPicked(false);
             else if (_picked.Count < picksRequired)
@@ -59,6 +60,7 @@ namespace Courtyard.Minigames
             }
 
             _counter.Mug.Interactable = _picked.Count == picksRequired;
+            NudgeTarget = _picked.Count == picksRequired ? _counter.Mug.transform : null; // never hint the answer
         }
 
         private void Serve()

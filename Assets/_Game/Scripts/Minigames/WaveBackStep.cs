@@ -23,6 +23,7 @@ namespace Courtyard.Minigames
             ctx.Kitchen.SetMiraWindow(MiraWindowState.Waving);
             ctx.Counter.Mug.Clicked += OnClicked;
             ctx.Counter.Mug.Interactable = true;
+            NudgeTarget = ctx.Counter.Mug.transform;
         }
 
         private void OnDestroy()

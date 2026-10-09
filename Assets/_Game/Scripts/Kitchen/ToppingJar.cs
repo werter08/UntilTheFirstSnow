@@ -12,10 +12,13 @@ namespace Courtyard.Kitchen
         [SerializeField] private PointerTarget target;
         [Tooltip("Shown while this topping is picked.")]
         [SerializeField] private GameObject pickedMarker;
+        [Tooltip("Colour of the little sprinkle when this topping is picked.")]
+        [SerializeField] private Color sprinkleColour = new(0.6f, 0.4f, 0.25f);
 
         public Topping Topping => topping;
         public PointerTarget Target => target;
         public bool IsPicked => pickedMarker.activeSelf;
+        public Color SprinkleColour => sprinkleColour;
 
         public void SetPicked(bool picked) => pickedMarker.SetActive(picked);
     }

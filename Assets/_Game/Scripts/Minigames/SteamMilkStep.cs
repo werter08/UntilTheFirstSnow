@@ -24,7 +24,7 @@ namespace Courtyard.Minigames
         [SerializeField, Min(0.1f)] private float heatPerSecond = 13f;
         [SerializeField, Min(0.1f)] private float qualityFalloff = 18f;
         [Tooltip("Releasing before this much heating is ignored, so a quick click doesn't end the step.")]
-        [SerializeField, Min(0f)] private float minHeatingToFinish = 5f;
+        [SerializeField, Min(0f)] private float minHeatingToFinish = 35f;
 
         [Header("Look")]
         [SerializeField] private Color jugColor = new(0.8f, 0.82f, 0.85f);
@@ -42,6 +42,7 @@ namespace Courtyard.Minigames
             _counter.MilkJug.Pressed += OnPressed;
             _counter.MilkJug.Released += OnReleased;
             _counter.MilkJug.Interactable = true;
+            NudgeTarget = _counter.MilkJug.transform;
 
             var bottom = ToScaleY(bandMin);
             var top = ToScaleY(bandMax);
@@ -95,6 +96,7 @@ namespace Courtyard.Minigames
             if (_counter.MugLevel < 0.85f) _counter.SetMugLevel(0.85f); // the milk tops the mug up
             StopSounds();
             _fx.Punch(_counter.MilkJugBody.transform);
+            _fx.Burst(_counter.Mug.transform.position + Vector3.up * 0.65f, new Color(0.98f, 0.95f, 0.88f), 10, 0.8f, 0.07f, 0.4f);
             var centre = (bandMin + bandMax) * 0.5f;
             Complete(1f - Mathf.Abs(_temperature - centre) / qualityFalloff);
         }

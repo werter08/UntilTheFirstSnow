@@ -27,6 +27,9 @@ namespace Courtyard.Minigames
         public Kitchen.CounterZone Zone => zone;
         public bool IsComplete { get; private set; }
 
+        /// <summary>The tool to nudge when the player idles (null = no nudge, e.g. when it would give the answer away).</summary>
+        public Transform NudgeTarget { get; protected set; }
+
         public abstract void Begin(MinigameContext ctx);
 
         protected void Complete(float quality)

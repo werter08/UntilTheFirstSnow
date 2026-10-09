@@ -149,7 +149,7 @@ MonoBehaviour:
   bandMax: 68
   heatPerSecond: 13
   qualityFalloff: 18
-  minHeatingToFinish: 5
+  minHeatingToFinish: 35
   jugColor: {r: 1, g: 1, b: 1, a: 1}
   squealColor: {r: 1, g: 0.78, b: 0.75, a: 1}
 --- !u!1 &6907516859651134100

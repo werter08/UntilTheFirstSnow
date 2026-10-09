@@ -41,6 +41,15 @@ namespace Courtyard.Kitchen
         [SerializeField, Min(0.05f)] private float waveFrameSeconds = 0.35f;
         [SerializeField] private float waveArmAngle = 35f;
         [SerializeField] private GameObject miraAtDoor;
+        [Tooltip("Click Mira's lit window and, from this day on, she waves back.")]
+        [SerializeField] private Fidget miraWindowFidget;
+        [SerializeField] private int waveBackFromDay = 5;
+        [SerializeField, Min(0.1f)] private float waveBackSeconds = 2f;
+
+        [Header("Wind (ambient motion strength per weather)")]
+        [SerializeField] private float calmWind = 1f;
+        [SerializeField] private float rainWind = 1.6f;
+        [SerializeField] private float windyWind = 3.2f;
 
         [Header("Ceiling lamp (optional art)")]
         [SerializeField] private SpriteRenderer lampRenderer;
@@ -126,6 +135,12 @@ namespace Courtyard.Kitchen
             if (sillMugs != null) sillMugs.SetActive(props.mugsOnSill);
 
             ApplyWeather(level.Weather);
+            AmbientMotion.Wind = level.Weather switch
+            {
+                Weather.Wind => windyWind,
+                Weather.HeavyRain => rainWind,
+                _ => calmWind,
+            };
             SetMiraAtDoor(false);
             SetMiraWindow(level.MiraWindow);
         }
@@ -148,6 +163,33 @@ namespace Courtyard.Kitchen
         }
 
         public void SetMiraAtDoor(bool visible) => miraAtDoor.SetActive(visible);
+
+        private void OnEnable()
+        {
+            if (miraWindowFidget != null) miraWindowFidget.Poked += OnMiraWindowPoked;
+        }
+
+        private void OnDisable()
+        {
+            if (miraWindowFidget != null) miraWindowFidget.Poked -= OnMiraWindowPoked;
+        }
+
+        private Coroutine _waveBack;
+
+        private void OnMiraWindowPoked()
+        {
+            if (_level == null || _level.DayNumber < waveBackFromDay) return;
+            if (_windowState != MiraWindowState.LitWarmSilhouette || _waveBack != null) return;
+            _waveBack = StartCoroutine(WaveBackOnce());
+        }
+
+        private System.Collections.IEnumerator WaveBackOnce()
+        {
+            SetMiraWindow(MiraWindowState.Waving);
+            yield return new WaitForSeconds(waveBackSeconds);
+            if (_windowState == MiraWindowState.Waving) SetMiraWindow(MiraWindowState.LitWarmSilhouette);
+            _waveBack = null;
+        }
 
         private void Update()
         {
