@@ -258,6 +258,14 @@ namespace Courtyard.Editor
 
         public static Color Gray(float value) => new(value, value, value);
 
+        /// <summary>Finds a descendant by name (including inactive ones).</summary>
+        public static Transform Find(Transform root, string objectName, bool required = true)
+        {
+            var found = root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == objectName);
+            if (found == null && required) throw new InvalidOperationException($"{root.name} has no '{objectName}' object.");
+            return found;
+        }
+
         // ---------------------------------------------------------------- UI
 
         public static RectTransform UiObject(string name, Transform parent)

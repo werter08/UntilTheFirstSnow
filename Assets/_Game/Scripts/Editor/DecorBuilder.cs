@@ -60,6 +60,8 @@ namespace Courtyard.Editor
         [MenuItem("Courtyard/Setup/Apply Pack Decor")]
         public static void Apply()
         {
+            ArtManifestBuilder.EnsureSortingLayers();
+            _layout = ArtManifestBuilder.LoadOrCreateLayout();
             ConfigureImports(OddblotFolder);
             ConfigureImports(WindowFolder);
             ConfigureImports(KitchenFolder);
@@ -72,6 +74,8 @@ namespace Courtyard.Editor
             AssetDatabase.SaveAssets();
         }
 
+        private static KitchenArtLayout _layout;
+
         private static void ApplyToKitchen(Scene scene)
         {
             var kitchen = scene.GetRootGameObjects().First(g => g.name == "Kitchen").transform;
@@ -81,6 +85,7 @@ namespace Courtyard.Editor
             ApplyFridge(kitchen);
             ApplyKettle(kitchen);
             ApplyMugs(kitchen);
+            ArtManifestBuilder.Apply(scene, kitchen, _layout); // manifest zones, layers and file slots win
 
             // Ceiling: hanging bulb; the lamp light sits on the bulb.
             if (Fit(kitchen, "CeilingLamp", "Oddblot_light", new Vector2(0f, 5.05f), 1.6f, "Wall", 13))
@@ -561,13 +566,6 @@ namespace Courtyard.Editor
             var renderer = target.GetComponent<SpriteRenderer>();
             renderer.sortingLayerName = layer;
             renderer.sortingOrder = order;
-        }
-
-        private static Transform Find(Transform root, string objectName, bool required = true)
-        {
-            var found = root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == objectName);
-            if (found == null && required) throw new System.InvalidOperationException($"Kitchen has no '{objectName}' object.");
-            return found;
         }
 
         private static void ConfigureImports(string folder)

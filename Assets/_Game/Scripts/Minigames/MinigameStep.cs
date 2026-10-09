@@ -15,6 +15,8 @@ namespace Courtyard.Minigames
         [Tooltip("Unscored steps (story events like waving back) don't restore warmth or count toward the drink.")]
         [SerializeField] private bool scored = true;
         [SerializeField] private WarmthTarget warmthTarget = WarmthTarget.Both;
+        [Tooltip("Counter zone this step's own parts belong to; the step is shifted with the zone.")]
+        [SerializeField] private Kitchen.CounterZone zone;
 
         /// <summary>Raised once with the result quality in [0, 1].</summary>
         public event Action<float> Completed;
@@ -22,6 +24,7 @@ namespace Courtyard.Minigames
         public string HintText => hintText;
         public bool Scored => scored;
         public WarmthTarget WarmthTarget => warmthTarget;
+        public Kitchen.CounterZone Zone => zone;
         public bool IsComplete { get; private set; }
 
         public abstract void Begin(MinigameContext ctx);

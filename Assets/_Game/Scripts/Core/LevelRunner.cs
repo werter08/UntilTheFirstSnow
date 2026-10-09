@@ -41,6 +41,8 @@ namespace Courtyard.Core
         [SerializeField] private Color endColor = Color.black;
         [SerializeField] private Color failColor = new(0.55f, 0.7f, 0.9f);
         [SerializeField, Min(0f)] private float failHoldSeconds = 2.5f;
+        [Tooltip("Served drink icon height above the mug centre (art manifest: 140 px).")]
+        [SerializeField] private float drinkIconHeight = 1.4f;
 
         private WarmthGroup _warmth;
         private LevelDefinition _level;
@@ -101,6 +103,7 @@ namespace Courtyard.Core
             {
                 var quality = -1f;
                 _activeStep = Instantiate(_level.Steps[i], stepRoot);
+                _activeStep.transform.position += (Vector3)counter.ZoneShift(_activeStep.Zone);
                 _activeStep.Completed += q => quality = q;
                 hint.Show(_activeStep.HintText);
                 counter.SetAllInteractable(false);
@@ -133,7 +136,7 @@ namespace Courtyard.Core
             _warmth.Restore(WarmthTarget.Both, finalQuality * _level.DrinkWarmthBonus);
             var lastGood = qualities.Count == 0 || IsGood(qualities[qualities.Count - 1]);
             var drinks = _level.DrinkResults.Where(d => d != null && d.icon != null && d.Shows(lastGood)).Select(d => d.icon).ToList();
-            yield return fx.ShowDrinks(drinks, counter.Mug.transform.position + Vector3.up * 1.4f, counter.MugSteam);
+            yield return fx.ShowDrinks(drinks, counter.Mug.transform.position + Vector3.up * drinkIconHeight, counter.MugSteam);
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
 
             yield return fader.FadeOut(endColor, fadeDuration);

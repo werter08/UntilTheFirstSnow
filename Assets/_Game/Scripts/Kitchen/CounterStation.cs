@@ -40,6 +40,10 @@ namespace Courtyard.Kitchen
         [Tooltip("Steam above the mug while there is a hot drink in it.")]
         [SerializeField] private ParticleSystem mugSteam;
 
+        [Header("Zones")]
+        [Tooltip("Offset from where step prefabs were authored to the manifest zone, indexed by CounterZone. Written by the decor pass.")]
+        [SerializeField] private Vector2[] zoneShift;
+
         [Header("Milk")]
         [SerializeField] private GameObject milkStation;
         [SerializeField] private PointerTarget milkJug;
@@ -113,6 +117,12 @@ namespace Courtyard.Kitchen
         }
 
         public ParticleSystem MugSteam => mugSteam;
+
+        public Vector2 ZoneShift(CounterZone zone)
+        {
+            var index = (int)zone;
+            return zoneShift != null && index < zoneShift.Length ? zoneShift[index] : Vector2.zero;
+        }
 
         /// <summary>Shows the fill gauge (and its target line) while a pouring step runs.</summary>
         public void SetMugGauge(bool visible)

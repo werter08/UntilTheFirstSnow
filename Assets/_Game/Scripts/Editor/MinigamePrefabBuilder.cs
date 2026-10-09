@@ -44,6 +44,7 @@ namespace Courtyard.Editor
         public static void PatchKettlePrefabs()
         {
             PatchChooseMug();
+            PatchZones();
             Patch(Folder + KettleBoil + ".prefab", root =>
             {
                 var thermometer = root.transform.Find("Thermometer");
@@ -88,6 +89,37 @@ namespace Courtyard.Editor
                 }
 
                 Wire(root.GetComponent<ChooseMugStep>(), "herMugIndex", 2);
+            });
+        }
+
+        /// <summary>Each step's own parts belong to a counter zone and move with it (see KitchenArtLayout).</summary>
+        private static void PatchZones()
+        {
+            var zones = new Dictionary<string, Kitchen.CounterZone>
+            {
+                [KettleBoil] = Kitchen.CounterZone.Kettle,
+                [InstantCoffee] = Kitchen.CounterZone.Grinder, // jar + spoon use the grinder's spot on Day 1
+                [GrindBeans] = Kitchen.CounterZone.Grinder,
+                [PourOver] = Kitchen.CounterZone.Brew,
+                [SteamMilk] = Kitchen.CounterZone.Milk,
+                [ChooseMug] = Kitchen.CounterZone.Rack,
+            };
+
+            foreach (var (name, zone) in zones)
+                Patch(Folder + name + ".prefab", root => WireEnum(root.GetComponent<MinigameStep>(), "zone", zone));
+
+            // Milk thermometer on the left of the jug, clear of the topping jars.
+            Patch(Folder + SteamMilk + ".prefab", root =>
+            {
+                var thermometer = root.transform.Find("Thermometer");
+                thermometer.localPosition = new Vector3(CounterLayout.MilkX - 0.9f, thermometer.localPosition.y, 0f);
+            });
+
+            // The spoon is held in front of everything on the counter.
+            Patch(Folder + InstantCoffee + ".prefab", root =>
+            {
+                var spoon = root.transform.Find("Spoon");
+                foreach (var r in spoon.GetComponentsInChildren<SpriteRenderer>(true)) r.sortingLayerName = "PropsFront";
             });
         }
 

@@ -128,7 +128,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayer: 10
   m_SortingOrder: 3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 4c75ccea1ad234a8c93f3f613d3d5f2e, type: 3}
@@ -192,6 +192,7 @@ MonoBehaviour:
     green. Fill to the line.
   scored: 1
   warmthTarget: 0
+  zone: 3
   pourZone: {fileID: 4250179583806582046}
   flowMeter: {fileID: 3642921038372427440}
   flowBand: {fileID: 3218554875146003721}
@@ -285,7 +286,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayer: 10
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 4c75ccea1ad234a8c93f3f613d3d5f2e, type: 3}
@@ -376,7 +377,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayer: 10
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 4c75ccea1ad234a8c93f3f613d3d5f2e, type: 3}

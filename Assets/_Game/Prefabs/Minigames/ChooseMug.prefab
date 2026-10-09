@@ -50,6 +50,7 @@ MonoBehaviour:
   hintText: Which one is her mug?
   scored: 1
   warmthTarget: 2
+  zone: 5
   mugs:
   - {fileID: 5290173502700370505}
   - {fileID: 171806295647684026}
@@ -138,15 +139,15 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayer: 10
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -6922397303854527695, guid: 6ffc050f9b8db4c07a35af55343dae8b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6ffc050f9b8db4c07a35af55343dae8b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.9, y: 1.1}
+  m_Size: {x: 1.6, y: 1.24}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -189,13 +190,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.58, y: 1.22}
-    newSize: {x: 0.9, y: 1.1}
+    oldSize: {x: 1.6, y: 1.24}
+    newSize: {x: 1.6, y: 1.24}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.58, y: 1.22}
+  m_Size: {x: 1.6, y: 1.24}
   m_EdgeRadius: 0
 --- !u!114 &171806295647684026
 MonoBehaviour:
@@ -291,15 +292,15 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayer: 10
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4560348429053935140, guid: 5bd6fcca26ee0488ebe245c251707444, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5bd6fcca26ee0488ebe245c251707444, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.9, y: 1.1}
+  m_Size: {x: 1.6, y: 1.24}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -342,13 +343,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.58, y: 1.22}
-    newSize: {x: 0.9, y: 1.1}
+    oldSize: {x: 1.6, y: 1.24}
+    newSize: {x: 1.6, y: 1.24}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.58, y: 1.22}
+  m_Size: {x: 1.6, y: 1.24}
   m_EdgeRadius: 0
 --- !u!114 &5290173502700370505
 MonoBehaviour:
@@ -444,15 +445,15 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayer: 10
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1238515245428368040, guid: d1121a822fa814454821d33b911bbc53, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d1121a822fa814454821d33b911bbc53, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.9, y: 1.1}
+  m_Size: {x: 1.6, y: 1.24}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -495,13 +496,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.58, y: 1.22}
-    newSize: {x: 0.9, y: 1.1}
+    oldSize: {x: 1.6, y: 1.24}
+    newSize: {x: 1.6, y: 1.24}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.58, y: 1.22}
+  m_Size: {x: 1.6, y: 1.24}
   m_EdgeRadius: 0
 --- !u!114 &3731539167638045292
 MonoBehaviour:

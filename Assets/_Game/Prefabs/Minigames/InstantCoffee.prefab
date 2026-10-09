@@ -79,7 +79,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayer: 10
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 4c75ccea1ad234a8c93f3f613d3d5f2e, type: 3}
@@ -188,6 +188,7 @@ MonoBehaviour:
     to the line.
   scored: 1
   warmthTarget: 0
+  zone: 2
   spoon: {fileID: 6712108707556685920}
   spoonLoad: {fileID: 5879990792989624871}
   jar: {fileID: 5691306432783900373}
@@ -284,8 +285,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayerID: 812909395
+  m_SortingLayer: 11
   m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 4c75ccea1ad234a8c93f3f613d3d5f2e, type: 3}
@@ -435,8 +436,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -831152179
-  m_SortingLayer: 5
+  m_SortingLayerID: 812909395
+  m_SortingLayer: 11
   m_SortingOrder: 6
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 4c75ccea1ad234a8c93f3f613d3d5f2e, type: 3}

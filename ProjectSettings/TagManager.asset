@@ -41,23 +41,47 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Wall
+    uniqueID: 405905959
+    locked: 0
   - name: Sky
     uniqueID: 3471968533
     locked: 0
-  - name: Courtyard
+  - name: Outside
     uniqueID: 991577889
     locked: 0
-  - name: Wall
-    uniqueID: 405905959
+  - name: Weather
+    uniqueID: 1382623551
+    locked: 0
+  - name: Glass
+    uniqueID: 3033398163
+    locked: 0
+  - name: WindowFrame
+    uniqueID: 650408689
+    locked: 0
+  - name: WallProps
+    uniqueID: 1283594053
     locked: 0
   - name: Counter
     uniqueID: 3639581499
     locked: 0
+  - name: Fridge
+    uniqueID: 1413046779
+    locked: 0
   - name: Props
     uniqueID: 3463815117
     locked: 0
-  - name: Foreground
+  - name: PropsFront
     uniqueID: 812909395
+    locked: 0
+  - name: Hands
+    uniqueID: 949732049
+    locked: 0
+  - name: FX
+    uniqueID: 4057784757
+    locked: 0
+  - name: UI
+    uniqueID: 3204161549
     locked: 0
   m_RenderingLayers:
   - Default
