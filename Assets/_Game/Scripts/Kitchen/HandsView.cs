@@ -90,7 +90,7 @@ namespace Courtyard.Kitchen
             transform.position = Vector3.Lerp(transform.position, new Vector3(target.x, target.y, transform.position.z),
                 1f - Mathf.Exp(-followSmoothing * Time.deltaTime));
 
-            var wanted = holding ? 1f : hovering ? hoverAlpha : 0f;
+            var wanted = holding ? (_heldPose == HandPose.Hidden ? 0f : 1f) : hovering ? hoverAlpha : 0f;
             _alpha = Mathf.MoveTowards(_alpha, wanted, fadeSpeed * Time.deltaTime);
             SetAlpha(_alpha);
         }

@@ -16,6 +16,7 @@ namespace Courtyard.Kitchen
         [SerializeField] private PointerTarget kettleSwitch;
         [SerializeField] private SpriteRenderer switchLight;
         [SerializeField] private SpriteRenderer kettleStream;
+        [SerializeField] private KettleView kettleView;
 
         [Header("Grinder")]
         [SerializeField] private GameObject grinder;
@@ -54,6 +55,7 @@ namespace Courtyard.Kitchen
         public PointerTarget KettleSwitch => kettleSwitch;
         public SpriteRenderer SwitchLight => switchLight;
         public SpriteRenderer KettleStream => kettleStream;
+        public KettleView KettleView => kettleView;
         public Transform GrinderArm => grinderArm;
         public DragTarget GrinderHandle => grinderHandle;
         public PointerTarget Mug => mug;
@@ -91,6 +93,7 @@ namespace Courtyard.Kitchen
 
             kettle.position = _kettleRest;
             kettleStream.enabled = false;
+            kettleView.Prepare(props.sweater);
             mugFill.SetValue(0f);
             mugFillLine.gameObject.SetActive(false);
             mugFoam.SetActive(false);

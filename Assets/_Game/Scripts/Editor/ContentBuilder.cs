@@ -47,6 +47,7 @@ namespace Courtyard.Editor
             EnsureSquareSprite();
             EnsureVignetteSprite();
             var sfx = EnsureSfxLibrary();
+            SyncSfxLibrary();
 
             var storyBox = LoadOrCreatePrefab(StoryBoxPath, BuildStoryBox);
             UpgradeStoryBox(storyBox);
@@ -85,6 +86,32 @@ namespace Courtyard.Editor
                     entry.FindPropertyRelative("pitch").vector2Value = new Vector2(0.95f, 1.05f);
                 }
             });
+        }
+
+        /// <summary>Adds a slot for every SfxId the library doesn't have yet (existing clips are kept).</summary>
+        [MenuItem("Courtyard/Setup/Sync Sfx Library")]
+        public static void SyncSfxLibrary()
+        {
+            var library = EnsureSfxLibrary();
+            Edit(library, so =>
+            {
+                var entries = so.FindProperty("entries");
+                var have = new HashSet<int>();
+                for (var i = 0; i < entries.arraySize; i++)
+                    have.Add(entries.GetArrayElementAtIndex(i).FindPropertyRelative("id").enumValueIndex);
+
+                foreach (SfxId id in System.Enum.GetValues(typeof(SfxId)))
+                {
+                    if (have.Contains((int)id)) continue;
+                    entries.InsertArrayElementAtIndex(entries.arraySize);
+                    var entry = entries.GetArrayElementAtIndex(entries.arraySize - 1);
+                    entry.FindPropertyRelative("id").enumValueIndex = (int)id;
+                    entry.FindPropertyRelative("clips").arraySize = 0;
+                    entry.FindPropertyRelative("volume").floatValue = 1f;
+                    entry.FindPropertyRelative("pitch").vector2Value = new Vector2(0.95f, 1.05f);
+                }
+            });
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary>The Boot scene owns the persistent AudioManager (audio starts after the title-screen click).</summary>

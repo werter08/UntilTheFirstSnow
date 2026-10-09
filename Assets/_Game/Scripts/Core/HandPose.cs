@@ -8,5 +8,7 @@ namespace Courtyard.Core
         Pinch,
         Grip,
         RaiseMug,
+        [UnityEngine.Tooltip("No hand overlay: the tool's own art shows the hand (e.g. the kettle while pouring).")]
+        Hidden,
     }
 }

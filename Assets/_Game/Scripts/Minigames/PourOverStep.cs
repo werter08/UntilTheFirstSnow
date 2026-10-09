@@ -78,6 +78,7 @@ namespace Courtyard.Minigames
         private void OnPressed()
         {
             if (_kettleReturn != null) StopCoroutine(_kettleReturn);
+            _counter.KettleView.SetPouring(true);
             _lastPointer = PointerWorld();
         }
 
@@ -132,6 +133,7 @@ namespace Courtyard.Minigames
         private void ReturnKettle()
         {
             SetStream(false);
+            _counter.KettleView.SetPouring(false);
             if (_kettleReturn != null) StopCoroutine(_kettleReturn);
             var kettle = _counter.Kettle;
             var from = kettle.position;

@@ -31,7 +31,48 @@ namespace Courtyard.Editor
         private static readonly Color Water = new(0.75f, 0.85f, 0.95f);
         private static readonly Color Green = new(0.4f, 0.8f, 0.4f, 0.55f);
 
+        // No gauge: the player reads the boil from the kettle itself (rattling lid, sound).
+        public const string KettleBoilHint = "Switch the kettle on. Switch it off when it boils.";
+
         private static Recipe _miraUsual;
+
+        /// <summary>
+        /// In-place update of the kettle steps after the kettle art arrived (no gauge, untinted kettle), keeping the
+        /// prefabs' file IDs so level assets stay linked. Safe to run more than once.
+        /// </summary>
+        [UnityEditor.MenuItem("Courtyard/Setup/Patch Kettle Prefabs")]
+        public static void PatchKettlePrefabs()
+        {
+            Patch(Folder + KettleBoil + ".prefab", root =>
+            {
+                var thermometer = root.transform.Find("Thermometer");
+                if (thermometer != null) Object.DestroyImmediate(thermometer.gameObject);
+                Wire(root.GetComponent<KettleBoilStep>(), "hintText", KettleBoilHint);
+            });
+            Patch(Folder + InstantCoffee + ".prefab", root =>
+            {
+                var step = root.GetComponent<InstantCoffeeStep>();
+                Edit(step, so =>
+                {
+                    so.FindProperty("kettleIdleColor").colorValue = Color.white;
+                    so.FindProperty("kettleReadyColor").colorValue = Color.white;
+                });
+            });
+        }
+
+        private static void Patch(string path, System.Action<GameObject> edit)
+        {
+            var root = UnityEditor.PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                edit(root);
+                UnityEditor.PrefabUtility.SaveAsPrefabAsset(root, path);
+            }
+            finally
+            {
+                UnityEditor.PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
 
         public static Dictionary<string, MinigameStep> BuildAll(Recipe miraUsual, bool overwrite)
         {
@@ -59,12 +100,7 @@ namespace Courtyard.Editor
         {
             var root = new GameObject(KettleBoil);
             var step = root.AddComponent<KettleBoilStep>();
-            var (band, needle) = Thermometer(root.transform, new Vector2(CounterLayout.KettleX + 1.1f, CounterLayout.Top));
-
-            Wire(step, "hintText", "Click the kettle switch. Click again when the needle is in the green.");
-            Wire(step, "needle", needle);
-            Wire(step, "greenBand", band);
-            Wire(step, "scaleHeight", CounterLayout.GaugeHeight);
+            Wire(step, "hintText", KettleBoilHint);
             return root;
         }
 

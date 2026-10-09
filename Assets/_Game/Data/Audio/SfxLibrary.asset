@@ -73,3 +73,7 @@ MonoBehaviour:
     clips: []
     volume: 1
     pitch: {x: 0.95, y: 1.05}
+  - id: 15
+    clips: []
+    volume: 1
+    pitch: {x: 0.95, y: 1.05}

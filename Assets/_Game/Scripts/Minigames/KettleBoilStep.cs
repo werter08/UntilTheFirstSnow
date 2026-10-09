@@ -5,66 +5,66 @@ using UnityEngine;
 namespace Courtyard.Minigames
 {
     /// <summary>
-    /// Click the kettle switch to start heating, click again to stop. Quality depends on how close the
-    /// temperature is to the centre of the green band. Uses the counter kettle; owns only the thermometer.
+    /// Switch the kettle on, switch it off when it boils. No gauge: the temperature is hidden and only read from the
+    /// kettle itself — the badge pulses while it heats, the lid starts to tremble, then rattles with a boiling sound
+    /// when the water is ready. It keeps heating: leave it too long and the water boils away (lower quality), and
+    /// eventually the kettle clicks off by itself.
     /// </summary>
     public sealed class KettleBoilStep : MinigameStep
     {
         private enum State { Idle, Heating, Done }
 
-        [Header("Own gauge")]
-        [SerializeField] private Transform needle;
-        [SerializeField] private SpriteRenderer greenBand;
-        [SerializeField, Min(0.1f)] private float scaleHeight = 2.4f;
-
-        [Header("Tuning (°C)")]
+        [Header("Tuning (°C, hidden from the player)")]
         [SerializeField] private float startTemperature = 20f;
-        [SerializeField] private float maxTemperature = 100f;
+        [Tooltip("The lid starts to tremble from here.")]
+        [SerializeField] private float trembleFrom = 75f;
         [SerializeField] private float bandMin = 90f;
-        [SerializeField] private float bandMax = 96f;
+        [SerializeField] private float bandMax = 97f;
         [SerializeField, Min(0.1f)] private float heatPerSecond = 12f;
-        [Tooltip("Degrees away from the band centre at which quality reaches 0.")]
-        [SerializeField, Min(0.1f)] private float qualityFalloff = 15f;
-
-        [Header("Look")]
-        [SerializeField] private Color switchOffColor = new(0.35f, 0.35f, 0.35f);
-        [SerializeField] private Color switchOnColor = new(1f, 0.45f, 0.3f);
+        [Tooltip("Degrees outside the band at which quality reaches 0. Past the band, 'degrees' keep counting as water boils away.")]
+        [SerializeField, Min(0.1f)] private float qualityFalloff = 25f;
 
         private CounterStation _counter;
         private FeedbackFx _fx;
         private State _state = State.Idle;
-        private float _temperature;
+        private float _heat;
+        private bool _boiling;
 
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
             _fx = ctx.Fx;
-            _temperature = startTemperature;
+            _heat = startTemperature;
             _counter.KettleSwitch.Clicked += OnSwitchClicked;
             _counter.KettleSwitch.Interactable = true;
-
-            var bottom = ToScaleY(bandMin);
-            var top = ToScaleY(bandMax);
-            greenBand.size = new Vector2(greenBand.size.x, top - bottom);
-            greenBand.transform.localPosition = new Vector3(0f, (bottom + top) * 0.5f, 0f);
-            UpdateVisuals();
+            _counter.KettleView.SetHeating(false);
         }
 
         private void OnDestroy()
         {
             if (_counter == null) return;
             _counter.KettleSwitch.Clicked -= OnSwitchClicked;
-            _counter.SwitchLight.color = switchOffColor;
-            AudioManager.StopLoop(SfxId.KettleBoil);
+            _counter.KettleView.SetHeating(false);
+            _counter.KettleView.SetBoil(0f);
+            StopSounds();
         }
 
         private void Update()
         {
             if (_state != State.Heating) return;
 
-            _temperature = Mathf.Min(maxTemperature, _temperature + heatPerSecond * Time.deltaTime);
-            UpdateVisuals();
-            if (_temperature >= maxTemperature) Stop();
+            _heat += heatPerSecond * Time.deltaTime;
+            var boil = _heat >= bandMin ? 1f : Mathf.InverseLerp(trembleFrom, bandMin, _heat) * 0.6f;
+            _counter.KettleView.SetBoil(boil);
+
+            if (!_boiling && _heat >= bandMin)
+            {
+                _boiling = true;
+                AudioManager.StartLoop(SfxId.KettleBubble);
+            }
+
+            // Boiled dry: the kettle switches itself off.
+            if (_heat >= bandMax + qualityFalloff) Stop();
         }
 
         private void OnSwitchClicked()
@@ -73,10 +73,10 @@ namespace Courtyard.Minigames
             {
                 case State.Idle:
                     _state = State.Heating;
+                    _counter.KettleView.SetHeating(true);
                     AudioManager.Play(SfxId.KettleSwitch);
                     AudioManager.StartLoop(SfxId.KettleBoil);
                     _fx.Punch(_counter.SwitchLight.transform);
-                    UpdateVisuals();
                     break;
                 case State.Heating:
                     Stop();
@@ -88,22 +88,20 @@ namespace Courtyard.Minigames
         {
             _state = State.Done;
             _counter.KettleSwitch.Interactable = false;
-            AudioManager.StopLoop(SfxId.KettleBoil);
+            _counter.KettleView.SetHeating(false);
+            _counter.KettleView.SetBoil(0f);
+            StopSounds();
             AudioManager.Play(SfxId.KettleSwitch);
             _fx.Punch(_counter.KettleBody.transform);
-            UpdateVisuals();
 
-            var bandCentre = (bandMin + bandMax) * 0.5f;
-            Complete(1f - Mathf.Abs(_temperature - bandCentre) / qualityFalloff);
+            var distance = _heat < bandMin ? bandMin - _heat : _heat > bandMax ? _heat - bandMax : 0f;
+            Complete(1f - distance / qualityFalloff);
         }
 
-        private float ToScaleY(float temperature) =>
-            Mathf.InverseLerp(startTemperature, maxTemperature, temperature) * scaleHeight;
-
-        private void UpdateVisuals()
+        private static void StopSounds()
         {
-            needle.localPosition = new Vector3(0f, ToScaleY(_temperature), 0f);
-            _counter.SwitchLight.color = _state == State.Heating ? switchOnColor : switchOffColor;
+            AudioManager.StopLoop(SfxId.KettleBoil);
+            AudioManager.StopLoop(SfxId.KettleBubble);
         }
     }
 }

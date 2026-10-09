@@ -1,4 +1,5 @@
 using System.Linq;
+using Courtyard.Core;
 using Courtyard.Kitchen;
 using UnityEditor;
 using UnityEngine;
@@ -17,6 +18,24 @@ namespace Courtyard.Editor
         private const string OddblotFolder = "Assets/_Game/Art/Sprites/Decor/ODDBLOT/";
         private const string WindowFolder = "Assets/_Game/Art/Sprites/Window/";
         private const string KitchenFolder = "Assets/_Game/Art/Sprites/Kitchen/";
+        private const string KettleFolder = "Assets/_Game/Art/Sprites/Kettle/";
+
+        // Kettle parts, offsets from the standing kettle's centre (px at 100 px/unit), measured by matching the parts
+        // against the assembled drawing in Kettle_Sheet_Source.png.
+        private static readonly (string sprite, string name, Vector2 offsetPx, int order)[] KettleParts =
+        {
+            ("Kettle_Handle", "Handle", new Vector2(73.5f, 7.5f), 2),
+            ("Kettle_Spout", "Spout", new Vector2(-79.5f, 7f), 2),
+            ("Kettle_Body", "Body", new Vector2(-6f, -8f), 3),
+            ("Kettle_Badge", "Badge", new Vector2(-6f, -67.5f), 4),
+        };
+        private static readonly Vector2 LidOffsetPx = new(-6f, 68f);
+        private static readonly Vector2 KnobOffsetPx = new(31f, 85f);
+        private static readonly Vector2 IdleSpoutTipPx = new(-90f, 61f);
+        private static readonly Vector2 PourSpoutPivot = new(0.985f, 0.818f);
+        private const float KettleX = -7f;
+        private const float KettleBaseY = -2.54f; // base ellipse centre, before CounterLift
+        private const float KettleCentreY = -1.56f; // standing kettle centre on the base, before CounterLift
 
         // Counter (top + drawer fronts) as in the layout mockup: back edge at y ≈ -1.47, drawers to the screen bottom,
         // right end hidden behind the fridge. Uniform scale (the art is ~4.16:1).
@@ -42,6 +61,9 @@ namespace Courtyard.Editor
             ConfigureImports(OddblotFolder);
             ConfigureImports(WindowFolder);
             ConfigureImports(KitchenFolder);
+            ConfigureImports(KettleFolder);
+            SetPivot(KettleFolder + "Kettle_HandGrey.png", PourSpoutPivot);
+            SetPivot(KettleFolder + "Kettle_HandBeige.png", PourSpoutPivot);
             EditScene(BuildScript.Scenes[1], ApplyToKitchen);
             AssetDatabase.SaveAssets();
         }
@@ -53,6 +75,7 @@ namespace Courtyard.Editor
             ApplyWallBackground(kitchen);
             ApplyTable(kitchen);
             ApplyFridge(kitchen);
+            ApplyKettle(kitchen);
 
             // Ceiling: hanging bulb; the lamp light sits on the bulb.
             if (Fit(kitchen, "CeilingLamp", "Oddblot_light", new Vector2(0f, 5.05f), 1.6f, "Wall", 13))
@@ -198,6 +221,137 @@ namespace Courtyard.Editor
                 AddMagnet(note, magnets[i], 0.25f);
                 SetLayer(note.Find("Magnet"), "Counter", 22);
             }
+        }
+
+        /// <summary>
+        /// Electric kettle from the team's sprite sheet: base, switch (green = ready, red = heating), the standing kettle
+        /// built from parts so the lid can rattle, spout steam, and the "hand holding the kettle" sprites for pouring.
+        /// The kettle root is the pouring spout tip; the standing kettle and its click area sit around it.
+        /// </summary>
+        private static void ApplyKettle(Transform kitchen)
+        {
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(KettleFolder + n + ".png");
+            if (Load("Kettle_Body") == null) return;
+
+            var tools = Find(kitchen, "Counter Tools");
+            var counter = tools.GetComponent<CounterStation>();
+            var kettle = Find(tools, "Kettle");
+            kettle.localPosition = new Vector3(KettleX, KettleCentreY, 0f);
+            kettle.localRotation = Quaternion.identity;
+
+            // Base and switch.
+            var baseObj = Find(tools, "KettleBase");
+            PlaceAtScreenScale(baseObj, Load("Kettle_Base"), new Vector2(KettleX, KettleBaseY), "Props", 1);
+            var switchObj = Find(tools, "KettleSwitch");
+            PlaceAtScreenScale(switchObj, Load("Kettle_SwitchReady"), new Vector2(KettleX + 0.85f, KettleBaseY - 0.02f), "Props", 5);
+            switchObj.GetComponent<BoxCollider2D>().size = new Vector2(0.6f, 0.5f);
+
+            // Standing kettle, built from parts.
+            var idle = Child(kettle, "Idle");
+            idle.localPosition = Vector3.zero;
+            foreach (var (spriteName, partName, offset, order) in KettleParts)
+            {
+                var part = MoveUnder(kettle, idle, partName);
+                PlaceAtScreenScale(part, Load(spriteName), offset / 100f, "Props", order);
+                var oldTarget = part.GetComponent<PointerTarget>(); // before its required collider
+                if (oldTarget != null) Object.DestroyImmediate(oldTarget);
+                var oldCollider = part.GetComponent<BoxCollider2D>();
+                if (oldCollider != null) Object.DestroyImmediate(oldCollider);
+            }
+
+            var lid = Child(idle, "Lid");
+            lid.localPosition = LidOffsetPx / 100f;
+            PlaceAtScreenScale(SpriteChild(lid, "LidBar"), Load("Kettle_Lid"), Vector2.zero, "Props", 5);
+            PlaceAtScreenScale(SpriteChild(lid, "Knob"), Load("Kettle_Knob"), (KnobOffsetPx - LidOffsetPx) / 100f, "Props", 6);
+
+            var steam = Find(idle, "SpoutSteam", false);
+            if (steam == null)
+            {
+                var system = Particles(idle, "SpoutSteam", IdleSpoutTipPx / 100f, 0.15f, new Vector2(-0.25f, 0.9f),
+                    new Color(1f, 1f, 1f, 0.45f), 0.16f, 1.3f, 0f, "Props", 7);
+                var main = system.main;
+                main.playOnAwake = true;
+                var size = system.sizeOverLifetime;
+                size.enabled = true;
+                size.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 0.6f, 1f, 2.4f));
+                steam = system.transform;
+            }
+
+            // Click area outside the visuals, so hiding the standing kettle while pouring never cancels the hold.
+            var hit = Child(kettle, "Hit");
+            hit.localPosition = Vector3.zero;
+            var hitCollider = GetOrAdd<BoxCollider2D>(hit);
+            hitCollider.size = new Vector2(1.9f, 1.85f);
+            var hitTarget = GetOrAdd<PointerTarget>(hit);
+            WireEnum(hitTarget, "handPose", HandPose.Hidden);
+
+            // Hand holding the kettle (pivot = spout tip = kettle root while pouring).
+            var pourGrey = SpriteChild(kettle, "PourGrey");
+            PlaceAtScreenScale(pourGrey, Load("Kettle_HandGrey"), Vector2.zero, "Props", 8);
+            pourGrey.GetComponent<SpriteRenderer>().enabled = false;
+            var pourBeige = SpriteChild(kettle, "PourBeige");
+            PlaceAtScreenScale(pourBeige, Load("Kettle_HandBeige"), Vector2.zero, "Props", 8);
+            pourBeige.GetComponent<SpriteRenderer>().enabled = false;
+
+            var view = GetOrAdd<KettleView>(kettle);
+            Wire(view, "idle", idle.gameObject);
+            Wire(view, "lid", lid);
+            Wire(view, "badge", Find(idle, "Badge").GetComponent<SpriteRenderer>());
+            Wire(view, "spoutSteam", steam.GetComponent<ParticleSystem>());
+            Wire(view, "switchRenderer", switchObj.GetComponent<SpriteRenderer>());
+            Wire(view, "switchReady", Load("Kettle_SwitchReady"));
+            Wire(view, "switchOn", Load("Kettle_SwitchOn"));
+            Wire(view, "pourGrey", pourGrey.GetComponent<SpriteRenderer>());
+            Wire(view, "pourBeige", pourBeige.GetComponent<SpriteRenderer>());
+            Wire(view, "stream", Find(kettle, "Stream"));
+
+            Wire(counter, "kettleView", view);
+            Wire(counter, "kettleTarget", hitTarget);
+            Wire(counter, "kettleBody", Find(idle, "Body").GetComponent<SpriteRenderer>());
+        }
+
+        // Unity's fake-null means `??` can't be used with GetComponent in the Editor.
+        private static T GetOrAdd<T>(Transform target) where T : Component
+        {
+            var component = target.GetComponent<T>();
+            return component != null ? component : target.gameObject.AddComponent<T>();
+        }
+
+        private static Transform Child(Transform parent, string childName)
+        {
+            var child = parent.Find(childName);
+            if (child != null) return child;
+            child = new GameObject(childName).transform;
+            child.SetParent(parent, false);
+            return child;
+        }
+
+        private static Transform SpriteChild(Transform parent, string childName)
+        {
+            var child = Child(parent, childName);
+            if (child.GetComponent<SpriteRenderer>() == null) child.gameObject.AddComponent<SpriteRenderer>();
+            return child;
+        }
+
+        /// <summary>Moves an existing child of <paramref name="from"/> under <paramref name="to"/> (or creates it there).</summary>
+        private static Transform MoveUnder(Transform from, Transform to, string childName)
+        {
+            var existing = from.Find(childName);
+            if (existing != null) existing.SetParent(to, false);
+            return SpriteChild(to, childName);
+        }
+
+        private static void SetPivot(string path, Vector2 pivot)
+        {
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null) return;
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            if (settings.spriteAlignment == (int)SpriteAlignment.Custom && settings.spritePivot == pivot) return;
+            settings.spriteAlignment = (int)SpriteAlignment.Custom;
+            settings.spritePivot = pivot;
+            importer.SetTextureSettings(settings);
+            importer.SaveAndReimport();
         }
 
         private static Sprite LoadKitchen(string spriteName) =>

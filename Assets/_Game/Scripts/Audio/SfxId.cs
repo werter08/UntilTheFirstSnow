@@ -18,5 +18,6 @@ namespace Courtyard.Audio
         Footsteps,
         Perfect,
         Fail,
+        KettleBubble, // appended: enum values are serialized in SfxLibrary, never insert in the middle
     }
 }

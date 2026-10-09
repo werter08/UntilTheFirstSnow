@@ -1,0 +1,442 @@
+fileFormatVersion: 2
+guid: 44fdf691cba1248958ea81ac39d04953
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2929888083859990397
+    second: Kettle_Sheet_Source_0
+  - first:
+      213: -8202568691886995942
+    second: Kettle_Sheet_Source_1
+  - first:
+      213: -7482825823749697019
+    second: Kettle_Sheet_Source_2
+  - first:
+      213: 4679998031312635786
+    second: Kettle_Sheet_Source_3
+  - first:
+      213: -7686824591755938622
+    second: Kettle_Sheet_Source_4
+  - first:
+      213: 6630711351928923653
+    second: Kettle_Sheet_Source_5
+  - first:
+      213: -298078447588097283
+    second: Kettle_Sheet_Source_6
+  - first:
+      213: 8953211173432677045
+    second: Kettle_Sheet_Source_7
+  - first:
+      213: -2019005821803781998
+    second: Kettle_Sheet_Source_8
+  - first:
+      213: -1662763943441241818
+    second: Kettle_Sheet_Source_9
+  - first:
+      213: -7380753282093087685
+    second: Kettle_Sheet_Source_10
+  - first:
+      213: -7208112141964704472
+    second: Kettle_Sheet_Source_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_0
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 224
+        width: 475
+        height: 226
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38810e99f42f657d0800000000000000
+      internalID: -2929888083859990397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_1
+      rect:
+        serializedVersion: 2
+        x: 942
+        y: 245
+        width: 474
+        height: 226
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a16c55adb3f9a2e80800000000000000
+      internalID: -8202568691886995942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_2
+      rect:
+        serializedVersion: 2
+        x: 189
+        y: 20
+        width: 208
+        height: 190
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 502974b1f89a72890800000000000000
+      internalID: -7482825823749697019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_3
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 179
+        width: 122
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a87caede961b2f040800000000000000
+      internalID: 4679998031312635786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 106
+        width: 37
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c476a5a2c9e25590800000000000000
+      internalID: -7686824591755938622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_5
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 0
+        width: 138
+        height: 171
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 506afd3f7d4050c50800000000000000
+      internalID: 6630711351928923653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_6
+      rect:
+        serializedVersion: 2
+        x: 670
+        y: 135
+        width: 30
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df2cf403b330ddbf0800000000000000
+      internalID: -298078447588097283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_7
+      rect:
+        serializedVersion: 2
+        x: 1256
+        y: 30
+        width: 49
+        height: 112
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b253874022304c70800000000000000
+      internalID: 8953211173432677045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_8
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 99
+        width: 38
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 290a0f7f6ec0bf3e0800000000000000
+      internalID: -2019005821803781998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_9
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 36
+        width: 61
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6296bddc00dace8e0800000000000000
+      internalID: -1662763943441241818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_10
+      rect:
+        serializedVersion: 2
+        x: 968
+        y: 61
+        width: 234
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b340b0eaefb429990800000000000000
+      internalID: -7380753282093087685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Kettle_Sheet_Source_11
+      rect:
+        serializedVersion: 2
+        x: 671
+        y: 9
+        width: 40
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82583057234a7fb90800000000000000
+      internalID: -7208112141964704472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Kettle_Sheet_Source_0: -2929888083859990397
+      Kettle_Sheet_Source_1: -8202568691886995942
+      Kettle_Sheet_Source_10: -7380753282093087685
+      Kettle_Sheet_Source_11: -7208112141964704472
+      Kettle_Sheet_Source_2: -7482825823749697019
+      Kettle_Sheet_Source_3: 4679998031312635786
+      Kettle_Sheet_Source_4: -7686824591755938622
+      Kettle_Sheet_Source_5: 6630711351928923653
+      Kettle_Sheet_Source_6: -298078447588097283
+      Kettle_Sheet_Source_7: 8953211173432677045
+      Kettle_Sheet_Source_8: -2019005821803781998
+      Kettle_Sheet_Source_9: -1662763943441241818
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
