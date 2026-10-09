@@ -62,6 +62,7 @@ namespace Courtyard.Editor
         {
             ArtManifestBuilder.EnsureSortingLayers();
             _layout = ArtManifestBuilder.LoadOrCreateLayout();
+            _sleeves = SleeveBuilder.BuildLibrary();
             ConfigureImports(OddblotFolder);
             ConfigureImports(WindowFolder);
             ConfigureImports(KitchenFolder);
@@ -75,6 +76,7 @@ namespace Courtyard.Editor
         }
 
         private static KitchenArtLayout _layout;
+        private static SleeveLibrary _sleeves;
 
         private static void ApplyToKitchen(Scene scene)
         {
@@ -86,6 +88,7 @@ namespace Courtyard.Editor
             ApplyKettle(kitchen);
             ApplyMugs(kitchen);
             ArtManifestBuilder.Apply(scene, kitchen, _layout); // manifest zones, layers and file slots win
+            SleeveBuilder.WireScene(scene, _sleeves);
 
             // Ceiling: hanging bulb; the lamp light sits on the bulb.
             if (Fit(kitchen, "CeilingLamp", "Oddblot_light", new Vector2(0f, 5.05f), 1.6f, "Wall", 13))

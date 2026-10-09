@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b08135069fce74df69470198d1fbe6d4, type: 3}
+  m_Name: SleeveLibrary
+  m_EditorClassIdentifier: Courtyard::Courtyard.Kitchen.SleeveLibrary
+  entries:
+  - sprite: {fileID: 21300000, guid: ddcfaa3891259415a9223faa54c6564e, type: 3}
+    strip: {fileID: 21300000, guid: 6c536931d3fa54867b4a07db9c4765ee, type: 3}
+    anchor: {x: -1.5284245, y: -1.3808684}
+    angle: -43.11348
+  - sprite: {fileID: 21300000, guid: a70eb6ec25a1b4b408b8b52633ddc358, type: 3}
+    strip: {fileID: 21300000, guid: c22e3e564de774d91969c8ea3fa0057c, type: 3}
+    anchor: {x: -2.0664709, y: -0.44513476}
+    angle: -81.96725
+  - sprite: {fileID: 21300000, guid: 7340db144cfd44510b09336a00915a57, type: 3}
+    strip: {fileID: 21300000, guid: f7767f607d66e430c8235141171cc557, type: 3}
+    anchor: {x: -0.22496301, y: -1.8243182}
+    angle: -12.054754
+  - sprite: {fileID: 21300000, guid: 34b8d7fc5493d451383e898ff0571c66, type: 3}
+    strip: {fileID: 21300000, guid: 118a2d6d4a8ca453897e2adaff7b376f, type: 3}
+    anchor: {x: -0.22496301, y: -1.8243182}
+    angle: -12.054754
+  - sprite: {fileID: 21300000, guid: bd68aaf68be6947e4804d3e1493da3f2, type: 3}
+    strip: {fileID: 21300000, guid: f70391cc360654ec8a44ced8a106a8df, type: 3}
+    anchor: {x: -1.8077737, y: -1.690079}
+    angle: -49.985775
+  - sprite: {fileID: 21300000, guid: 753d973e54e694de5ba516c557683ea4, type: 3}
+    strip: {fileID: 21300000, guid: b04d6ef6a045a4c9392bd5721428af28, type: 3}
+    anchor: {x: -1.8077737, y: -1.690079}
+    angle: -49.985775
+  - sprite: {fileID: 21300000, guid: 694b840328a2649c695976ef64cb03f0, type: 3}
+    strip: {fileID: 21300000, guid: 2ebb4fb2558e742a0b82bc249a645dfc, type: 3}
+    anchor: {x: 0.28901976, y: -1.8505622}
+    angle: -0.5300842
+  - sprite: {fileID: 21300000, guid: 3457aac4cd45a4c96b4546870e2366ad, type: 3}
+    strip: {fileID: 21300000, guid: 98ee3b1863bc04b518394f641d4974f0, type: 3}
+    anchor: {x: 0.28901976, y: -1.8505622}
+    angle: -0.5300842
+  - sprite: {fileID: 21300000, guid: 6365684a14d6e4dea893c048581e54eb, type: 3}
+    strip: {fileID: 21300000, guid: 570e2591c4e14460db08602d580a2d3a, type: 3}
+    anchor: {x: -1.2281454, y: -1.6493039}
+    angle: -40.7165
+  - sprite: {fileID: 21300000, guid: 796fb524c6fa84d33ad6afd04082a741, type: 3}
+    strip: {fileID: 21300000, guid: f0a00cab9453049d5b1f6c9a9be371a0, type: 3}
+    anchor: {x: -1.2281454, y: -1.6493039}
+    angle: -40.7165
+  - sprite: {fileID: 21300000, guid: a1c514dd779674b3db254faebf370b5f, type: 3}
+    strip: {fileID: 21300000, guid: 171bb8242c0414fe4bd6aa0e30971e20, type: 3}
+    anchor: {x: -3.324559, y: -1.3079157}
+    angle: -75.43776
+  - sprite: {fileID: 21300000, guid: 35b51e6e708454bcba738e1299c2c1d6, type: 3}
+    strip: {fileID: 21300000, guid: c6f4d774ec5854c258c45b756c043e84, type: 3}
+    anchor: {x: -3.3395655, y: -1.3080268}
+    angle: -75.49674
