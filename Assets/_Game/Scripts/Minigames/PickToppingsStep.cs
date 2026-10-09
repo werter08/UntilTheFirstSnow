@@ -1,56 +1,67 @@
 using System.Collections.Generic;
-using Courtyard.Core;
+using Courtyard.Kitchen;
 using UnityEngine;
 
 namespace Courtyard.Minigames
 {
     /// <summary>
-    /// Pick toppings for Mira's drink, then click her mug to serve. Scored against a <see cref="Recipe"/>.
+    /// Pick toppings from the counter jars, then click the mug to serve. Scored against a <see cref="Recipe"/>.
     /// Used by both GuessHerDrink (with her hint in the story) and HerDrinkFromMemory (no hint).
     /// </summary>
     public sealed class PickToppingsStep : MinigameStep
     {
         [SerializeField] private Recipe recipe;
-        [SerializeField] private ToppingOption[] options;
-        [SerializeField] private PointerTarget serveMug;
         [SerializeField, Min(1)] private int picksRequired = 2;
 
         private readonly List<Topping> _picked = new();
+        private readonly List<(ToppingJar jar, System.Action handler)> _subscriptions = new();
+        private CounterStation _counter;
 
         public override void Begin(MinigameContext ctx)
         {
-            foreach (var option in options)
+            _counter = ctx.Counter;
+            foreach (var jar in _counter.ToppingJars)
             {
-                option.pickedMarker.SetActive(false);
-                var captured = option;
-                option.target.Clicked += () => Toggle(captured);
+                jar.SetPicked(false);
+                var captured = jar;
+                System.Action handler = () => Toggle(captured);
+                jar.Target.Clicked += handler;
+                jar.Target.Interactable = true;
+                _subscriptions.Add((jar, handler));
             }
 
-            serveMug.Clicked += Serve;
-            serveMug.Interactable = false;
+            _counter.Mug.Clicked += Serve;
+            _counter.Mug.Interactable = false;
         }
 
-        private void Toggle(ToppingOption option)
+        private void OnDestroy()
+        {
+            if (_counter == null) return;
+            foreach (var (jar, handler) in _subscriptions) jar.Target.Clicked -= handler;
+            _counter.Mug.Clicked -= Serve;
+        }
+
+        private void Toggle(ToppingJar jar)
         {
             if (IsComplete) return;
 
-            if (_picked.Remove(option.topping))
-                option.pickedMarker.SetActive(false);
+            if (_picked.Remove(jar.Topping))
+                jar.SetPicked(false);
             else if (_picked.Count < picksRequired)
             {
-                _picked.Add(option.topping);
-                option.pickedMarker.SetActive(true);
+                _picked.Add(jar.Topping);
+                jar.SetPicked(true);
             }
 
-            serveMug.Interactable = _picked.Count == picksRequired;
+            _counter.Mug.Interactable = _picked.Count == picksRequired;
         }
 
         private void Serve()
         {
             if (IsComplete || _picked.Count != picksRequired) return;
 
-            foreach (var option in options) option.target.Interactable = false;
-            serveMug.Interactable = false;
+            foreach (var jar in _counter.ToppingJars) jar.Target.Interactable = false;
+            _counter.Mug.Interactable = false;
             Complete(recipe.Score(_picked));
         }
     }

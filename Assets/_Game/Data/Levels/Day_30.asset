@@ -31,6 +31,8 @@ MonoBehaviour:
     milk: 1
     cinnamon: 1
     herMug: 1
+    toppings: 1
+    brewInHerMug: 1
     scarf: 1
     blanket: 1
     plantStage: 3
@@ -68,7 +70,7 @@ MonoBehaviour:
   startWarmth: 70
   drainPerSecond: 0
   coldMultiplier: 1
-  warmthPerStep: 12
+  warmthPerStep: 15
   drinkWarmthBonus: 25
   goodResultThreshold: 0.7
   failText: "Too cold\u2026 let's try again."

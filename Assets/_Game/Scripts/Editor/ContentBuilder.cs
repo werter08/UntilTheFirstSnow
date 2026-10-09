@@ -29,8 +29,17 @@ namespace Courtyard.Editor
         private static readonly Vector2 ReferenceResolution = new(1920f, 1080f);
         private const float CameraSize = 5.4f; // 1080 px at 100 px per unit
 
-        [MenuItem("Courtyard/Setup/Build Content")]
-        public static void Build()
+        [MenuItem("Courtyard/Setup/Build Content (keep existing)")]
+        public static void Build() => Build(false);
+
+        /// <summary>
+        /// Rebuilds generated minigame prefabs, level data and the Kitchen scene in place (GUIDs kept).
+        /// Hand edits to those assets are lost; Boot, Ending and UI prefabs are kept.
+        /// </summary>
+        [MenuItem("Courtyard/Setup/Rebuild Generated Content (overwrite)")]
+        public static void Rebuild() => Build(true);
+
+        public static void Build(bool overwrite)
         {
             EnsureSortingLayers(SortingLayerNames);
             EnsureSquareSprite();
@@ -40,11 +49,11 @@ namespace Courtyard.Editor
             var fader = LoadOrCreatePrefab(FaderPath, BuildFader);
 
             var miraUsual = LevelDataBuilder.EnsureMiraUsual();
-            var steps = MinigamePrefabBuilder.BuildAll(miraUsual);
-            var levels = LevelDataBuilder.BuildLevels(steps);
+            var steps = MinigamePrefabBuilder.BuildAll(miraUsual, overwrite);
+            var levels = LevelDataBuilder.BuildLevels(steps, overwrite);
             var ending = LevelDataBuilder.BuildEnding();
 
-            LoadOrCreateScene(BuildScript.Scenes[1], () => BuildKitchenScene(levels[0], storyBox, fader));
+            LoadOrCreateScene(BuildScript.Scenes[1], () => BuildKitchenScene(levels[0], storyBox, fader), overwrite);
             LoadOrCreateScene(BuildScript.Scenes[2], () => BuildEndingScene(ending, storyBox, fader));
             LoadOrCreateScene(BuildScript.Scenes[0], BuildBootScene);
             SyncLevelOrder(levels);
@@ -133,6 +142,7 @@ namespace Courtyard.Editor
             camera.gameObject.AddComponent<Physics2DRaycaster>();
 
             var director = BuildKitchenWorld();
+            var counter = CounterLayout.Build(director.transform);
             var stepRoot = new GameObject("StepRoot").transform;
 
             var canvas = CreateCanvas();
@@ -147,6 +157,7 @@ namespace Courtyard.Editor
             Wire(runner, "fallbackLevel", fallbackLevel);
             Wire(runner, "worldCamera", camera);
             Wire(runner, "kitchen", director);
+            Wire(runner, "counter", counter);
             Wire(runner, "stepRoot", stepRoot);
             Wire(runner, "story", story);
             Wire(runner, "hint", hint);
@@ -212,12 +223,10 @@ namespace Courtyard.Editor
             Box(root, "PlantPot", new Vector2(2.9f, -0.5f), new Vector2(0.5f, 0.4f), new Color(0.7f, 0.4f, 0.3f), 7, false, "Wall");
             var plant = Box(root, "Plant", new Vector2(2.9f, -0.05f), new Vector2(0.65f, 0.6f), Color.white, 7, false, "Wall");
 
-            // Counter and counter props (kept to the edges, clear of the minigame area)
+            // Counter (tools are built by CounterLayout)
             Box(root, "Counter", new Vector2(0f, -4.1f), new Vector2(19.2f, 2.6f), new Color(0.55f, 0.48f, 0.42f), 0, false, "Counter");
             Box(root, "CounterEdge", new Vector2(0f, -2.85f), new Vector2(19.2f, 0.15f), new Color(0.4f, 0.34f, 0.3f), 1, false, "Counter");
-            var grinder = Box(root, "GrinderProp", new Vector2(-8.3f, -2.2f), new Vector2(0.8f, 1.2f), new Color(0.5f, 0.36f, 0.25f), 0);
-            var milk = Box(root, "MilkProp", new Vector2(6.4f, -2.25f), new Vector2(0.7f, 1.1f), Gray(0.97f), 0);
-            var scarf = Box(root, "Scarf", new Vector2(7.8f, -2.5f), new Vector2(1.4f, 0.4f), new Color(0.75f, 0.2f, 0.2f), 1);
+            var scarf = Box(root, "Scarf", new Vector2(-9f, -2.55f), new Vector2(1f, 0.35f), new Color(0.75f, 0.2f, 0.2f), 1);
 
             // Foreground
             var blanket = Box(root, "Blanket", new Vector2(-7.6f, -4.6f), new Vector2(3.4f, 1.3f), new Color(0.65f, 0.45f, 0.35f), 0, false, "Foreground");
@@ -239,8 +248,6 @@ namespace Courtyard.Editor
             Wire(director, "calendarDay", calendar);
             Wire(director, "clockTime", clock);
             Wire(director, "beans", beans.gameObject);
-            Wire(director, "grinder", grinder.gameObject);
-            Wire(director, "milk", milk.gameObject);
             Wire(director, "cinnamon", cinnamon.gameObject);
             Wire(director, "herMug", herMug.gameObject);
             Wire(director, "scarf", scarf.gameObject);

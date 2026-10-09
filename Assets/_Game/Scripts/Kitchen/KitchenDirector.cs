@@ -6,7 +6,8 @@ using UnityEngine.Rendering.Universal;
 namespace Courtyard.Kitchen
 {
     /// <summary>
-    /// Applies a <see cref="LevelDefinition"/> to the kitchen scene: lights, Mira's window, the tree, calendar, clock and props.
+    /// Applies a <see cref="LevelDefinition"/> to the kitchen scene: lights, Mira's window, the tree, calendar, clock and wall props.
+    /// Counter tools are handled by <see cref="CounterStation"/>.
     /// Minigame steps use it for story moments (Mira waving, Mira at the door).
     /// </summary>
     public sealed class KitchenDirector : MonoBehaviour
@@ -44,8 +45,6 @@ namespace Courtyard.Kitchen
 
         [Header("Props")]
         [SerializeField] private GameObject beans;
-        [SerializeField] private GameObject grinder;
-        [SerializeField] private GameObject milk;
         [SerializeField] private GameObject cinnamon;
         [SerializeField] private GameObject herMug;
         [SerializeField] private GameObject scarf;
@@ -88,8 +87,6 @@ namespace Courtyard.Kitchen
 
             var props = level.Props;
             beans.SetActive(props.beans);
-            grinder.SetActive(props.grinder);
-            milk.SetActive(props.milk);
             cinnamon.SetActive(props.cinnamon);
             herMug.SetActive(props.herMug);
             scarf.SetActive(props.scarf);

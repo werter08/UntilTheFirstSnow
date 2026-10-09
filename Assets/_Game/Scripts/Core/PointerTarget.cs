@@ -12,14 +12,22 @@ namespace Courtyard.Core
     {
         [SerializeField] private bool interactable = true;
 
+        private Collider2D _collider;
+
         public event Action Pressed;
         public event Action Released;
         public event Action Clicked;
 
+        /// <summary>Inactive targets also disable their collider, so they never block clicks meant for something behind them.</summary>
         public bool Interactable
         {
             get => interactable;
-            set => interactable = value;
+            set
+            {
+                interactable = value;
+                if (_collider == null) _collider = GetComponent<Collider2D>();
+                _collider.enabled = value;
+            }
         }
 
         public bool IsHeld { get; private set; }

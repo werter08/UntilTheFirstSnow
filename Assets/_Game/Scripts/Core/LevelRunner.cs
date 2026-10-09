@@ -23,6 +23,7 @@ namespace Courtyard.Core
         [Header("Scene refs")]
         [SerializeField] private Camera worldCamera;
         [SerializeField] private KitchenDirector kitchen;
+        [SerializeField] private CounterStation counter;
         [SerializeField] private Transform stepRoot;
         [SerializeField] private StoryPlayer story;
         [SerializeField] private HintView hint;
@@ -56,6 +57,7 @@ namespace Courtyard.Core
             }
 
             kitchen.Apply(_level);
+            counter.Prepare(_level);
             CreateMeters();
             _run = StartCoroutine(Run());
         }
@@ -91,13 +93,15 @@ namespace Courtyard.Core
                 _activeStep = Instantiate(_level.Steps[i], stepRoot);
                 _activeStep.Completed += q => quality = q;
                 hint.Show(_activeStep.HintText);
-                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen));
+                counter.SetAllInteractable(false);
+                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter));
 
                 _draining = true;
                 yield return new WaitUntil(() => quality >= 0f);
                 _draining = false;
 
                 hint.Hide();
+                counter.SetAllInteractable(false);
                 var step = _activeStep;
                 _activeStep = null;
                 Destroy(step.gameObject);
@@ -138,6 +142,7 @@ namespace Courtyard.Core
             _draining = false;
             if (_run != null) StopCoroutine(_run);
             if (_activeStep != null) Destroy(_activeStep.gameObject);
+            counter.SetAllInteractable(false);
             hint.Hide();
 
             yield return fader.FadeOut(failColor, fadeDuration, _level.FailText);

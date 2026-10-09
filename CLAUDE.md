@@ -191,7 +191,9 @@ public abstract class MinigameStep : MonoBehaviour {
 - Day 30: `drainPerSecond = 0`, meter locked at full with a glow animation.
 - Visuals: below 30 %, a frost vignette on the screen edges and the music low-pass filter closes slightly. Above 70 %, a warm vignette.
 
-**Tuning:** all numbers live in `LevelDefinition`. No magic numbers in code. Target values to start with: Day 1 drain 1.5/s, Day 5 2.5/s, Day 10 3/s, Day 20 4/s per meter, startWarmth 70, warmthPerStep 12, drinkWarmthBonus 25.
+**Tuning:** all numbers live in `LevelDefinition`. No magic numbers in code. Current values (after playtest; the first guesses of 1.5–4/s made Day 20 impossible): Day 1 drain 0.8/s, Day 5 1.0/s, Day 10 1.2/s, Day 20 1.4/s per meter, Day 30 0, startWarmth 70, warmthPerStep 15, drinkWarmthBonus 25. Warmth drains only while a minigame step is active. `BalanceTests` checks that an average player (~15 s per step, quality 0.6) finishes every day and that a very slow player can still fail Day 20.
+
+**Counter layout:** all of the day's tools stand on the counter at once (kettle → grinder → mug + V60 → milk jug → topping jars). They live in `CounterStation` in the Kitchen scene; each minigame step activates its tool and shows only its own gauge next to it. The mug is shared, so the drink visibly builds up across steps.
 
 ## 8. Data model
 

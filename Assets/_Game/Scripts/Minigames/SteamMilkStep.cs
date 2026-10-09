@@ -1,23 +1,19 @@
-using Courtyard.Core;
 using Courtyard.Kitchen;
 using UnityEngine;
 
 namespace Courtyard.Minigames
 {
     /// <summary>
-    /// Hold the jug to steam: temperature and foam rise. Release inside the green zone.
+    /// Hold the counter milk jug to steam: temperature and foam rise. Release inside the green zone.
     /// Holding too long makes the milk squeal (the jug flashes) and ends the step at the maximum.
+    /// The finished foam goes onto the mug. Owns only the thermometer.
     /// </summary>
     public sealed class SteamMilkStep : MinigameStep
     {
-        [Header("Scene refs")]
-        [SerializeField] private PointerTarget jug;
-        [SerializeField] private SpriteRenderer jugBody;
-        [SerializeField] private SpriteBar foam;
-        [Tooltip("Local origin is the bottom of the thermometer scale.")]
+        [Header("Own gauge")]
         [SerializeField] private Transform needle;
         [SerializeField] private SpriteRenderer greenBand;
-        [SerializeField, Min(0.1f)] private float scaleHeight = 3f;
+        [SerializeField, Min(0.1f)] private float scaleHeight = 2.4f;
 
         [Header("Tuning (°C)")]
         [SerializeField] private float startTemperature = 5f;
@@ -33,12 +29,15 @@ namespace Courtyard.Minigames
         [SerializeField] private Color jugColor = new(0.8f, 0.82f, 0.85f);
         [SerializeField] private Color squealColor = new(1f, 0.55f, 0.5f);
 
+        private CounterStation _counter;
         private float _temperature;
 
         public override void Begin(MinigameContext ctx)
         {
+            _counter = ctx.Counter;
             _temperature = startTemperature;
-            jug.Released += OnReleased;
+            _counter.MilkJug.Released += OnReleased;
+            _counter.MilkJug.Interactable = true;
 
             var bottom = ToScaleY(bandMin);
             var top = ToScaleY(bandMax);
@@ -49,12 +48,14 @@ namespace Courtyard.Minigames
 
         private void OnDestroy()
         {
-            if (jug != null) jug.Released -= OnReleased;
+            if (_counter == null) return;
+            _counter.MilkJug.Released -= OnReleased;
+            _counter.MilkJugBody.color = jugColor;
         }
 
         private void Update()
         {
-            if (IsComplete || !jug.IsHeld) return;
+            if (IsComplete || !_counter.MilkJug.IsHeld) return;
 
             _temperature = Mathf.Min(maxTemperature, _temperature + heatPerSecond * Time.deltaTime);
             UpdateVisuals();
@@ -68,7 +69,8 @@ namespace Courtyard.Minigames
 
         private void Finish()
         {
-            jug.Interactable = false;
+            _counter.MilkJug.Interactable = false;
+            _counter.MugFoam.SetActive(true);
             var centre = (bandMin + bandMax) * 0.5f;
             Complete(1f - Mathf.Abs(_temperature - centre) / qualityFalloff);
         }
@@ -79,8 +81,8 @@ namespace Courtyard.Minigames
         private void UpdateVisuals()
         {
             needle.localPosition = new Vector3(0f, ToScaleY(_temperature), 0f);
-            foam.SetValue(Mathf.InverseLerp(startTemperature, maxTemperature, _temperature));
-            jugBody.color = _temperature > bandMax ? squealColor : jugColor;
+            _counter.MilkFoam.SetValue(Mathf.InverseLerp(startTemperature, maxTemperature, _temperature));
+            _counter.MilkJugBody.color = _temperature > bandMax ? squealColor : jugColor;
         }
     }
 }

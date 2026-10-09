@@ -6,19 +6,14 @@ using UnityEngine.InputSystem;
 namespace Courtyard.Minigames
 {
     /// <summary>
-    /// Hold over the V60 to pour and move in slow circles. Flow follows how fast the pointer moves and must stay in a band.
-    /// Quality = share of pouring time in the band + how close the fill ends to the line.
+    /// Hold over the V60 to pour from the counter kettle and move in slow circles. Flow follows how fast the
+    /// pointer moves and must stay in a band. Quality = share of pouring time in the band + how close the mug
+    /// fill ends to the line. Owns the pour zone and the flow meter.
     /// </summary>
     public sealed class PourOverStep : MinigameStep
     {
-        [Header("Scene refs")]
+        [Header("Own parts")]
         [SerializeField] private PointerTarget pourZone;
-        [SerializeField] private Transform dripperCenter;
-        [Tooltip("Follows the pointer while pouring.")]
-        [SerializeField] private Transform kettle;
-        [SerializeField] private SpriteRenderer stream;
-        [SerializeField] private SpriteBar fill;
-        [SerializeField] private Transform fillLine;
         [SerializeField] private SpriteBar flowMeter;
         [SerializeField] private SpriteRenderer flowBand;
 
@@ -36,8 +31,11 @@ namespace Courtyard.Minigames
         [SerializeField, Range(0f, 1f)] private float bandWeight = 0.6f;
         [SerializeField, Range(0f, 1f)] private float minFillToFinish = 0.1f;
 
+        [Header("Look")]
+        [SerializeField] private Color coffeeColor = new(0.35f, 0.2f, 0.1f);
+
+        private CounterStation _counter;
         private Camera _camera;
-        private Vector3 _kettleRest;
         private Vector2 _lastPointer;
         private float _flow;
         private float _pourTime;
@@ -45,16 +43,17 @@ namespace Courtyard.Minigames
 
         public override void Begin(MinigameContext ctx)
         {
+            _counter = ctx.Counter;
             _camera = ctx.WorldCamera;
-            _kettleRest = kettle.position;
             pourZone.Pressed += OnPressed;
             pourZone.Released += OnReleased;
 
-            fill.SetValue(0f);
-            flowMeter.SetValue(0f);
-            stream.enabled = false;
-            fillLine.localPosition = new Vector3(fillLine.localPosition.x, targetFill * fill.MaxHeight, 0f);
+            _counter.MugFill.Fill.color = coffeeColor;
+            var line = _counter.MugFillLine;
+            line.gameObject.SetActive(true);
+            line.localPosition = new Vector3(line.localPosition.x, targetFill * _counter.MugFill.MaxHeight, 0f);
 
+            flowMeter.SetValue(0f);
             var height = flowMeter.MaxHeight;
             flowBand.size = new Vector2(flowBand.size.x, (bandMax - bandMin) * height);
             flowBand.transform.localPosition = new Vector3(0f, (bandMin + bandMax) * 0.5f * height, 0f);
@@ -62,18 +61,23 @@ namespace Courtyard.Minigames
 
         private void OnDestroy()
         {
-            if (pourZone == null) return;
-            pourZone.Pressed -= OnPressed;
-            pourZone.Released -= OnReleased;
+            if (pourZone != null)
+            {
+                pourZone.Pressed -= OnPressed;
+                pourZone.Released -= OnReleased;
+            }
+
+            if (_counter == null) return;
+            ReturnKettle();
+            _counter.MugFillLine.gameObject.SetActive(false);
         }
 
         private void OnPressed() => _lastPointer = PointerWorld();
 
         private void OnReleased()
         {
-            kettle.position = _kettleRest;
-            stream.enabled = false;
-            if (!IsComplete && fill.Value >= minFillToFinish) Finish();
+            ReturnKettle();
+            if (!IsComplete && _counter.MugFill.Value >= minFillToFinish) Finish();
         }
 
         private void Update()
@@ -86,14 +90,16 @@ namespace Courtyard.Minigames
             _flow = Mathf.Lerp(_flow, Mathf.Clamp01(speed / speedForFullFlow), 1f - Mathf.Exp(-flowSmoothing * Time.deltaTime));
             flowMeter.SetValue(_flow);
 
+            var kettle = _counter.Kettle;
             kettle.position = new Vector3(pointer.x, pointer.y, kettle.position.z);
-            var overDripper = Vector2.Distance(pointer, dripperCenter.position) <= pourRadius;
-            stream.enabled = overDripper;
+            var overDripper = Vector2.Distance(pointer, _counter.Dripper.position) <= pourRadius;
+            _counter.KettleStream.enabled = overDripper;
             if (!overDripper) return;
 
             _pourTime += Time.deltaTime;
             if (_flow >= bandMin && _flow <= bandMax) _bandTime += Time.deltaTime;
 
+            var fill = _counter.MugFill;
             fill.SetValue(fill.Value + fillPerSecond * Time.deltaTime);
             if (fill.Value >= 1f) Finish();
         }
@@ -104,14 +110,19 @@ namespace Courtyard.Minigames
             return _camera.ScreenToWorldPoint(screen);
         }
 
+        private void ReturnKettle()
+        {
+            _counter.Kettle.position = _counter.KettleRest;
+            _counter.KettleStream.enabled = false;
+        }
+
         private void Finish()
         {
             pourZone.Interactable = false;
-            stream.enabled = false;
-            kettle.position = _kettleRest;
+            ReturnKettle();
 
             var bandScore = _pourTime > 0f ? _bandTime / _pourTime : 0f;
-            var fillScore = Mathf.Clamp01(1f - Mathf.Abs(fill.Value - targetFill) / fillTolerance);
+            var fillScore = Mathf.Clamp01(1f - Mathf.Abs(_counter.MugFill.Value - targetFill) / fillTolerance);
             Complete(bandWeight * bandScore + (1f - bandWeight) * fillScore);
         }
     }

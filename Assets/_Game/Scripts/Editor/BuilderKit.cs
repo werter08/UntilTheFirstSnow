@@ -67,10 +67,11 @@ namespace Courtyard.Editor
 
         // ---------------------------------------------------------------- create-if-missing
 
-        public static GameObject LoadOrCreatePrefab(string path, Func<GameObject> build)
+        /// <summary>Creates the prefab if missing. With <paramref name="overwrite"/>, rebuilds it in place (GUID kept).</summary>
+        public static GameObject LoadOrCreatePrefab(string path, Func<GameObject> build, bool overwrite = false)
         {
             var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (existing != null) return existing;
+            if (existing != null && !overwrite) return existing;
 
             var root = build();
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
@@ -78,23 +79,33 @@ namespace Courtyard.Editor
             return prefab;
         }
 
-        public static T LoadOrCreateAsset<T>(string path, Action<SerializedObject> fill) where T : ScriptableObject
+        /// <summary>Creates the asset if missing. With <paramref name="overwrite"/>, refills the existing asset (GUID kept).</summary>
+        public static T LoadOrCreateAsset<T>(string path, Action<SerializedObject> fill, bool overwrite = false) where T : ScriptableObject
         {
-            var existing = AssetDatabase.LoadAssetAtPath<T>(path);
-            if (existing != null) return existing;
+            var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (asset != null && !overwrite) return asset;
 
-            var asset = ScriptableObject.CreateInstance<T>();
-            AssetDatabase.CreateAsset(asset, path);
+            if (asset == null)
+            {
+                asset = ScriptableObject.CreateInstance<T>();
+                AssetDatabase.CreateAsset(asset, path);
+            }
+
             var so = new SerializedObject(asset);
             fill(so);
             so.ApplyModifiedPropertiesWithoutUndo();
             return asset;
         }
 
-        /// <summary>Builds a scene in an additive scratch scene so scenes the user has open are never touched.</summary>
-        public static void LoadOrCreateScene(string path, Action build)
+        /// <summary>
+        /// Builds a scene in an additive scratch scene so scenes the user has open are never touched.
+        /// With <paramref name="overwrite"/>, replaces an existing scene file (GUID kept) unless it is open.
+        /// </summary>
+        public static void LoadOrCreateScene(string path, Action build, bool overwrite = false)
         {
-            if (File.Exists(path)) return;
+            if (File.Exists(path) && !overwrite) return;
+            if (SceneManager.GetSceneByPath(path).isLoaded)
+                throw new InvalidOperationException($"Close {path} before rebuilding it (it may have unsaved changes).");
 
             var previous = SceneManager.GetActiveScene();
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
