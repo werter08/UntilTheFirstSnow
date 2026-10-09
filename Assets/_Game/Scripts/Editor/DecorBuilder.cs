@@ -89,6 +89,8 @@ namespace Courtyard.Editor
             SetPivot(KettleFolder + "Kettle_HandGrey.png", PourSpoutPivot);
             SetPivot(KettleFolder + "Kettle_HandBeige.png", PourSpoutPivot);
             EditScene(BuildScript.Scenes[1], ApplyToKitchen);
+            EditScene(BuildScript.Scenes[0], ApplyToBoot);
+            EditScene(BuildScript.Scenes[2], ApplyToEnding);
             AssetDatabase.SaveAssets();
         }
 
@@ -902,6 +904,77 @@ namespace Courtyard.Editor
             var runner = scene.GetRootGameObjects().Select(g => g.GetComponent<LevelRunner>()).First(r => r != null);
             Wire(runner, "finaleFocus", focus);
             Wire(runner, "hudGroup", hud.GetComponent<CanvasGroup>());
+        }
+
+        /// <summary>Title screen: a steaming mug under the title and autumn leaves drifting down.</summary>
+        private static void ApplyToBoot(Scene scene)
+        {
+            var root = SceneRoot(scene, "TitleDecor");
+            var mug = SpriteChild(root, "Mug");
+            var his = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "mug_his.png");
+            if (his == null) return;
+            FitMug(mug, his, new Vector2(0f, -3.4f), 1.3f, "Props", 1);
+            var steam = SoftParticles(root, "Steam", new Vector2(-0.3f, -2.45f), 0.5f, new Vector2(0f, 0.45f), new Color(1f, 1f, 1f, 0.3f), 0.3f, 1.8f, 5f, "FX");
+            var oldLeaves = root.Find("Leaves");
+            if (oldLeaves != null) Object.DestroyImmediate(oldLeaves.gameObject);
+            var leaves = Particles(root, "Leaves", new Vector2(0f, 5.8f), 19f, new Vector2(0.25f, -0.8f), new Color(0.9f, 0.5f, 0.2f), 0.16f, 14f, 3f, "FX", 0);
+            var spin = leaves.rotationOverLifetime;
+            spin.enabled = true;
+            spin.z = new ParticleSystem.MinMaxCurve(-2f, 2f);
+            var main = leaves.main;
+            main.playOnAwake = true;
+            main.prewarm = true;
+            main.startColor = new ParticleSystem.MinMaxGradient(new Color(0.9f, 0.45f, 0.2f), new Color(0.95f, 0.75f, 0.3f));
+            Motion(mug, sway: 0f, bob: 0.03f, speed: 0.5f, wind: 0f);
+            EditorUtility.SetDirty(steam);
+        }
+
+        /// <summary>Ending: his and her mugs side by side in falling snow while the last lines and credits play.</summary>
+        private static void ApplyToEnding(Scene scene)
+        {
+            var root = SceneRoot(scene, "EndingDecor");
+            var his = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "mug_his.png");
+            var hers = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "mug_hers.png");
+            if (his == null || hers == null) return;
+            FitMug(SpriteChild(root, "HisMug"), his, new Vector2(-0.95f, 0.4f), 1.3f, "Props", 1);
+            FitMug(SpriteChild(root, "HerMug"), hers, new Vector2(0.95f, 0.4f), 1.3f, "Props", 1);
+            var glow = SpriteChild(root, "Glow");
+            PlaceAtScreenScale(glow, AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png"), new Vector2(0f, 0.4f), "Props", 0);
+            glow.localScale = new Vector3(2.4f, 1.6f, 1f);
+            glow.GetComponent<SpriteRenderer>().color = new Color(1f, 0.75f, 0.45f, 0.35f);
+            SoftParticles(root, "SteamHis", new Vector2(-1.2f, 1.35f), 0.4f, new Vector2(0f, 0.55f), new Color(1f, 1f, 1f, 0.3f), 0.3f, 2f, 4f, "FX");
+            SoftParticles(root, "SteamHers", new Vector2(0.7f, 1.35f), 0.4f, new Vector2(0f, 0.55f), new Color(1f, 1f, 1f, 0.3f), 0.3f, 2f, 4f, "FX");
+            var snow = SoftParticles(root, "Snow", new Vector2(0f, 5.8f), 19f, new Vector2(0.15f, -0.7f), new Color(1f, 1f, 1f, 0.85f), 0.14f, 16f, 18f, "FX");
+            var main = snow.main;
+            main.prewarm = true;
+        }
+
+        private static Transform SceneRoot(Scene scene, string name)
+        {
+            var existing = scene.GetRootGameObjects().FirstOrDefault(g => g.name == name);
+            if (existing != null) return existing.transform;
+            var go = new GameObject(name);
+            SceneManager.MoveGameObjectToScene(go, scene);
+            return go.transform;
+        }
+
+        /// <summary>Soft round particles (steam, snow) using the radial puff sprite.</summary>
+        private static ParticleSystem SoftParticles(Transform parent, string name, Vector2 position, float width, Vector2 velocity,
+            Color colour, float size, float lifetime, float rate, string layer)
+        {
+            var existing = parent.Find(name);
+            if (existing != null) Object.DestroyImmediate(existing.gameObject);
+            var system = Particles(parent, name, position, width, velocity, colour, size, lifetime, rate, layer, 5);
+            var main = system.main;
+            main.playOnAwake = true;
+            var sheet = system.textureSheetAnimation;
+            sheet.enabled = true;
+            sheet.mode = ParticleSystemAnimationMode.Sprites;
+            sheet.AddSprite(AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png"));
+            var growth = system.sizeOverLifetime;
+            growth.enabled = true;
+            growth.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 0.7f, 1f, 1.6f));
+            return system;
         }
 
         private static void Motion(Transform target, float sway = 0f, float bob = 0f, float stretch = 0f, float speed = 0.6f, float wind = 1f)
