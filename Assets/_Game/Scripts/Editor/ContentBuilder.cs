@@ -62,6 +62,7 @@ namespace Courtyard.Editor
             LoadOrCreateScene(BuildScript.Scenes[0], BuildBootScene);
             SyncLevelOrder(levels);
             EnsureAudioManager(sfx);
+            DecorBuilder.Apply();
 
             EditorBuildSettings.scenes = BuildScript.Scenes.Select(p => new EditorBuildSettingsScene(p, true)).ToArray();
             AssetDatabase.SaveAssets();
@@ -233,6 +234,7 @@ namespace Courtyard.Editor
             var root = new GameObject("FeedbackFx");
             var popup = WorldText(root.transform, "PopupTemplate", Vector2.zero, "Perfect!", 12f, new Color(1f, 0.85f, 0.4f), "Foreground", 60);
             popup.fontStyle = FontStyles.Bold;
+            popup.gameObject.SetActive(false); // template; FeedbackFx clones it
             var fx = root.AddComponent<FeedbackFx>();
             Wire(fx, "popupTemplate", popup);
             return fx;
@@ -244,6 +246,8 @@ namespace Courtyard.Editor
             var root = new GameObject("Hands");
             var hand = Box(root.transform, "Hand", Vector2.zero, new Vector2(0.7f, 0.8f), new Color(0.93f, 0.78f, 0.66f), 40, false, "Foreground");
             Box(hand.transform, "Sleeve", new Vector2(0.25f, -0.6f), new Vector2(0.6f, 0.5f), new Color(0.35f, 0.38f, 0.45f), 39, false, "Foreground");
+            foreach (var renderer in root.GetComponentsInChildren<SpriteRenderer>())
+                renderer.color = new Color(renderer.color.r, renderer.color.g, renderer.color.b, 0f); // HandsView fades it in
             var view = root.AddComponent<HandsView>();
             Wire(view, "worldCamera", camera);
             Wire(view, "hand", hand);
