@@ -197,6 +197,7 @@ MonoBehaviour:
   targetFill: 0.85
   fillTolerance: 0.3
   spoonWeight: 0.5
+  spoonReturnSeconds: 0.2
   waterColor: {r: 0.75, g: 0.85, b: 0.95, a: 1}
   coffeeColor: {r: 0.35, g: 0.2, b: 0.1, a: 1}
   kettleIdleColor: {r: 0.6, g: 0.6, b: 0.65, a: 1}

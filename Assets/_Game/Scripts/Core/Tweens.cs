@@ -24,5 +24,17 @@ namespace Courtyard.Core
 
             apply(1f);
         }
+
+        /// <summary>Like <see cref="Run"/> but with linear t, for tweens that shape their own curve.</summary>
+        public static IEnumerator RunLinear(float duration, Action<float> apply)
+        {
+            for (var elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
+            {
+                apply(elapsed / duration);
+                yield return null;
+            }
+
+            apply(1f);
+        }
     }
 }

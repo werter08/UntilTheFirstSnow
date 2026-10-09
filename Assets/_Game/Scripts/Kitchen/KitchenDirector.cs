@@ -29,6 +29,9 @@ namespace Courtyard.Kitchen
             new(0.62f, 0.7f, 0.3f), new(0.9f, 0.5f, 0.2f), new(0.95f, 0.75f, 0.3f), new(0.7f, 0.45f, 0.3f), new(0.92f, 0.94f, 0.97f),
         };
 
+        [Header("Weather (seen through the window)")]
+        [SerializeField] private WeatherPreset[] weatherPresets;
+
         [Header("Mira's window")]
         [SerializeField] private SpriteRenderer miraWindow;
         [SerializeField] private Color miraWindowDark = new(0.2f, 0.22f, 0.3f);
@@ -95,6 +98,7 @@ namespace Courtyard.Kitchen
             for (var i = 0; i < fridgeNotes.Length; i++)
                 fridgeNotes[i].SetActive(i < props.fridgeNotes);
 
+            ApplyWeather(level.Weather);
             SetMiraAtDoor(false);
             SetMiraWindow(level.MiraWindow);
         }
@@ -133,6 +137,28 @@ namespace Courtyard.Kitchen
         {
             _armUp = up;
             miraArm.localRotation = Quaternion.Euler(0f, 0f, up ? waveArmAngle : 0f);
+        }
+
+        private void ApplyWeather(Weather weather)
+        {
+            foreach (var preset in weatherPresets)
+            {
+                if (preset.system == null) continue;
+                preset.system.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+
+            foreach (var preset in weatherPresets)
+            {
+                if (preset.system == null || preset.weather != weather) continue;
+
+                var emission = preset.system.emission;
+                emission.rateOverTime = preset.emissionRate;
+                var velocity = preset.system.velocityOverLifetime;
+                velocity.enabled = true;
+                velocity.x = preset.wind;
+                preset.system.Simulate(5f, true, true); // start mid-weather, not with an empty sky
+                preset.system.Play(true);
+            }
         }
 
         private static Color PickColor(Color[] colors, int index) =>

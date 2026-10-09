@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Courtyard.Audio;
 using Courtyard.Kitchen;
 using Courtyard.Minigames;
 using Courtyard.Story;
@@ -11,7 +12,7 @@ using UnityEngine.SceneManagement;
 namespace Courtyard.Core
 {
     /// <summary>
-    /// Runs one day in the kitchen: story → minigame steps (warmth drains) → serve → ending beat → next level.
+    /// Runs one day in the kitchen: calendar card → story → minigame steps (warmth drains) → serve → ending beat → outro → next level.
     /// Warmth only drains while a step is being played, never while story text is on screen.
     /// Day 20 uses two meters (him, Mira); the level fails gently when either empties.
     /// </summary>
@@ -24,12 +25,15 @@ namespace Courtyard.Core
         [SerializeField] private Camera worldCamera;
         [SerializeField] private KitchenDirector kitchen;
         [SerializeField] private CounterStation counter;
+        [SerializeField] private FeedbackFx fx;
         [SerializeField] private Transform stepRoot;
         [SerializeField] private StoryPlayer story;
         [SerializeField] private HintView hint;
         [Tooltip("Index 0 = him, index 1 = Mira (two-meter days).")]
         [SerializeField] private WarmthMeterView[] meterViews;
         [SerializeField] private ScreenFader fader;
+        [SerializeField] private DayCard dayCard;
+        [SerializeField] private WarmthVignette vignette;
 
         [Header("Transitions")]
         [SerializeField, Min(0f)] private float fadeDuration = 0.8f;
@@ -65,6 +69,7 @@ namespace Courtyard.Core
         private void Update()
         {
             if (_draining) _warmth.Tick(Time.deltaTime);
+            if (_warmth != null) AudioManager.SetWarmth(vignette.Coldest);
         }
 
         private void OnDestroy()
@@ -78,11 +83,14 @@ namespace Courtyard.Core
             _warmth.Depleted += OnMeterDepleted;
             for (var i = 0; i < meterViews.Length; i++)
                 meterViews[i].Bind(i < _warmth.Meters.Count ? _warmth.Meters[i] : null);
+            vignette.Bind(_warmth, _level.Palette.vignetteTint);
         }
 
         private IEnumerator Run()
         {
             hint.Hide();
+            AudioManager.SetAmbience(_level.Ambience);
+            yield return dayCard.Show(_level);
             yield return fader.FadeIn(fadeDuration);
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelStart));
 
@@ -94,7 +102,7 @@ namespace Courtyard.Core
                 _activeStep.Completed += q => quality = q;
                 hint.Show(_activeStep.HintText);
                 counter.SetAllInteractable(false);
-                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter));
+                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx));
 
                 _draining = true;
                 yield return new WaitUntil(() => quality >= 0f);
@@ -105,11 +113,14 @@ namespace Courtyard.Core
                 var step = _activeStep;
                 _activeStep = null;
                 Destroy(step.gameObject);
+                AudioManager.StopAllLoops();
 
                 if (step.Scored)
                 {
                     qualities.Add(quality);
                     _warmth.Restore(step.WarmthTarget, quality * _level.WarmthPerStep);
+                    fx.Punch(counter.Mug.transform);
+                    fx.CelebrateQuality(quality, counter.Mug.transform.position + Vector3.up * 1.2f);
                 }
 
                 yield return story.Play(_level.GetBeats(BeatTrigger.AfterStep, i, IsGood(quality)));
@@ -122,10 +133,21 @@ namespace Courtyard.Core
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
 
             yield return fader.FadeOut(endColor, fadeDuration);
+            yield return Outro();
             if (GameManager.Instance != null)
                 GameManager.Instance.CompleteLevel();
             else
                 SceneManager.LoadScene(SceneNames.Ending);
+        }
+
+        /// <summary>Optional beat over black, e.g. Day 20's footsteps across the courtyard.</summary>
+        private IEnumerator Outro()
+        {
+            if (_level.OutroHoldSeconds <= 0f) yield break;
+
+            if (_level.OutroClip != null) AudioSource.PlayClipAtPoint(_level.OutroClip, worldCamera.transform.position);
+            else AudioManager.Play(SfxId.Footsteps);
+            yield return new WaitForSeconds(_level.OutroHoldSeconds);
         }
 
         private bool IsGood(float quality) => quality >= _level.GoodResultThreshold;
@@ -144,6 +166,8 @@ namespace Courtyard.Core
             if (_activeStep != null) Destroy(_activeStep.gameObject);
             counter.SetAllInteractable(false);
             hint.Hide();
+            AudioManager.StopAllLoops();
+            AudioManager.Play(SfxId.Fail);
 
             yield return fader.FadeOut(failColor, fadeDuration, _level.FailText);
             yield return new WaitForSeconds(failHoldSeconds);

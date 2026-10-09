@@ -14,6 +14,10 @@ namespace Courtyard.Core
 
         private Collider2D _collider;
 
+        /// <summary>Raised for any target when it is pressed / released (used by the hands view).</summary>
+        public static event Action<Transform> AnyPressed;
+        public static event Action<Transform> AnyReleased;
+
         public event Action Pressed;
         public event Action Released;
         public event Action Clicked;
@@ -37,6 +41,7 @@ namespace Courtyard.Core
             if (!interactable || eventData.button != PointerEventData.InputButton.Left) return;
             IsHeld = true;
             Pressed?.Invoke();
+            AnyPressed?.Invoke(transform);
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -44,6 +49,7 @@ namespace Courtyard.Core
             if (!IsHeld) return;
             IsHeld = false;
             Released?.Invoke();
+            AnyReleased?.Invoke(transform);
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -57,6 +63,7 @@ namespace Courtyard.Core
             if (!IsHeld) return;
             IsHeld = false;
             Released?.Invoke();
+            AnyReleased?.Invoke(transform);
         }
     }
 }

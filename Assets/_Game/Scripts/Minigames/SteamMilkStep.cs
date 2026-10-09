@@ -1,3 +1,4 @@
+using Courtyard.Audio;
 using Courtyard.Kitchen;
 using UnityEngine;
 
@@ -30,12 +31,15 @@ namespace Courtyard.Minigames
         [SerializeField] private Color squealColor = new(1f, 0.55f, 0.5f);
 
         private CounterStation _counter;
+        private FeedbackFx _fx;
         private float _temperature;
 
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
+            _fx = ctx.Fx;
             _temperature = startTemperature;
+            _counter.MilkJug.Pressed += OnPressed;
             _counter.MilkJug.Released += OnReleased;
             _counter.MilkJug.Interactable = true;
 
@@ -49,8 +53,10 @@ namespace Courtyard.Minigames
         private void OnDestroy()
         {
             if (_counter == null) return;
+            _counter.MilkJug.Pressed -= OnPressed;
             _counter.MilkJug.Released -= OnReleased;
             _counter.MilkJugBody.color = jugColor;
+            StopSounds();
         }
 
         private void Update()
@@ -62,8 +68,17 @@ namespace Courtyard.Minigames
             if (_temperature >= maxTemperature) Finish();
         }
 
+        private void OnPressed() => AudioManager.StartLoop(SfxId.Steam);
+
+        private static void StopSounds()
+        {
+            AudioManager.StopLoop(SfxId.Steam);
+            AudioManager.StopLoop(SfxId.Squeal);
+        }
+
         private void OnReleased()
         {
+            StopSounds();
             if (!IsComplete && _temperature - startTemperature >= minHeatingToFinish) Finish();
         }
 
@@ -71,6 +86,8 @@ namespace Courtyard.Minigames
         {
             _counter.MilkJug.Interactable = false;
             _counter.MugFoam.SetActive(true);
+            StopSounds();
+            _fx.Punch(_counter.MilkJugBody.transform);
             var centre = (bandMin + bandMax) * 0.5f;
             Complete(1f - Mathf.Abs(_temperature - centre) / qualityFalloff);
         }
@@ -82,7 +99,9 @@ namespace Courtyard.Minigames
         {
             needle.localPosition = new Vector3(0f, ToScaleY(_temperature), 0f);
             _counter.MilkFoam.SetValue(Mathf.InverseLerp(startTemperature, maxTemperature, _temperature));
-            _counter.MilkJugBody.color = _temperature > bandMax ? squealColor : jugColor;
+            var squealing = _temperature > bandMax;
+            _counter.MilkJugBody.color = squealing ? squealColor : jugColor;
+            if (squealing && _counter.MilkJug.IsHeld) AudioManager.StartLoop(SfxId.Squeal);
         }
     }
 }

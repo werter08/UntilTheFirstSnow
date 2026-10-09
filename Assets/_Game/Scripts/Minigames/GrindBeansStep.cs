@@ -1,3 +1,4 @@
+using Courtyard.Audio;
 using Courtyard.Kitchen;
 using UnityEngine;
 
@@ -48,6 +49,7 @@ namespace Courtyard.Minigames
             handle.DragStarted -= OnDragStarted;
             handle.Dragged -= OnDragged;
             handle.DragEnded -= OnDragEnded;
+            AudioManager.StopLoop(SfxId.Grind);
         }
 
         private float AngleTo(Vector2 world)
@@ -56,7 +58,11 @@ namespace Courtyard.Minigames
             return Mathf.Atan2(offset.y, offset.x) * Mathf.Rad2Deg;
         }
 
-        private void OnDragStarted(Vector2 world) => _lastAngle = AngleTo(world);
+        private void OnDragStarted(Vector2 world)
+        {
+            _lastAngle = AngleTo(world);
+            AudioManager.StartLoop(SfxId.Grind);
+        }
 
         private void OnDragged(Vector2 world)
         {
@@ -73,12 +79,14 @@ namespace Courtyard.Minigames
 
         private void OnDragEnded(Vector2 world)
         {
+            AudioManager.StopLoop(SfxId.Grind);
             if (!IsComplete && meter.Value >= minLevelToFinish) Finish();
         }
 
         private void Finish()
         {
             _counter.GrinderHandle.Interactable = false;
+            AudioManager.StopLoop(SfxId.Grind);
             Complete(1f - Mathf.Abs(meter.Value - targetLevel) / qualityFalloff);
         }
     }

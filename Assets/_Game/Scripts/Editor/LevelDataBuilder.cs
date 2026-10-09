@@ -43,6 +43,7 @@ namespace Courtyard.Editor
             public Beat[] Beats;
             public bool TwoMeters;
             public float Drain;
+            public float OutroSeconds;
         }
 
         public static Recipe EnsureMiraUsual() =>
@@ -99,6 +100,7 @@ namespace Courtyard.Editor
             so.FindProperty("coldMultiplier").floatValue = 1f;
             so.FindProperty("warmthPerStep").floatValue = 15f;
             so.FindProperty("drinkWarmthBonus").floatValue = 25f;
+            so.FindProperty("outroHoldSeconds").floatValue = spec.OutroSeconds;
         }
 
         /// <summary>Day_01 was created in M1 before palettes and props existed; fill those in once if still at defaults.</summary>
@@ -247,6 +249,7 @@ namespace Courtyard.Editor
                 },
                 TwoMeters = true,
                 Drain = 1.4f,
+                OutroSeconds = 3f, // fade to black, footsteps across the courtyard with two mugs
             };
 
             yield return new Spec

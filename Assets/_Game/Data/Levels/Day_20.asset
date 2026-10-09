@@ -77,3 +77,5 @@ MonoBehaviour:
   goodResultThreshold: 0.7
   failText: "Too cold\u2026 let's try again."
   ambience: {fileID: 0}
+  outroClip: {fileID: 0}
+  outroHoldSeconds: 3

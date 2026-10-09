@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Courtyard.Audio;
 using Courtyard.Kitchen;
 using UnityEngine;
 
@@ -16,10 +17,12 @@ namespace Courtyard.Minigames
         private readonly List<Topping> _picked = new();
         private readonly List<(ToppingJar jar, System.Action handler)> _subscriptions = new();
         private CounterStation _counter;
+        private FeedbackFx _fx;
 
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
+            _fx = ctx.Fx;
             foreach (var jar in _counter.ToppingJars)
             {
                 jar.SetPicked(false);
@@ -45,6 +48,8 @@ namespace Courtyard.Minigames
         {
             if (IsComplete) return;
 
+            AudioManager.Play(SfxId.Topping);
+            _fx.Punch(jar.transform, 0.7f);
             if (_picked.Remove(jar.Topping))
                 jar.SetPicked(false);
             else if (_picked.Count < picksRequired)
@@ -62,6 +67,7 @@ namespace Courtyard.Minigames
 
             foreach (var jar in _counter.ToppingJars) jar.Target.Interactable = false;
             _counter.Mug.Interactable = false;
+            AudioManager.Play(SfxId.MugClink);
             Complete(recipe.Score(_picked));
         }
     }

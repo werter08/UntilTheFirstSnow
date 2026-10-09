@@ -1,3 +1,4 @@
+using Courtyard.Audio;
 using Courtyard.Core;
 using Courtyard.Kitchen;
 using UnityEngine;
@@ -25,6 +26,8 @@ namespace Courtyard.Minigames
         [SerializeField, Min(0.01f)] private float fillTolerance = 0.3f;
         [SerializeField, Range(0f, 1f)] private float spoonWeight = 0.5f;
 
+        [SerializeField, Min(0f)] private float spoonReturnSeconds = 0.2f;
+
         [Header("Look")]
         [SerializeField] private Color waterColor = new(0.75f, 0.85f, 0.95f);
         [SerializeField] private Color coffeeColor = new(0.35f, 0.2f, 0.1f);
@@ -32,6 +35,8 @@ namespace Courtyard.Minigames
         [SerializeField] private Color kettleReadyColor = new(0.85f, 0.85f, 0.9f);
 
         private CounterStation _counter;
+        private FeedbackFx _fx;
+        private Coroutine _spoonReturn;
         private Vector3 _spoonRest;
         private Vector2 _grabOffset;
         private bool _spoonLoaded;
@@ -42,6 +47,7 @@ namespace Courtyard.Minigames
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
+            _fx = ctx.Fx;
             _spoonRest = spoon.transform.position;
             spoon.DragStarted += OnSpoonDragStarted;
             spoon.Dragged += OnSpoonDragged;
@@ -73,6 +79,7 @@ namespace Courtyard.Minigames
             _counter.KettleTarget.Released -= OnKettleReleased;
             _counter.KettleBody.color = kettleIdleColor;
             _counter.MugFillLine.gameObject.SetActive(false);
+            AudioManager.StopLoop(SfxId.Pour);
         }
 
         private void Update()
@@ -84,7 +91,11 @@ namespace Courtyard.Minigames
             if (fill.Value >= 1f) Finish();
         }
 
-        private void OnSpoonDragStarted(Vector2 world) => _grabOffset = (Vector2)spoon.transform.position - world;
+        private void OnSpoonDragStarted(Vector2 world)
+        {
+            if (_spoonReturn != null) StopCoroutine(_spoonReturn);
+            _grabOffset = (Vector2)spoon.transform.position - world;
+        }
 
         private void OnSpoonDragged(Vector2 world)
         {
@@ -93,6 +104,8 @@ namespace Courtyard.Minigames
             {
                 _spoonLoaded = true;
                 spoonLoad.enabled = true;
+                AudioManager.Play(SfxId.Spoon);
+                _fx.Punch(jar.transform, 0.6f);
             }
         }
 
@@ -105,9 +118,12 @@ namespace Courtyard.Minigames
                 _spoons++;
                 RefreshSpoonMarkers();
                 RefreshKettle();
+                AudioManager.Play(SfxId.Spoon);
+                _fx.Punch(_counter.Mug.transform);
             }
 
-            spoon.transform.position = _spoonRest;
+            var from = spoon.transform.position;
+            _spoonReturn = StartCoroutine(Tweens.Run(spoonReturnSeconds, t => spoon.transform.position = Vector3.Lerp(from, _spoonRest, t)));
         }
 
         private void OnKettlePressed()
@@ -116,6 +132,7 @@ namespace Courtyard.Minigames
 
             _pouring = true;
             _pourStarted = true;
+            AudioManager.StartLoop(SfxId.Pour);
             spoon.Interactable = false;
             _counter.MugFill.Fill.color = Color.Lerp(waterColor, coffeeColor, Mathf.Clamp01((float)_spoons / targetSpoons));
         }
@@ -123,6 +140,7 @@ namespace Courtyard.Minigames
         private void OnKettleReleased()
         {
             _pouring = false;
+            AudioManager.StopLoop(SfxId.Pour);
             if (_pourStarted && _counter.MugFill.Value > 0f) Finish();
         }
 
@@ -131,6 +149,7 @@ namespace Courtyard.Minigames
             if (IsComplete) return;
             _pouring = false;
             _counter.KettleTarget.Interactable = false;
+            AudioManager.StopLoop(SfxId.Pour);
 
             var spoonScore = _spoons == targetSpoons ? 1f : wrongSpoonScore;
             var fillScore = 1f - Mathf.Abs(_counter.MugFill.Value - targetFill) / fillTolerance;

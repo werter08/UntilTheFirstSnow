@@ -1,3 +1,4 @@
+using Courtyard.Audio;
 using Courtyard.Core;
 using Courtyard.Kitchen;
 using UnityEngine;
@@ -30,6 +31,8 @@ namespace Courtyard.Minigames
         [SerializeField, Min(0.1f)] private float pourRadius = 1.4f;
         [SerializeField, Range(0f, 1f)] private float bandWeight = 0.6f;
         [SerializeField, Range(0f, 1f)] private float minFillToFinish = 0.1f;
+        [Tooltip("How quickly the kettle catches up with the pointer (higher = snappier).")]
+        [SerializeField, Min(0.1f)] private float kettleFollow = 14f;
 
         [Header("Look")]
         [SerializeField] private Color coffeeColor = new(0.35f, 0.2f, 0.1f);
@@ -72,7 +75,22 @@ namespace Courtyard.Minigames
             _counter.MugFillLine.gameObject.SetActive(false);
         }
 
-        private void OnPressed() => _lastPointer = PointerWorld();
+        private void OnPressed()
+        {
+            if (_kettleReturn != null) StopCoroutine(_kettleReturn);
+            _lastPointer = PointerWorld();
+        }
+
+        private bool _streamOn;
+
+        private void SetStream(bool on)
+        {
+            if (_streamOn == on) return;
+            _streamOn = on;
+            _counter.KettleStream.enabled = on;
+            if (on) AudioManager.StartLoop(SfxId.Pour);
+            else AudioManager.StopLoop(SfxId.Pour);
+        }
 
         private void OnReleased()
         {
@@ -91,9 +109,10 @@ namespace Courtyard.Minigames
             flowMeter.SetValue(_flow);
 
             var kettle = _counter.Kettle;
-            kettle.position = new Vector3(pointer.x, pointer.y, kettle.position.z);
-            var overDripper = Vector2.Distance(pointer, _counter.Dripper.position) <= pourRadius;
-            _counter.KettleStream.enabled = overDripper;
+            var follow = 1f - Mathf.Exp(-kettleFollow * Time.deltaTime);
+            kettle.position = Vector3.Lerp(kettle.position, new Vector3(pointer.x, pointer.y, kettle.position.z), follow);
+            var overDripper = Vector2.Distance(kettle.position, _counter.Dripper.position) <= pourRadius;
+            SetStream(overDripper);
             if (!overDripper) return;
 
             _pourTime += Time.deltaTime;
@@ -112,9 +131,21 @@ namespace Courtyard.Minigames
 
         private void ReturnKettle()
         {
-            _counter.Kettle.position = _counter.KettleRest;
-            _counter.KettleStream.enabled = false;
+            SetStream(false);
+            if (_kettleReturn != null) StopCoroutine(_kettleReturn);
+            var kettle = _counter.Kettle;
+            var from = kettle.position;
+            var rest = _counter.KettleRest;
+            if (!isActiveAndEnabled)
+            {
+                kettle.position = rest;
+                return;
+            }
+
+            _kettleReturn = StartCoroutine(Tweens.Run(0.25f, t => kettle.position = Vector3.Lerp(from, rest, t)));
         }
+
+        private Coroutine _kettleReturn;
 
         private void Finish()
         {

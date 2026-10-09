@@ -32,6 +32,9 @@ namespace Courtyard.Kitchen
         [SerializeField] private GameObject mugLeafPrint;
         [SerializeField] private GameObject dripper;
 
+        [Tooltip("Steam above the mug while there is a hot drink in it.")]
+        [SerializeField] private ParticleSystem mugSteam;
+
         [Header("Milk")]
         [SerializeField] private GameObject milkStation;
         [SerializeField] private PointerTarget milkJug;
@@ -66,7 +69,15 @@ namespace Courtyard.Kitchen
         public SpriteBar MilkFoam => milkFoam;
         public ToppingJar[] ToppingJars => toppingJars;
 
+        public bool HasDrink => mugFill.Value > 0.05f || mugFoam.activeSelf;
+
         private void Awake() => _kettleRest = kettle.position;
+
+        private void Update()
+        {
+            var emission = mugSteam.emission;
+            emission.enabled = HasDrink;
+        }
 
         /// <summary>Shows the tools this day uses and puts everything back to a clean, inactive state.</summary>
         public void Prepare(LevelDefinition level)

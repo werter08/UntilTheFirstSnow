@@ -57,6 +57,7 @@ MonoBehaviour:
   herMugIndex: 2
   wrongQuality: 0.6
   pickedLift: 0.3
+  liftSeconds: 0.25
 --- !u!1 &917517866165032903
 GameObject:
   m_ObjectHideFlags: 0

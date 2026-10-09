@@ -1,4 +1,5 @@
 using System.Collections;
+using Courtyard.Audio;
 using Courtyard.Core;
 using Courtyard.Kitchen;
 using UnityEngine;
@@ -32,6 +33,7 @@ namespace Courtyard.Minigames
         private void OnClicked()
         {
             _ctx.Counter.Mug.Interactable = false;
+            AudioManager.Play(SfxId.MugClink);
             StartCoroutine(WaveBack());
         }
 

@@ -15,8 +15,11 @@ namespace Courtyard.Editor
     internal static class BuilderKit
     {
         public const string SquarePath = "Assets/_Game/Art/Sprites/Placeholder_Square.png";
+        public const string VignettePath = "Assets/_Game/Art/UI/Vignette.png";
+        private const string SpriteUnlitMaterialPath = "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat";
 
         public static Sprite Square { get; private set; }
+        public static Sprite Vignette { get; private set; }
 
         // ---------------------------------------------------------------- project setup
 
@@ -63,6 +66,79 @@ namespace Courtyard.Editor
             importer.SaveAndReimport();
 
             Square = AssetDatabase.LoadAssetAtPath<Sprite>(SquarePath);
+        }
+
+        /// <summary>Code-generated radial gradient (transparent centre, opaque edges) for screen vignettes.</summary>
+        public static void EnsureVignetteSprite()
+        {
+            if (!File.Exists(VignettePath))
+            {
+                const int size = 256;
+                var texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+                var pixels = new Color[size * size];
+                for (var y = 0; y < size; y++)
+                for (var x = 0; x < size; x++)
+                {
+                    var dx = (x + 0.5f) / size * 2f - 1f;
+                    var dy = (y + 0.5f) / size * 2f - 1f;
+                    var distance = Mathf.Sqrt(dx * dx + dy * dy) / Mathf.Sqrt(2f);
+                    pixels[y * size + x] = new Color(1f, 1f, 1f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.45f, 0.95f, distance)));
+                }
+
+                texture.SetPixels(pixels);
+                File.WriteAllBytes(VignettePath, texture.EncodeToPNG());
+                Object.DestroyImmediate(texture);
+                AssetDatabase.ImportAsset(VignettePath);
+            }
+
+            var importer = (TextureImporter)AssetImporter.GetAtPath(VignettePath);
+            importer.textureType = TextureImporterType.Sprite;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.SaveAndReimport();
+            Vignette = AssetDatabase.LoadAssetAtPath<Sprite>(VignettePath);
+        }
+
+        public static Material SpriteUnlitMaterial() => AssetDatabase.LoadAssetAtPath<Material>(SpriteUnlitMaterialPath);
+
+        /// <summary>Simple 2D particle emitter: particles spawn along a horizontal line and move with a constant velocity.</summary>
+        public static ParticleSystem Particles(Transform parent, string name, Vector2 position, float width, Vector2 velocity,
+            Color color, float size, float lifetime, float rate, string layer, int order)
+        {
+            var go = Empty(parent, name, position).gameObject;
+            var system = go.AddComponent<ParticleSystem>();
+            system.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+            var main = system.main;
+            main.playOnAwake = false;
+            main.loop = true;
+            main.startColor = color;
+            main.startSize = size;
+            main.startSpeed = 0f;
+            main.startLifetime = lifetime;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = 400;
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+
+            var shape = system.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(width, 0.05f, 0.05f);
+
+            var emission = system.emission;
+            emission.rateOverTime = rate;
+
+            var motion = system.velocityOverLifetime;
+            motion.enabled = true;
+            motion.space = ParticleSystemSimulationSpace.World;
+            motion.x = velocity.x;
+            motion.y = velocity.y;
+            motion.z = 0f;
+
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            renderer.sharedMaterial = SpriteUnlitMaterial();
+            renderer.sortingLayerName = layer;
+            renderer.sortingOrder = order;
+            return system;
         }
 
         // ---------------------------------------------------------------- create-if-missing

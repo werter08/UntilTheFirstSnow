@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Courtyard.Audio;
 using Courtyard.Core;
 using Courtyard.Kitchen;
 using Courtyard.Story;
@@ -24,6 +25,7 @@ namespace Courtyard.Editor
     {
         private const string StoryBoxPath = "Assets/_Game/Prefabs/UI/StoryBox.prefab";
         private const string FaderPath = "Assets/_Game/Prefabs/UI/ScreenFader.prefab";
+        private const string SfxLibraryPath = "Assets/_Game/Data/Audio/SfxLibrary.asset";
 
         private static readonly string[] SortingLayerNames = { "Sky", "Courtyard", "Wall", "Counter", "Props", "Foreground" };
         private static readonly Vector2 ReferenceResolution = new(1920f, 1080f);
@@ -43,6 +45,8 @@ namespace Courtyard.Editor
         {
             EnsureSortingLayers(SortingLayerNames);
             EnsureSquareSprite();
+            EnsureVignetteSprite();
+            var sfx = EnsureSfxLibrary();
 
             var storyBox = LoadOrCreatePrefab(StoryBoxPath, BuildStoryBox);
             UpgradeStoryBox(storyBox);
@@ -57,10 +61,42 @@ namespace Courtyard.Editor
             LoadOrCreateScene(BuildScript.Scenes[2], () => BuildEndingScene(ending, storyBox, fader));
             LoadOrCreateScene(BuildScript.Scenes[0], BuildBootScene);
             SyncLevelOrder(levels);
+            EnsureAudioManager(sfx);
 
             EditorBuildSettings.scenes = BuildScript.Scenes.Select(p => new EditorBuildSettingsScene(p, true)).ToArray();
             AssetDatabase.SaveAssets();
             Debug.Log("[ContentBuilder] Done. Open Assets/_Game/Scenes/Boot.unity and press Play.");
+        }
+
+        private static SfxLibrary EnsureSfxLibrary()
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/_Game/Data/Audio")) AssetDatabase.CreateFolder("Assets/_Game/Data", "Audio");
+            return LoadOrCreateAsset<SfxLibrary>(SfxLibraryPath, so =>
+            {
+                var ids = (SfxId[])System.Enum.GetValues(typeof(SfxId));
+                var entries = so.FindProperty("entries");
+                entries.arraySize = ids.Length;
+                for (var i = 0; i < ids.Length; i++)
+                {
+                    var entry = entries.GetArrayElementAtIndex(i);
+                    entry.FindPropertyRelative("id").enumValueIndex = (int)ids[i];
+                    entry.FindPropertyRelative("volume").floatValue = 1f;
+                    entry.FindPropertyRelative("pitch").vector2Value = new Vector2(0.95f, 1.05f);
+                }
+            });
+        }
+
+        /// <summary>The Boot scene owns the persistent AudioManager (audio starts after the title-screen click).</summary>
+        private static void EnsureAudioManager(SfxLibrary sfx)
+        {
+            EditScene(BuildScript.Scenes[0], scene =>
+            {
+                if (scene.GetRootGameObjects().Any(g => g.GetComponent<AudioManager>() != null)) return;
+
+                var go = new GameObject("AudioManager");
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene);
+                Wire(go.AddComponent<AudioManager>(), "library", sfx);
+            });
         }
 
         /// <summary>GameManager plays every LevelDefinition in day order.</summary>
@@ -143,14 +179,19 @@ namespace Courtyard.Editor
 
             var director = BuildKitchenWorld();
             var counter = CounterLayout.Build(director.transform);
+            BuildMugSteam(counter);
+            var fx = BuildFeedbackFx();
+            BuildHands(camera);
             var stepRoot = new GameObject("StepRoot").transform;
 
             var canvas = CreateCanvas();
+            var vignette = BuildVignette(canvas);
             var meterHim = BuildMeterView(canvas, "WarmthMeter_Him", "You", new Vector2(40f, -40f));
             var meterMira = BuildMeterView(canvas, "WarmthMeter_Mira", "Mira", new Vector2(40f, -100f));
             var hint = BuildHint(canvas);
             var story = ((GameObject)PrefabUtility.InstantiatePrefab(storyBoxPrefab, canvas)).GetComponent<StoryPlayer>();
             var fader = ((GameObject)PrefabUtility.InstantiatePrefab(faderPrefab, canvas)).GetComponent<ScreenFader>();
+            var dayCard = BuildDayCard(canvas); // after the fader, so it shows over black
             CreateEventSystem();
 
             var runner = new GameObject("LevelRunner").AddComponent<LevelRunner>();
@@ -163,6 +204,98 @@ namespace Courtyard.Editor
             Wire(runner, "hint", hint);
             WireArray(runner, "meterViews", new Object[] { meterHim, meterMira });
             Wire(runner, "fader", fader);
+            Wire(runner, "fx", fx);
+            Wire(runner, "dayCard", dayCard);
+            Wire(runner, "vignette", vignette);
+        }
+
+        private static void BuildMugSteam(CounterStation counter)
+        {
+            var mug = new SerializedObject(counter).FindProperty("mug").objectReferenceValue as Component;
+            var steam = Particles(mug.transform, "Steam", new Vector2(0f, 0.75f), 0.6f, new Vector2(0f, 0.7f),
+                new Color(1f, 1f, 1f, 0.35f), 0.18f, 1.6f, 7f, "Props", 6);
+            var main = steam.main;
+            main.playOnAwake = true;
+            var size = steam.sizeOverLifetime;
+            size.enabled = true;
+            size.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 0.6f, 1f, 2.2f));
+            var colour = steam.colorOverLifetime;
+            colour.enabled = true;
+            var fade = new Gradient();
+            fade.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.2f), new GradientAlphaKey(0f, 1f) });
+            colour.color = fade;
+            Wire(counter, "mugSteam", steam);
+        }
+
+        private static FeedbackFx BuildFeedbackFx()
+        {
+            var root = new GameObject("FeedbackFx");
+            var popup = WorldText(root.transform, "PopupTemplate", Vector2.zero, "Perfect!", 12f, new Color(1f, 0.85f, 0.4f), "Foreground", 60);
+            popup.fontStyle = FontStyles.Bold;
+            var fx = root.AddComponent<FeedbackFx>();
+            Wire(fx, "popupTemplate", popup);
+            return fx;
+        }
+
+        /// <summary>Placeholder hand (a skin-coloured box) until the hand-drawn sprites are in.</summary>
+        private static void BuildHands(Camera camera)
+        {
+            var root = new GameObject("Hands");
+            var hand = Box(root.transform, "Hand", Vector2.zero, new Vector2(0.7f, 0.8f), new Color(0.93f, 0.78f, 0.66f), 40, false, "Foreground");
+            Box(hand.transform, "Sleeve", new Vector2(0.25f, -0.6f), new Vector2(0.6f, 0.5f), new Color(0.35f, 0.38f, 0.45f), 39, false, "Foreground");
+            var view = root.AddComponent<HandsView>();
+            Wire(view, "worldCamera", camera);
+            Wire(view, "hand", hand);
+        }
+
+        private static WarmthVignette BuildVignette(RectTransform canvas)
+        {
+            var root = UiObject("WarmthVignette", canvas);
+            Stretch(root);
+            var frost = UiObject("Frost", root);
+            Stretch(frost);
+            var frostImage = Img(frost, new Color(0.78f, 0.9f, 1f, 0f));
+            frostImage.sprite = BuilderKit.Vignette;
+            var warm = UiObject("Warm", root);
+            Stretch(warm);
+            var warmImage = Img(warm, new Color(1f, 0.62f, 0.3f, 0f));
+            warmImage.sprite = BuilderKit.Vignette;
+
+            var vignette = root.gameObject.AddComponent<WarmthVignette>();
+            Wire(vignette, "frost", frostImage);
+            Wire(vignette, "warm", warmImage);
+            return vignette;
+        }
+
+        private static DayCard BuildDayCard(RectTransform canvas)
+        {
+            var root = UiObject("DayCard", canvas);
+            Stretch(root);
+            var group = root.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f;
+            group.blocksRaycasts = false;
+
+            var page = UiObject("Page", root);
+            Place(page, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, 240f), new Vector2(420f, 480f));
+            Img(page, new Color(0.96f, 0.94f, 0.88f));
+            var header = UiObject("Header", page);
+            Place(header, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, 110f));
+            Img(header, new Color(0.8f, 0.3f, 0.25f));
+            Label(header, "Label", "DAY", 56f, TextAlignmentOptions.Center, Color.white);
+
+            var number = Label(page, "Number", "1", 200f, TextAlignmentOptions.Center, new Color(0.2f, 0.17f, 0.15f));
+            number.rectTransform.offsetMax = new Vector2(0f, -110f);
+            number.rectTransform.offsetMin = new Vector2(0f, 90f);
+            var clock = Label(page, "Clock", "06:40", 48f, TextAlignmentOptions.Bottom, new Color(0.35f, 0.3f, 0.28f));
+            clock.rectTransform.offsetMin = new Vector2(0f, 30f);
+
+            var card = root.gameObject.AddComponent<DayCard>();
+            Wire(card, "group", group);
+            Wire(card, "page", page);
+            Wire(card, "dayNumber", number);
+            Wire(card, "clockTime", clock);
+            return card;
         }
 
         /// <summary>Placeholder kitchen (grey boxes until real art exists) plus its KitchenDirector.</summary>
@@ -234,6 +367,25 @@ namespace Courtyard.Editor
             Box(miraAtDoor.transform, "Scarf", new Vector2(-0.1f, 1.2f), new Vector2(1.7f, 0.45f), new Color(0.75f, 0.2f, 0.2f), 2, false, "Foreground");
             Box(miraAtDoor.transform, "Hand", new Vector2(-0.9f, 0f), new Vector2(0.4f, 0.3f), new Color(0.9f, 0.75f, 0.65f), 2, false, "Foreground");
 
+            // Weather, visible only inside the window.
+            var mask = Empty(root, "WindowMask", new Vector2(0f, 1.7f)).gameObject.AddComponent<SpriteMask>();
+            mask.sprite = Square;
+            mask.transform.localScale = new Vector3(7f, 4.5f, 1f);
+            var weatherTop = new Vector2(0f, 4.1f);
+            var rain = Particles(root, "Rain", weatherTop, 7.5f, new Vector2(-0.6f, -9f), new Color(0.75f, 0.85f, 1f, 0.6f), 0.06f, 0.6f, 0f, "Wall", 6);
+            var rainShape = rain.main;
+            rainShape.startSize3D = true;
+            rainShape.startSizeX = 0.04f;
+            rainShape.startSizeY = 0.35f;
+            rainShape.startRotation = 0f;
+            var leaves = Particles(root, "Leaves", weatherTop, 7.5f, new Vector2(0.2f, -0.9f), new Color(0.9f, 0.5f, 0.2f), 0.16f, 5.5f, 0f, "Wall", 6);
+            var spin = leaves.rotationOverLifetime;
+            spin.enabled = true;
+            spin.z = new ParticleSystem.MinMaxCurve(-2f, 2f);
+            var snow = Particles(root, "Snow", weatherTop, 7.5f, new Vector2(0.1f, -0.7f), new Color(1f, 1f, 1f, 0.9f), 0.09f, 7f, 0f, "Wall", 6);
+            foreach (var system in new[] { rain, leaves, snow })
+                system.GetComponent<ParticleSystemRenderer>().maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+
             var director = root.gameObject.AddComponent<KitchenDirector>();
             Wire(director, "globalLight", globalLight);
             Wire(director, "lampLight", lampLight);
@@ -254,6 +406,27 @@ namespace Courtyard.Editor
             Wire(director, "blanket", blanket.gameObject);
             Wire(director, "plant", plant);
             WireArray(director, "fridgeNotes", notes);
+            Edit(director, so =>
+            {
+                var presets = new (Weather weather, ParticleSystem system, float rate, float wind)[]
+                {
+                    (Weather.LightRain, rain, 45f, -0.6f),
+                    (Weather.HeavyRain, rain, 160f, -1.5f),
+                    (Weather.Leaves, leaves, 4f, 0.3f),
+                    (Weather.Wind, leaves, 10f, 3.5f),
+                    (Weather.Snow, snow, 30f, 0.15f),
+                };
+                var array = Property(so, "weatherPresets");
+                array.arraySize = presets.Length;
+                for (var i = 0; i < presets.Length; i++)
+                {
+                    var element = array.GetArrayElementAtIndex(i);
+                    element.FindPropertyRelative("weather").enumValueIndex = (int)presets[i].weather;
+                    element.FindPropertyRelative("system").objectReferenceValue = presets[i].system;
+                    element.FindPropertyRelative("emissionRate").floatValue = presets[i].rate;
+                    element.FindPropertyRelative("wind").floatValue = presets[i].wind;
+                }
+            });
             return director;
         }
 
@@ -272,6 +445,12 @@ namespace Courtyard.Editor
             Place(frame, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), position, new Vector2(460f, 44f));
             Img(frame, new Color(0.1f, 0.1f, 0.12f, 0.8f));
 
+            var glow = UiObject("Glow", frame);
+            Stretch(glow);
+            glow.offsetMin = new Vector2(-8f, -8f);
+            glow.offsetMax = new Vector2(8f, 8f);
+            var glowImage = Img(glow, new Color(1f, 0.8f, 0.45f, 0f));
+
             var track = UiObject("Track", frame);
             Stretch(track);
             track.offsetMin = new Vector2(5f, 5f);
@@ -287,6 +466,7 @@ namespace Courtyard.Editor
             var view = frame.gameObject.AddComponent<WarmthMeterView>();
             Wire(view, "fill", fill);
             Wire(view, "fillImage", fillImage);
+            Wire(view, "glow", glowImage);
             var gradient = new Gradient();
             gradient.SetKeys(
                 new[] { new GradientColorKey(new Color(0.45f, 0.65f, 0.95f), 0f), new GradientColorKey(new Color(1f, 0.6f, 0.25f), 1f) },

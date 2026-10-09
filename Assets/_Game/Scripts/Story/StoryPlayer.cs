@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Courtyard.Audio;
 using Courtyard.Core;
 using TMPro;
 using UnityEngine;
@@ -59,6 +60,7 @@ namespace Courtyard.Story
             speakerLabel.text = isDialogue ? beat.Speaker : string.Empty;
             body.fontStyle = beat.Style == BeatStyle.Thought ? FontStyles.Italic : FontStyles.Normal;
             ApplyStyleColours(beat.Style);
+            if (beat.Style == BeatStyle.Note) AudioManager.Play(SfxId.PaperNote);
             body.text = beat.Text;
             body.maxVisibleCharacters = 0;
             continueHint.SetActive(false);

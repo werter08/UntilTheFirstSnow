@@ -44,6 +44,11 @@ namespace Courtyard.Core
         [Header("Audio")]
         [SerializeField] private AudioClip ambience;
 
+        [Header("Outro")]
+        [Tooltip("Played over black after the last line (Day 20: footsteps across the courtyard).")]
+        [SerializeField] private AudioClip outroClip;
+        [SerializeField, Min(0f)] private float outroHoldSeconds;
+
         public int DayNumber => dayNumber;
         public string ClockTime => clockTime;
         public TimeOfDay TimeOfDay => timeOfDay;
@@ -62,6 +67,8 @@ namespace Courtyard.Core
         public float GoodResultThreshold => goodResultThreshold;
         public string FailText => failText;
         public AudioClip Ambience => ambience;
+        public AudioClip OutroClip => outroClip;
+        public float OutroHoldSeconds => outroHoldSeconds;
 
         public List<StoryBeat> GetBeats(BeatTrigger trigger, int stepIndex = 0, bool goodResult = true) =>
             storyBeats.Where(b => b != null && b.Matches(trigger, stepIndex, goodResult)).ToList();

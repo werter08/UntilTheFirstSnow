@@ -15,6 +15,10 @@ namespace Courtyard.Core
 
         private Collider2D _collider;
 
+        /// <summary>Raised for any target when a drag starts / ends (used by the hands view).</summary>
+        public static event Action<Transform> AnyDragStarted;
+        public static event Action<Transform> AnyDragEnded;
+
         public event Action<Vector2> DragStarted;
         public event Action<Vector2> Dragged;
         public event Action<Vector2> DragEnded;
@@ -38,6 +42,7 @@ namespace Courtyard.Core
             if (!interactable || eventData.button != PointerEventData.InputButton.Left) return;
             IsDragging = true;
             DragStarted?.Invoke(ToWorld(eventData));
+            AnyDragStarted?.Invoke(transform);
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -50,6 +55,7 @@ namespace Courtyard.Core
             if (!IsDragging) return;
             IsDragging = false;
             DragEnded?.Invoke(ToWorld(eventData));
+            AnyDragEnded?.Invoke(transform);
         }
 
         private static Vector2 ToWorld(PointerEventData eventData)

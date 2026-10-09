@@ -1,3 +1,4 @@
+using Courtyard.Audio;
 using Courtyard.Kitchen;
 using UnityEngine;
 
@@ -30,12 +31,14 @@ namespace Courtyard.Minigames
         [SerializeField] private Color switchOnColor = new(1f, 0.45f, 0.3f);
 
         private CounterStation _counter;
+        private FeedbackFx _fx;
         private State _state = State.Idle;
         private float _temperature;
 
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
+            _fx = ctx.Fx;
             _temperature = startTemperature;
             _counter.KettleSwitch.Clicked += OnSwitchClicked;
             _counter.KettleSwitch.Interactable = true;
@@ -52,6 +55,7 @@ namespace Courtyard.Minigames
             if (_counter == null) return;
             _counter.KettleSwitch.Clicked -= OnSwitchClicked;
             _counter.SwitchLight.color = switchOffColor;
+            AudioManager.StopLoop(SfxId.KettleBoil);
         }
 
         private void Update()
@@ -69,6 +73,9 @@ namespace Courtyard.Minigames
             {
                 case State.Idle:
                     _state = State.Heating;
+                    AudioManager.Play(SfxId.KettleSwitch);
+                    AudioManager.StartLoop(SfxId.KettleBoil);
+                    _fx.Punch(_counter.SwitchLight.transform);
                     UpdateVisuals();
                     break;
                 case State.Heating:
@@ -81,6 +88,9 @@ namespace Courtyard.Minigames
         {
             _state = State.Done;
             _counter.KettleSwitch.Interactable = false;
+            AudioManager.StopLoop(SfxId.KettleBoil);
+            AudioManager.Play(SfxId.KettleSwitch);
+            _fx.Punch(_counter.KettleBody.transform);
             UpdateVisuals();
 
             var bandCentre = (bandMin + bandMax) * 0.5f;

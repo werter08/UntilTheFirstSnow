@@ -1,4 +1,5 @@
 using System.Collections;
+using Courtyard.Audio;
 using Courtyard.Core;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ namespace Courtyard.Minigames
 
         private IEnumerator Visit(MinigameContext ctx)
         {
+            AudioManager.Play(SfxId.Knock);
             yield return new WaitForSeconds(knockDelaySeconds);
             ctx.Kitchen.SetMiraWindow(MiraWindowState.Dark);
             ctx.Kitchen.SetMiraAtDoor(true);
