@@ -42,6 +42,13 @@ namespace Courtyard.Kitchen
         [SerializeField] private float waveArmAngle = 35f;
         [SerializeField] private GameObject miraAtDoor;
 
+        [Header("Ceiling lamp (optional art)")]
+        [SerializeField] private SpriteRenderer lampRenderer;
+        [SerializeField] private Sprite lampOnSprite;
+        [SerializeField] private Sprite lampOffSprite;
+        [SerializeField] private SpriteRenderer lampGlow;
+        [SerializeField, Range(0f, 1f)] private float lampGlowAlpha = 0.45f;
+
         [Header("Wall")]
         [SerializeField] private TMP_Text calendarDay;
         [SerializeField] private TMP_Text clockTime;
@@ -81,6 +88,7 @@ namespace Courtyard.Kitchen
             globalLight.intensity = palette.globalLightIntensity;
             lampLight.color = palette.lampColor;
             lampLight.intensity = palette.lampIntensity;
+            ApplyLamp(level.Props.lampOff, palette.lampColor);
 
             courtyard.color = level.TimeOfDay switch
             {
@@ -166,6 +174,16 @@ namespace Courtyard.Kitchen
                 preset.system.Simulate(5f, true, true); // start mid-weather, not with an empty sky
                 preset.system.Play(true);
             }
+        }
+
+        private void ApplyLamp(bool off, Color colour)
+        {
+            lampLight.enabled = !off;
+            if (lampRenderer != null && lampOnSprite != null && lampOffSprite != null)
+                lampRenderer.sprite = off ? lampOffSprite : lampOnSprite;
+            if (lampGlow == null) return;
+            lampGlow.enabled = !off;
+            lampGlow.color = new Color(colour.r, colour.g, colour.b, lampGlowAlpha);
         }
 
         private void SetClockHands(string time)

@@ -122,6 +122,7 @@ namespace Courtyard.Editor
                     props.FindPropertyRelative("brewMug").enumValueIndex = (int)spec.Props.brewMug;
                     props.FindPropertyRelative("mugsOnSill").boolValue = spec.Props.mugsOnSill;
                     props.FindPropertyRelative("sweater").enumValueIndex = (int)spec.Props.sweater;
+                    props.FindPropertyRelative("lampOff").boolValue = spec.Props.lampOff;
                     WriteDrinks(so.FindProperty("drinkResults"), spec.Drinks);
                 });
             }
@@ -178,6 +179,7 @@ namespace Courtyard.Editor
             props.FindPropertyRelative("plantStage").enumValueIndex = (int)value.plantStage;
             props.FindPropertyRelative("fridgeNotes").intValue = value.fridgeNotes;
             props.FindPropertyRelative("sweater").enumValueIndex = (int)value.sweater;
+            props.FindPropertyRelative("lampOff").boolValue = value.lampOff;
         }
 
         private static void AddBeat(SerializedProperty list, Beat beat)
@@ -225,7 +227,7 @@ namespace Courtyard.Editor
                 Day = 1, Clock = "06:40", Time = TimeOfDay.Morning, Weather = Weather.LightRain, Tree = TreeStage.GreenYellow,
                 Window = MiraWindowState.LitWarmSilhouette,
                 Palette = Palette(new Color(0.78f, 0.82f, 0.9f), 1f, new Color(0.85f, 0.92f, 1f), 0.6f),
-                Props = new KitchenProps { plantStage = PlantStage.Wilted },
+                Props = new KitchenProps { plantStage = PlantStage.Wilted, lampOff = true },
                 Steps = new[] { P.KettleBoil, P.InstantCoffee },
                 Beats = new[]
                 {

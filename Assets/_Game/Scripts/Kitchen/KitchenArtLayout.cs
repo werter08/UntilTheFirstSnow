@@ -30,6 +30,15 @@ namespace Courtyard.Kitchen
         [Tooltip("V60 centre relative to the mug sprite's centre (px): its cone sits on the mug body, not the handle.")]
         public Vector2 dripperOnMugPx = new(-16.5f, 111f);
 
+        [Header("Wall")]
+        [Tooltip("Calendar centre (frame 140×200).")]
+        public Vector2 calendarCentre = new(1420f, 260f);
+        [Tooltip("Number on the calendar sheet, offset from the calendar centre (px, y down).")]
+        public Vector2 calendarNumberOffsetPx = new(0f, 15f);
+        [Tooltip("Ceiling lamp frame centre (frame 140×160; the cord starts at the frame top).")]
+        public Vector2 lampFrameCentre = new(960f, 40f);
+        public Vector2 lampFrameSize = new(140f, 160f);
+
         [Header("Window")]
         [Tooltip("Window opening for the SpriteMask (x, y, width, height).")]
         public Rect windowOpening = new(660f, 110f, 600f, 450f);

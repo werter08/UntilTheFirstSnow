@@ -37,6 +37,7 @@ MonoBehaviour:
     scarf: 0
     blanket: 0
     plantStage: 0
+    lampOff: 1
     sweater: 0
     fridgeNotes: 0
   steps:

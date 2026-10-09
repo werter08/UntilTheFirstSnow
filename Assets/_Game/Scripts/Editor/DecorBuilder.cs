@@ -21,6 +21,7 @@ namespace Courtyard.Editor
         private const string KettleFolder = "Assets/_Game/Art/Sprites/Kettle/";
         private const string PropsFolder = "Assets/_Game/Art/Props/";
         private const string DrinksFolder = "Assets/_Game/Art/Drinks/";
+        private const string FxFolder = "Assets/_Game/Art/FX/";
 
         // Kettle parts, offsets from the standing kettle's centre (px at 100 px/unit), measured by matching the parts
         // against the assembled drawing in Kettle_Sheet_Source.png.
@@ -70,6 +71,7 @@ namespace Courtyard.Editor
             ConfigureImports(KettleFolder);
             ConfigureImports(PropsFolder);
             ConfigureImports(DrinksFolder);
+            ConfigureImports(FxFolder);
         }
 
         public static void Apply()
@@ -106,11 +108,15 @@ namespace Courtyard.Editor
             ApplyMilk(kitchen);
             ApplyJars(kitchen);
             ApplyClock(kitchen);
+            ApplyCalendar(kitchen);
+            ApplyLamp(kitchen);
             ArtManifestBuilder.Apply(scene, kitchen, _layout); // manifest zones, layers and file slots win
             SleeveBuilder.WireScene(scene, _sleeves);
 
             // Ceiling: hanging bulb; the lamp light sits on the bulb.
-            if (Fit(kitchen, "CeilingLamp", "Oddblot_light", new Vector2(0f, 5.05f), 1.6f, "Wall", 13))
+            // Fallback bulb from the pack only when the team's lamp drawing isn't there (ApplyLamp handles it).
+            if (AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "lamp.png") == null
+                && Fit(kitchen, "CeilingLamp", "Oddblot_light", new Vector2(0f, 5.05f), 1.6f, "Wall", 13))
                 Find(kitchen, "LampLight").localPosition = new Vector3(0f, 4.8f, 0f);
 
             // Left wall: shelf with dishes (replaces the plank and the instant coffee jar placeholder).
@@ -626,6 +632,65 @@ namespace Courtyard.Editor
             var director = kitchen.GetComponent<KitchenDirector>();
             Wire(director, "clockHourHand", hour);
             Wire(director, "clockMinuteHand", minute);
+        }
+
+        /// <summary>Paper calendar right of the window; Unity writes the day number and a hand-drawn circle rings it.</summary>
+        private static void ApplyCalendar(Transform kitchen)
+        {
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
+            var sheet = Load("calendar");
+            if (sheet == null) return;
+
+            var centre = KitchenArtLayout.ToWorld(_layout.calendarCentre);
+            PlaceAtScreenScale(Find(kitchen, "Calendar"), sheet, centre, "WallProps", 1);
+            Find(kitchen, "CalendarHeader").gameObject.SetActive(false);
+
+            var numberPos = centre + new Vector2(_layout.calendarNumberOffsetPx.x, -_layout.calendarNumberOffsetPx.y) / KitchenArtLayout.PixelsPerUnit;
+            var number = Find(kitchen, "CalendarDay");
+            number.localPosition = numberPos;
+            var text = number.GetComponent<TMPro.TextMeshPro>();
+            text.color = new Color(0.17f, 0.14f, 0.13f);
+            text.fontSize = 7.5f;
+            text.sortingOrder = 2;
+
+            var circle = Load("calendar_circle");
+            if (circle != null)
+            {
+                var ring = Find(kitchen, "CalendarCircle", false) ?? Empty(kitchen, "CalendarCircle", Vector2.zero);
+                if (ring.GetComponent<SpriteRenderer>() == null) ring.gameObject.AddComponent<SpriteRenderer>();
+                PlaceAtScreenScale(ring, circle, numberPos, "WallProps", 3);
+            }
+        }
+
+        /// <summary>
+        /// Ceiling lamp from the manifest frame: cord from the frame top (off the top of the screen), shade, bulb.
+        /// Light and a soft glow sit on the bulb; Day 1 swaps to the unlit drawing (KitchenDirector).
+        /// </summary>
+        private static void ApplyLamp(Transform kitchen)
+        {
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
+            var lit = Load("lamp");
+            if (lit == null) return;
+
+            // The cropped drawing starts at the frame top (the cord), so place its top at the frame top.
+            var frameTop = KitchenArtLayout.ToWorldY(_layout.lampFrameCentre.y - _layout.lampFrameSize.y * 0.5f);
+            var centre = new Vector2(KitchenArtLayout.ToWorldX(_layout.lampFrameCentre.x), frameTop - lit.bounds.extents.y);
+            var lamp = Find(kitchen, "CeilingLamp");
+            PlaceAtScreenScale(lamp, lit, centre, "WallProps", 2);
+
+            var bulb = new Vector2(centre.x, centre.y - lit.bounds.extents.y + 0.14f);
+            Find(kitchen, "LampLight").localPosition = bulb;
+
+            var glow = Find(kitchen, "LampGlow", false) ?? Empty(kitchen, "LampGlow", Vector2.zero);
+            if (glow.GetComponent<SpriteRenderer>() == null) glow.gameObject.AddComponent<SpriteRenderer>();
+            PlaceAtScreenScale(glow, AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png"), bulb, "WallProps", 0);
+            glow.localScale = new Vector3(1.6f, 1.6f, 1f);
+
+            var director = kitchen.GetComponent<KitchenDirector>();
+            Wire(director, "lampRenderer", lamp.GetComponent<SpriteRenderer>());
+            Wire(director, "lampOnSprite", lit);
+            Wire(director, "lampOffSprite", Load("lamp_off"));
+            Wire(director, "lampGlow", glow.GetComponent<SpriteRenderer>());
         }
 
         private static void FitMug(Transform target, Sprite sprite, Vector2 centre, float scale, string layer = "Wall", int order = 2)
