@@ -259,6 +259,7 @@ Before importing, re-check each page's licence. Add every used pack to `CREDITS.
 ## 11. Testing
 
 - **EditMode tests** (`Tests/EditMode`): WarmthMeter drain/restore/clamp; two-meter fail rule; Day 30 no-drain; every `LevelDefinition` has ≥1 step, non-empty story, valid day number; recipe matching for GuessHerDrink.
+- **PlayMode playtests** (`Tests/PlayMode`, 17): every day played end to end with a virtual mouse (`InputTestFixture`), the Day 20 fail/restart, clumsy-player cases and kitchen "life". Run all PlayMode tests after gameplay changes. Results and the bug/suggestion backlog live in `Docs/Playtest_Report.md`.
 - **Manual checklist before each upload:** full playthrough in the WebGL build (not only the Editor), audio starts after the first click, no console errors, 60 fps in Chrome and Firefox, every text box readable at 1280×720, fail-and-restart works on Day 20.
 
 ## 12. How to work with me (Claude Code)
