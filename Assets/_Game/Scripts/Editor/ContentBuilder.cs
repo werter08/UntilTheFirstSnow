@@ -88,6 +88,9 @@ namespace Courtyard.Editor
             });
         }
 
+        [MenuItem("Courtyard/Setup/Patch Levels (art manifest)")]
+        public static void PatchLevelsForArtManifest() => LevelDataBuilder.PatchArtManifest();
+
         /// <summary>Adds a slot for every SfxId the library doesn't have yet (existing clips are kept).</summary>
         [MenuItem("Courtyard/Setup/Sync Sfx Library")]
         public static void SyncSfxLibrary()

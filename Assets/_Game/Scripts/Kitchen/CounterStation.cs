@@ -32,6 +32,10 @@ namespace Courtyard.Kitchen
         [SerializeField] private SpriteRenderer[] spoonMarkers;
         [SerializeField] private GameObject mugLeafPrint;
         [SerializeField] private GameObject dripper;
+        [Tooltip("Mug art per MugStyle (Chipped, His, Hers). Empty = keep the placeholder.")]
+        [SerializeField] private Sprite[] mugSprites;
+        [Tooltip("Fill gauge next to the mug (side-view mugs don't show their contents); shown only while pouring.")]
+        [SerializeField] private GameObject mugGauge;
 
         [Tooltip("Steam above the mug while there is a hot drink in it.")]
         [SerializeField] private ParticleSystem mugSteam;
@@ -89,7 +93,11 @@ namespace Courtyard.Kitchen
             dripper.SetActive(props.grinder); // pour-over days are the days with real beans and a grinder
             milkStation.SetActive(props.milk);
             toppingShelf.SetActive(props.toppings);
-            mugLeafPrint.SetActive(props.brewInHerMug);
+            var style = (int)props.brewMug;
+            var hasArt = mugSprites != null && style < mugSprites.Length && mugSprites[style] != null;
+            if (hasArt) mugBody.sprite = mugSprites[style];
+            mugLeafPrint.SetActive(!hasArt && props.brewMug == MugStyle.Hers);
+            SetMugGauge(false);
 
             kettle.position = _kettleRest;
             kettleStream.enabled = false;
@@ -102,6 +110,14 @@ namespace Courtyard.Kitchen
             foreach (var jar in toppingJars) jar.SetPicked(false);
 
             SetAllInteractable(false);
+        }
+
+        public ParticleSystem MugSteam => mugSteam;
+
+        /// <summary>Shows the fill gauge (and its target line) while a pouring step runs.</summary>
+        public void SetMugGauge(bool visible)
+        {
+            if (mugGauge != null) mugGauge.SetActive(visible);
         }
 
         public void SetAllInteractable(bool value)

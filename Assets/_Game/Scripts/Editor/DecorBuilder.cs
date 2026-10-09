@@ -19,6 +19,8 @@ namespace Courtyard.Editor
         private const string WindowFolder = "Assets/_Game/Art/Sprites/Window/";
         private const string KitchenFolder = "Assets/_Game/Art/Sprites/Kitchen/";
         private const string KettleFolder = "Assets/_Game/Art/Sprites/Kettle/";
+        private const string PropsFolder = "Assets/_Game/Art/Props/";
+        private const string DrinksFolder = "Assets/_Game/Art/Drinks/";
 
         // Kettle parts, offsets from the standing kettle's centre (px at 100 px/unit), measured by matching the parts
         // against the assembled drawing in Kettle_Sheet_Source.png.
@@ -62,6 +64,8 @@ namespace Courtyard.Editor
             ConfigureImports(WindowFolder);
             ConfigureImports(KitchenFolder);
             ConfigureImports(KettleFolder);
+            ConfigureImports(PropsFolder);
+            ConfigureImports(DrinksFolder);
             SetPivot(KettleFolder + "Kettle_HandGrey.png", PourSpoutPivot);
             SetPivot(KettleFolder + "Kettle_HandBeige.png", PourSpoutPivot);
             EditScene(BuildScript.Scenes[1], ApplyToKitchen);
@@ -76,6 +80,7 @@ namespace Courtyard.Editor
             ApplyTable(kitchen);
             ApplyFridge(kitchen);
             ApplyKettle(kitchen);
+            ApplyMugs(kitchen);
 
             // Ceiling: hanging bulb; the lamp light sits on the bulb.
             if (Fit(kitchen, "CeilingLamp", "Oddblot_light", new Vector2(0f, 5.05f), 1.6f, "Wall", 13))
@@ -317,6 +322,90 @@ namespace Courtyard.Editor
             return component != null ? component : target.gameObject.AddComponent<T>();
         }
 
+        /// <summary>
+        /// Mug art (side view, 1 px = 0.01 unit): the counter mug swaps per day (CounterStation.mugSprites); its fill
+        /// becomes a thin gauge beside it, since a side-view mug can't show its contents. Spare mugs on the wall rack;
+        /// Day 30's two mugs on the window sill.
+        /// </summary>
+        private static void ApplyMugs(Transform kitchen)
+        {
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
+            var chipped = Load("mug_chipped");
+            if (chipped == null) return;
+
+            var tools = Find(kitchen, "Counter Tools");
+            var counter = tools.GetComponent<CounterStation>();
+            var mug = Find(tools, "Mug");
+            var mugRenderer = mug.GetComponent<SpriteRenderer>();
+            mugRenderer.sprite = chipped;
+            mugRenderer.drawMode = SpriteDrawMode.Simple;
+            mugRenderer.color = Color.white;
+            mug.localScale = Vector3.one;
+            var collider = mug.GetComponent<BoxCollider2D>();
+            collider.size = chipped.bounds.size;
+            collider.offset = chipped.bounds.center;
+            Find(mug, "LeafPrint").gameObject.SetActive(false);
+            Find(mug, "Foam").GetComponent<SpriteRenderer>().enabled = false; // foam stays as state, not drawn
+            Edit(counter, so =>
+            {
+                var array = Property(so, "mugSprites");
+                array.arraySize = 3;
+                array.GetArrayElementAtIndex((int)MugStyle.Chipped).objectReferenceValue = chipped;
+                array.GetArrayElementAtIndex((int)MugStyle.His).objectReferenceValue = Load("mug_his");
+                array.GetArrayElementAtIndex((int)MugStyle.Hers).objectReferenceValue = Load("mug_hers");
+            });
+
+            // Fill gauge beside the mug (shown only while pouring).
+            var halfWidth = chipped.bounds.extents.x;
+            var gauge = Child(mug, "Gauge");
+            gauge.localPosition = new Vector3(halfWidth + 0.25f, -0.55f, 0f);
+            var back = SpriteChild(gauge, "Back");
+            var backRenderer = back.GetComponent<SpriteRenderer>();
+            backRenderer.sprite = Square;
+            backRenderer.drawMode = SpriteDrawMode.Sliced;
+            backRenderer.size = new Vector2(0.22f, 1.1f);
+            backRenderer.color = new Color(0.15f, 0.13f, 0.12f, 0.75f);
+            back.localPosition = new Vector3(0f, 0.55f, 0f);
+            SetLayer(back, "Props", 1);
+            var fill = Find(mug, "Fill");
+            fill.SetParent(gauge, false);
+            fill.localPosition = Vector3.zero;
+            var bar = fill.GetComponent<SpriteBar>();
+            Wire(bar, "width", 0.16f);
+            SetLayer(Find(fill, "Liquid"), "Props", 2);
+            var line = Find(fill, "FillLine").GetComponent<SpriteRenderer>();
+            line.size = new Vector2(0.32f, 0.05f);
+            Wire(counter, "mugGauge", gauge.gameObject);
+            for (var i = 0; i < 3; i++)
+                Find(mug, $"SpoonMarker{i}").localPosition = new Vector3(halfWidth + 0.6f, -0.45f + 0.28f * i, 0f);
+
+            // Spare mugs on the wall rack.
+            FitMug(Find(kitchen, "ChippedMug"), Load("mug_decoy_2"), new Vector2(4.9f, 0.99f), 0.4f);
+            FitMug(Find(kitchen, "HerMug"), Load("mug_hers"), new Vector2(5.75f, 0.99f), 0.4f);
+            var rackLeaf = Find(kitchen, "HerMug").Find("LeafPrint");
+            if (rackLeaf != null) rackLeaf.gameObject.SetActive(false);
+
+            // Day 30: his and her mugs side by side on the sill (Figma x 900 / 1020, standing on y 600).
+            var sill = Child(kitchen, "SillMugs");
+            sill.localPosition = Vector3.zero;
+            FitMug(SpriteChild(sill, "SillMugHis"), Load("mug_his"), new Vector2(-0.6f, -0.54f + chipped.bounds.extents.y), 1f, "Wall", 12);
+            FitMug(SpriteChild(sill, "SillMugHers"), Load("mug_hers"), new Vector2(0.6f, -0.54f + chipped.bounds.extents.y), 1f, "Wall", 12);
+            Wire(kitchen.GetComponent<KitchenDirector>(), "sillMugs", sill.gameObject);
+            Find(kitchen, "Plant").localPosition += new Vector3(2.15f - Find(kitchen, "Plant").GetComponent<SpriteRenderer>().bounds.center.x, 0f, 0f);
+        }
+
+        private static void FitMug(Transform target, Sprite sprite, Vector2 centre, float scale, string layer = "Wall", int order = 2)
+        {
+            if (sprite == null) return;
+            var renderer = target.GetComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.color = Color.white;
+            SetLayer(target, layer, order);
+            target.localScale = new Vector3(scale, scale, 1f);
+            target.localPosition = centre - (Vector2)sprite.bounds.center * scale;
+        }
+
         private static Transform Child(Transform parent, string childName)
         {
             var child = parent.Find(childName);
@@ -490,7 +579,8 @@ namespace Courtyard.Editor
                 var settings = new TextureImporterSettings();
                 importer.ReadTextureSettings(settings);
                 var changed = importer.textureType != TextureImporterType.Sprite || settings.spriteMeshType != SpriteMeshType.Tight
-                              || importer.maxTextureSize != 1024 || importer.mipmapEnabled;
+                              || importer.maxTextureSize != 2048 || importer.mipmapEnabled || importer.filterMode != FilterMode.Bilinear
+                              || importer.textureCompression != TextureImporterCompression.CompressedHQ;
                 if (!changed) continue;
 
                 importer.textureType = TextureImporterType.Sprite;
@@ -498,7 +588,9 @@ namespace Courtyard.Editor
                 importer.spritePixelsPerUnit = 100f;
                 importer.alphaIsTransparency = true;
                 importer.mipmapEnabled = false;
-                importer.maxTextureSize = 1024;
+                importer.maxTextureSize = 2048; // art manifest: PPU 100, bilinear, high-quality compression, max 2048
+                importer.filterMode = FilterMode.Bilinear;
+                importer.textureCompression = TextureImporterCompression.CompressedHQ;
                 importer.ReadTextureSettings(settings);
                 settings.spriteMeshType = SpriteMeshType.Tight;
                 importer.SetTextureSettings(settings);

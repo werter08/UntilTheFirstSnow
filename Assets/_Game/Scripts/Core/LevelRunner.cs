@@ -132,6 +132,8 @@ namespace Courtyard.Core
             var finalQuality = qualities.Count > 0 ? qualities.Average() : 1f;
             _warmth.Restore(WarmthTarget.Both, finalQuality * _level.DrinkWarmthBonus);
             var lastGood = qualities.Count == 0 || IsGood(qualities[qualities.Count - 1]);
+            var drinks = _level.DrinkResults.Where(d => d != null && d.icon != null && d.Shows(lastGood)).Select(d => d.icon).ToList();
+            yield return fx.ShowDrinks(drinks, counter.Mug.transform.position + Vector3.up * 1.4f, counter.MugSteam);
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
 
             yield return fader.FadeOut(endColor, fadeDuration);

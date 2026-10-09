@@ -24,6 +24,14 @@ namespace Courtyard.Kitchen
         [SerializeField] private float popupRise = 0.9f;
         [SerializeField, Min(0.01f)] private float popupSeconds = 1f;
 
+        [Header("Served drink")]
+        [SerializeField] private string drinkSortingLayer = "Foreground";
+        [SerializeField] private int drinkSortingOrder = 70;
+        [SerializeField, Min(0.1f)] private float drinkSpacing = 1.3f;
+        [SerializeField, Min(0f)] private float drinkPopSeconds = 0.35f;
+        [SerializeField, Min(0f)] private float drinkHoldSeconds = 1.5f;
+        [SerializeField, Min(0f)] private float drinkFadeSeconds = 0.4f;
+
         private readonly Dictionary<Transform, (Coroutine routine, Vector3 baseScale)> _punches = new();
 
         private void Awake() => popupTemplate.gameObject.SetActive(false);
@@ -49,6 +57,42 @@ namespace Courtyard.Kitchen
             if (quality < perfectThreshold) return;
             Popup(perfectText, worldPosition);
             AudioManager.Play(SfxId.Perfect);
+        }
+
+        /// <summary>
+        /// The served drink: icons pop up (scale 0 → 1 with a little overshoot) side by side above
+        /// <paramref name="worldPosition"/>, hold, then fade out. Optional steam puff from <paramref name="steam"/>.
+        /// </summary>
+        public IEnumerator ShowDrinks(IReadOnlyList<Sprite> icons, Vector3 worldPosition, ParticleSystem steam = null)
+        {
+            if (icons == null || icons.Count == 0) yield break;
+
+            var renderers = new List<SpriteRenderer>();
+            for (var i = 0; i < icons.Count; i++)
+            {
+                var go = new GameObject("Drink_" + icons[i].name);
+                go.transform.position = worldPosition + Vector3.right * (i - (icons.Count - 1) * 0.5f) * drinkSpacing;
+                go.transform.localScale = Vector3.zero;
+                var renderer = go.AddComponent<SpriteRenderer>();
+                renderer.sprite = icons[i];
+                renderer.sortingLayerName = drinkSortingLayer;
+                renderer.sortingOrder = drinkSortingOrder;
+                renderers.Add(renderer);
+            }
+
+            if (steam != null) steam.Emit(12);
+            AudioManager.Play(SfxId.MugClink);
+            yield return Tweens.RunLinear(drinkPopSeconds, t =>
+            {
+                var overshoot = 1f + Mathf.Sin(t * Mathf.PI) * 0.15f;
+                foreach (var r in renderers) r.transform.localScale = Vector3.one * (t * overshoot);
+            });
+            yield return new WaitForSeconds(drinkHoldSeconds);
+            yield return Tweens.Run(drinkFadeSeconds, t =>
+            {
+                foreach (var r in renderers) r.color = new Color(1f, 1f, 1f, 1f - t);
+            });
+            foreach (var r in renderers) Destroy(r.gameObject);
         }
 
         public void Popup(string text, Vector3 worldPosition)

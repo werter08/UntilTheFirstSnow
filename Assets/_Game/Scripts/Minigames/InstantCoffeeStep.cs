@@ -62,6 +62,7 @@ namespace Courtyard.Minigames
             _counter.KettleTarget.Interactable = true;
 
             var fill = _counter.MugFill;
+            _counter.SetMugGauge(true);
             var line = _counter.MugFillLine;
             line.gameObject.SetActive(true);
             line.localPosition = new Vector3(line.localPosition.x, targetFill * fill.MaxHeight, 0f);
@@ -84,6 +85,7 @@ namespace Courtyard.Minigames
             _counter.KettleTarget.Released -= OnKettleReleased;
             _counter.KettleBody.color = kettleIdleColor;
             _counter.MugFillLine.gameObject.SetActive(false);
+            _counter.SetMugGauge(false);
             _counter.KettleView.SetPouring(false);
             _counter.Kettle.position = _counter.KettleRest;
             AudioManager.StopLoop(SfxId.Pour);

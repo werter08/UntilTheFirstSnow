@@ -41,6 +41,10 @@ namespace Courtyard.Core
         [SerializeField, Range(0f, 1f)] private float goodResultThreshold = 0.7f;
         [SerializeField, TextArea] private string failText = "Too cold… let's try again.";
 
+        [Header("Served drink")]
+        [Tooltip("Icons that pop up above the mug when the drink is served.")]
+        [SerializeField] private List<DrinkResult> drinkResults = new();
+
         [Header("Audio")]
         [SerializeField] private AudioClip ambience;
 
@@ -67,6 +71,7 @@ namespace Courtyard.Core
         public float GoodResultThreshold => goodResultThreshold;
         public string FailText => failText;
         public AudioClip Ambience => ambience;
+        public IReadOnlyList<DrinkResult> DrinkResults => drinkResults;
         public AudioClip OutroClip => outroClip;
         public float OutroHoldSeconds => outroHoldSeconds;
 

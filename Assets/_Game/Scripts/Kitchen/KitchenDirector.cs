@@ -59,6 +59,8 @@ namespace Courtyard.Kitchen
             new(0.55f, 0.5f, 0.3f), new(0.5f, 0.62f, 0.32f), new(0.35f, 0.65f, 0.35f), new(0.95f, 0.55f, 0.65f),
         };
         [SerializeField] private GameObject[] fridgeNotes;
+        [Tooltip("Day 30: his and her mugs side by side on the window sill.")]
+        [SerializeField] private GameObject sillMugs;
 
         private LevelDefinition _level;
         private MiraWindowState _windowState;
@@ -97,6 +99,7 @@ namespace Courtyard.Kitchen
             plant.color = PickColor(plantStageColors, (int)props.plantStage);
             for (var i = 0; i < fridgeNotes.Length; i++)
                 fridgeNotes[i].SetActive(i < props.fridgeNotes);
+            if (sillMugs != null) sillMugs.SetActive(props.mugsOnSill);
 
             ApplyWeather(level.Weather);
             SetMiraAtDoor(false);

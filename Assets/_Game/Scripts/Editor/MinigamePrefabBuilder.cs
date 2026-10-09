@@ -40,9 +40,10 @@ namespace Courtyard.Editor
         /// In-place update of the kettle steps after the kettle art arrived (no gauge, untinted kettle), keeping the
         /// prefabs' file IDs so level assets stay linked. Safe to run more than once.
         /// </summary>
-        [UnityEditor.MenuItem("Courtyard/Setup/Patch Kettle Prefabs")]
+        [UnityEditor.MenuItem("Courtyard/Setup/Patch Art Prefabs")]
         public static void PatchKettlePrefabs()
         {
+            PatchChooseMug();
             Patch(Folder + KettleBoil + ".prefab", root =>
             {
                 var thermometer = root.transform.Find("Thermometer");
@@ -57,6 +58,36 @@ namespace Courtyard.Editor
                     so.FindProperty("kettleIdleColor").colorValue = Color.white;
                     so.FindProperty("kettleReadyColor").colorValue = Color.white;
                 });
+            });
+        }
+
+        /// <summary>Day 20 ChooseMug with the drawn mugs: two decoys and hers (the maple leaf, seen on Day 10).</summary>
+        private static void PatchChooseMug()
+        {
+            Sprite Load(string n) => UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/Props/{n}.png");
+            var sprites = new[] { Load("mug_decoy_1"), Load("mug_decoy_2"), Load("mug_hers") };
+            if (sprites.Any(s => s == null)) return;
+
+            const float scale = 0.8f;
+            Patch(Folder + ChooseMug + ".prefab", root =>
+            {
+                for (var i = 0; i < sprites.Length; i++)
+                {
+                    var mug = root.transform.Find($"Mug{i}");
+                    var renderer = mug.GetComponent<SpriteRenderer>();
+                    renderer.sprite = sprites[i];
+                    renderer.drawMode = SpriteDrawMode.Simple;
+                    renderer.color = Color.white;
+                    mug.localScale = new Vector3(scale, scale, 1f);
+                    mug.localPosition = new Vector3(CounterLayout.ServeX - 1.65f + 1.3f * i, -2.15f, 0f);
+                    var collider = mug.GetComponent<BoxCollider2D>();
+                    collider.size = sprites[i].bounds.size;
+                    collider.offset = sprites[i].bounds.center;
+                    var leaf = mug.Find("LeafPrint");
+                    if (leaf != null) Object.DestroyImmediate(leaf.gameObject);
+                }
+
+                Wire(root.GetComponent<ChooseMugStep>(), "herMugIndex", 2);
             });
         }
 

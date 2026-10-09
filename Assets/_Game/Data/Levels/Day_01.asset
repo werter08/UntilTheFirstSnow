@@ -32,7 +32,8 @@ MonoBehaviour:
     cinnamon: 0
     herMug: 0
     toppings: 0
-    brewInHerMug: 0
+    brewMug: 0
+    mugsOnSill: 0
     scarf: 0
     blanket: 0
     plantStage: 0
@@ -68,6 +69,9 @@ MonoBehaviour:
   drinkWarmthBonus: 25
   goodResultThreshold: 0.7
   failText: "Too cold\u2026 let's try again."
+  drinkResults:
+  - icon: {fileID: 21300000, guid: 3b9bb6d5ab51344f0bd121511651a0c2, type: 3}
+    condition: 0
   ambience: {fileID: 0}
   outroClip: {fileID: 0}
   outroHoldSeconds: 0

@@ -52,6 +52,7 @@ namespace Courtyard.Minigames
             pourZone.Released += OnReleased;
 
             _counter.MugFill.Fill.color = coffeeColor;
+            _counter.SetMugGauge(true);
             var line = _counter.MugFillLine;
             line.gameObject.SetActive(true);
             line.localPosition = new Vector3(line.localPosition.x, targetFill * _counter.MugFill.MaxHeight, 0f);
@@ -73,6 +74,7 @@ namespace Courtyard.Minigames
             if (_counter == null) return;
             ReturnKettle();
             _counter.MugFillLine.gameObject.SetActive(false);
+            _counter.SetMugGauge(false);
         }
 
         private void OnPressed()

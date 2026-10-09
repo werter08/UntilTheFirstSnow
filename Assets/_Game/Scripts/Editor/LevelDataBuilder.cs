@@ -44,6 +44,7 @@ namespace Courtyard.Editor
             public bool TwoMeters;
             public float Drain;
             public float OutroSeconds;
+            public (string icon, BeatCondition condition)[] Drinks = System.Array.Empty<(string, BeatCondition)>();
         }
 
         public static Recipe EnsureMiraUsual() =>
@@ -101,6 +102,43 @@ namespace Courtyard.Editor
             so.FindProperty("warmthPerStep").floatValue = 15f;
             so.FindProperty("drinkWarmthBonus").floatValue = 25f;
             so.FindProperty("outroHoldSeconds").floatValue = spec.OutroSeconds;
+            WriteDrinks(so.FindProperty("drinkResults"), spec.Drinks);
+        }
+
+        /// <summary>
+        /// Applies the art manifest's per-day mapping (mug, sill mugs, sleeve, served drinks) to existing level assets
+        /// without touching tuning or story.
+        /// </summary>
+        public static void PatchArtManifest()
+        {
+            foreach (var spec in Specs())
+            {
+                var level = AssetDatabase.LoadAssetAtPath<LevelDefinition>($"{LevelsFolder}Day_{spec.Day:00}.asset");
+                if (level == null) continue;
+
+                Edit(level, so =>
+                {
+                    var props = so.FindProperty("props");
+                    props.FindPropertyRelative("brewMug").enumValueIndex = (int)spec.Props.brewMug;
+                    props.FindPropertyRelative("mugsOnSill").boolValue = spec.Props.mugsOnSill;
+                    props.FindPropertyRelative("sweater").enumValueIndex = (int)spec.Props.sweater;
+                    WriteDrinks(so.FindProperty("drinkResults"), spec.Drinks);
+                });
+            }
+
+            AssetDatabase.SaveAssets();
+        }
+
+        private static void WriteDrinks(SerializedProperty list, (string icon, BeatCondition condition)[] drinks)
+        {
+            list.arraySize = drinks.Length;
+            for (var i = 0; i < drinks.Length; i++)
+            {
+                var element = list.GetArrayElementAtIndex(i);
+                element.FindPropertyRelative("icon").objectReferenceValue =
+                    AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/Drinks/{drinks[i].icon}.png");
+                element.FindPropertyRelative("condition").enumValueIndex = (int)drinks[i].condition;
+            }
         }
 
         /// <summary>Day_01 was created in M1 before palettes and props existed; fill those in once if still at defaults.</summary>
@@ -133,7 +171,8 @@ namespace Courtyard.Editor
             props.FindPropertyRelative("cinnamon").boolValue = value.cinnamon;
             props.FindPropertyRelative("herMug").boolValue = value.herMug;
             props.FindPropertyRelative("toppings").boolValue = value.toppings;
-            props.FindPropertyRelative("brewInHerMug").boolValue = value.brewInHerMug;
+            props.FindPropertyRelative("brewMug").enumValueIndex = (int)value.brewMug;
+            props.FindPropertyRelative("mugsOnSill").boolValue = value.mugsOnSill;
             props.FindPropertyRelative("scarf").boolValue = value.scarf;
             props.FindPropertyRelative("blanket").boolValue = value.blanket;
             props.FindPropertyRelative("plantStage").enumValueIndex = (int)value.plantStage;
@@ -195,6 +234,7 @@ namespace Courtyard.Editor
                     End(thought, "…Someone across the courtyard is already awake."),
                 },
                 Drain = 0.8f,
+                Drinks = new[] { ("drink_instant", BeatCondition.Always) },
             };
 
             yield return new Spec
@@ -202,7 +242,7 @@ namespace Courtyard.Editor
                 Day = 5, Clock = "19:30", Time = TimeOfDay.Evening, Weather = Weather.HeavyRain, Tree = TreeStage.Orange,
                 Window = MiraWindowState.LitWarmSilhouette,
                 Palette = Palette(new Color(0.7f, 0.68f, 0.75f), 0.9f, new Color(1f, 0.85f, 0.65f), 0.6f),
-                Props = new KitchenProps { beans = true, grinder = true, plantStage = PlantStage.Wilted },
+                Props = new KitchenProps { beans = true, grinder = true, brewMug = MugStyle.His, plantStage = PlantStage.Wilted },
                 Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.WaveBack },
                 Beats = new[]
                 {
@@ -211,6 +251,7 @@ namespace Courtyard.Editor
                     End(thought, "She waved. I waved back with my mug. Smooth."),
                 },
                 Drain = 1f,
+                Drinks = new[] { ("drink_pourover", BeatCondition.Always) },
             };
 
             yield return new Spec
@@ -218,7 +259,7 @@ namespace Courtyard.Editor
                 Day = 10, Clock = "09:15", Time = TimeOfDay.Morning, Weather = Weather.Leaves, Tree = TreeStage.Golden,
                 Window = MiraWindowState.LitWarm,
                 Palette = Palette(new Color(1f, 0.92f, 0.78f), 1.1f, new Color(1f, 0.82f, 0.55f), 0.5f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewInHerMug = true, plantStage = PlantStage.Recovering, fridgeNotes = 1, sweater = Sweater.Beige },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Hers, plantStage = PlantStage.Recovering, fridgeNotes = 1, sweater = Sweater.Grey },
                 // MiraVisit (knock at the door) sits between PourOver and SteamMilk so her lines follow the brief's order.
                 Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.MiraVisit, P.SteamMilk, P.GuessHerDrink },
                 Beats = new[]
@@ -231,6 +272,7 @@ namespace Courtyard.Editor
                     End(thought, "I think I'm smiling. Weird feeling."),
                 },
                 Drain = 1.2f,
+                Drinks = new[] { ("drink_latte", BeatCondition.Always), ("drink_cinnamon", BeatCondition.GoodResult) },
             };
 
             yield return new Spec
@@ -238,7 +280,7 @@ namespace Courtyard.Editor
                 Day = 20, Clock = "23:40", Time = TimeOfDay.Night, Weather = Weather.Wind, Tree = TreeStage.HalfBare,
                 Window = MiraWindowState.NoteOnGlass,
                 Palette = Palette(new Color(0.45f, 0.5f, 0.75f), 0.7f, new Color(1f, 0.75f, 0.45f), 1f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, brewMug = MugStyle.His, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
                 Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.SteamMilk, P.ChooseMug },
                 Beats = new[]
                 {
@@ -250,6 +292,7 @@ namespace Courtyard.Editor
                 },
                 TwoMeters = true,
                 Drain = 1.4f,
+                Drinks = new[] { ("drink_latte", BeatCondition.Always), ("drink_latte", BeatCondition.Always) },
                 OutroSeconds = 3f, // fade to black, footsteps across the courtyard with two mugs
             };
 
@@ -258,7 +301,7 @@ namespace Courtyard.Editor
                 Day = 30, Clock = "17:00", Time = TimeOfDay.Evening, Weather = Weather.Snow, Tree = TreeStage.BareSnow,
                 Window = MiraWindowState.Empty,
                 Palette = Palette(new Color(1f, 0.85f, 0.7f), 0.95f, new Color(1f, 0.72f, 0.42f), 1.1f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewInHerMug = true, herMug = true, scarf = true, blanket = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Hers, mugsOnSill = true, herMug = true, scarf = true, blanket = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
                 Steps = new[] { P.KettleBoil, P.SteamMilk, P.HerDrinkFromMemory },
                 Beats = new[]
                 {
@@ -268,6 +311,7 @@ namespace Courtyard.Editor
                     End(thought, "For the first time in a long while — I'm warm."),
                 },
                 Drain = 0f,
+                Drinks = new[] { ("drink_latte_heart", BeatCondition.Always) },
             };
         }
     }

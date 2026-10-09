@@ -32,11 +32,12 @@ MonoBehaviour:
     cinnamon: 1
     herMug: 0
     toppings: 1
-    brewInHerMug: 1
+    brewMug: 2
+    mugsOnSill: 0
     scarf: 0
     blanket: 0
     plantStage: 1
-    sweater: 1
+    sweater: 0
     fridgeNotes: 1
   steps:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
@@ -90,6 +91,11 @@ MonoBehaviour:
   drinkWarmthBonus: 25
   goodResultThreshold: 0.7
   failText: "Too cold\u2026 let's try again."
+  drinkResults:
+  - icon: {fileID: 21300000, guid: 722a94e002662491386aea713d5f2d88, type: 3}
+    condition: 0
+  - icon: {fileID: 21300000, guid: 7eba76af1516b448584c74c2eab16f9f, type: 3}
+    condition: 1
   ambience: {fileID: 0}
   outroClip: {fileID: 0}
   outroHoldSeconds: 0
