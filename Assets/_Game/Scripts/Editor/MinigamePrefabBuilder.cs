@@ -108,6 +108,16 @@ namespace Courtyard.Editor
             foreach (var (name, zone) in zones)
                 Patch(Folder + name + ".prefab", root => WireEnum(root.GetComponent<MinigameStep>(), "zone", zone));
 
+            // Grind meter clear of the drawn crank (it reaches ~1.4 units from the axle).
+            Patch(Folder + GrindBeans + ".prefab", root =>
+            {
+                var meter = root.transform.Find("GrindMeter");
+                var back = root.transform.Find("GrindMeterBack");
+                var x = CounterLayout.GrinderX + 1.95f;
+                meter.localPosition = new Vector3(x, meter.localPosition.y, 0f);
+                back.localPosition = new Vector3(x, back.localPosition.y, 0f);
+            });
+
             // Milk thermometer on the left of the jug, clear of the topping jars.
             Patch(Folder + SteamMilk + ".prefab", root =>
             {

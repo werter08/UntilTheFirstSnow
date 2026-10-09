@@ -87,6 +87,7 @@ namespace Courtyard.Editor
             ApplyFridge(kitchen);
             ApplyKettle(kitchen);
             ApplyMugs(kitchen);
+            ApplyGrinder(kitchen);
             ArtManifestBuilder.Apply(scene, kitchen, _layout); // manifest zones, layers and file slots win
             SleeveBuilder.WireScene(scene, _sleeves);
 
@@ -414,6 +415,44 @@ namespace Courtyard.Editor
             FitMug(SpriteChild(sill, "SillMugHers"), Load("mug_hers"), new Vector2(0.6f, -0.54f + chipped.bounds.extents.y), 1f, "Wall", 12);
             Wire(kitchen.GetComponent<KitchenDirector>(), "sillMugs", sill.gameObject);
             Find(kitchen, "Plant").localPosition += new Vector3(2.15f - Find(kitchen, "Plant").GetComponent<SpriteRenderer>().bounds.center.x, 0f, 0f);
+        }
+
+        // Grinder sheet measurements (px at 100 px/unit): the crank's axle (knob) relative to the assembled drawing's
+        // centre, the handle's pivot (round end) and its length to the grip.
+        private static readonly Vector2 GrinderKnobPx = new(-1f, 98f);
+        private static readonly Vector2 GrinderHandlePivot = new(0.101f, 0.511f);
+        private const float GrinderHandleReach = 1.285f;
+
+        /// <summary>
+        /// Hand grinder: the assembled drawing stands on the counter; the handle turns around the knob on top, and the
+        /// drag target sits on the handle's grip. Authored at the grinder zone like the placeholder (the manifest pass
+        /// moves the whole group to the zone).
+        /// </summary>
+        private static void ApplyGrinder(Transform kitchen)
+        {
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
+            var assembled = Load("grinder");
+            var handleSprite = Load("grinder_handle");
+            if (assembled == null || handleSprite == null) return;
+            SetPivot(PropsFolder + "grinder_handle.png", GrinderHandlePivot);
+            handleSprite = Load("grinder_handle");
+
+            var grinder = Find(Find(kitchen, "Counter Tools"), "Grinder");
+            var centre = new Vector2(CounterLayout.GrinderX, CounterLayout.Top + assembled.bounds.extents.y);
+            var body = Find(grinder, "Body");
+            PlaceAtScreenScale(body, assembled, centre, "Props", 1);
+            Find(grinder, "Hopper").gameObject.SetActive(false);
+
+            var arm = Find(grinder, "Arm");
+            arm.localPosition = centre + GrinderKnobPx / 100f;
+            var bar = Find(arm, "ArmBar");
+            PlaceAtScreenScale(bar, handleSprite, Vector2.zero, "Props", 3);
+
+            // The grip is drawn on the handle; the knob object stays as the invisible drag target at the grip.
+            var knob = Find(arm, "Knob");
+            knob.localPosition = new Vector3(GrinderHandleReach, 0f, 0f);
+            knob.GetComponent<SpriteRenderer>().enabled = false;
+            knob.GetComponent<BoxCollider2D>().size = new Vector2(0.7f, 0.7f);
         }
 
         private static void FitMug(Transform target, Sprite sprite, Vector2 centre, float scale, string layer = "Wall", int order = 2)
