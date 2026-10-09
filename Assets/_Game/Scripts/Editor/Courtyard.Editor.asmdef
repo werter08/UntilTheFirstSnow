@@ -1,0 +1,17 @@
+{
+    "name": "Courtyard.Editor",
+    "rootNamespace": "Courtyard.Editor",
+    "references": [
+        "Courtyard",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "autoReferenced": false,
+    "noEngineReferences": false
+}
