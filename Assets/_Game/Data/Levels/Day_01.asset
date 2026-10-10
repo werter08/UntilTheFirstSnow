@@ -79,7 +79,9 @@ MonoBehaviour:
   drinkResults:
   - icon: {fileID: 21300000, guid: 91d627434fcdd4e6abf3907d0bb14040, type: 3}
     condition: 0
-  ambience: {fileID: 0}
+  music: {fileID: 0}
+  ambience: {fileID: 8300000, guid: db14c8867a0f84059879f09eef722958, type: 3}
+  ambienceVolume: 1
   outroClip: {fileID: 0}
   outroHoldSeconds: 0
   outroWalkers: []

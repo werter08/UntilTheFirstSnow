@@ -14,4 +14,41 @@ Hands (all poses, grey and beige sweaters), window frame, curtains, curtain rod,
 
 ## Audio
 
-_To be added when audio packs are imported._
+Edited with ffmpeg (cuts, fades, seamless loops; see `Tools/process_audio.sh`). No generative AI.
+
+### Music
+
+| File | Track | Author | Source | Licence |
+|---|---|---|---|---|
+| music_day05 | The Golden Ratio | Purrple Cat | [Just Relax](https://purrplecat.itch.io/just-relax) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| music_day10 | Just Relax | Purrple Cat | [Just Relax](https://purrplecat.itch.io/just-relax) | CC BY-SA 4.0 |
+| music_day20 | Getting a Haircut | Purrple Cat | [Just Relax](https://purrplecat.itch.io/just-relax) | CC BY-SA 4.0 |
+| music_day30 (also Ending) | Road Trip | Purrple Cat | [Just Relax](https://purrplecat.itch.io/just-relax) | CC BY-SA 4.0 |
+
+### Ambience and sound effects
+
+> **TODO before submitting:** author, source link and licence for every row below. The files carry no author
+> metadata, so these must be filled in by whoever downloaded them.
+
+| File (in game) | Used for | Author | Source | Licence |
+|---|---|---|---|---|
+| amb_rain_light | Day 1 rain | TODO | TODO | TODO |
+| amb_rain_heavy | Day 5 rain | TODO | TODO | TODO |
+| amb_birds | Day 10 morning | TODO | TODO | TODO |
+| amb_wind | Day 20 wind, Day 30 (quiet), the cold swell on fail | TODO | TODO | TODO |
+| amb_room_fridge | Room tone, every day | TODO | TODO | TODO |
+| sfx_clock_tick (from amb_room_clock_ticking) | Wall clock (Day 1) | TODO | TODO | TODO |
+| sfx_kettle_switch | Kettle on | TODO | TODO | TODO |
+| sfx_kettle_boil_loop, sfx_kettle_done (cut from one file) | Kettle boiling / switch-off click | TODO | TODO | TODO |
+| sfx_pour | Pouring water | TODO | TODO | TODO |
+| sfx_spoon_scoop | Spoon in the jar, spice shake | TODO | TODO | TODO |
+| sfx_spoon_tink | Spoon on the mug | TODO | TODO | TODO |
+| sfx_grinder_loop | Hand grinder | TODO | TODO | TODO |
+| sfx_frother_loop | Milk frother | TODO | TODO | TODO |
+| sfx_froth_squeal | Overheated milk | TODO | TODO | TODO |
+| sfx_mug_down | Serving, mugs | TODO | TODO | TODO |
+| sfx_perfect | "Perfect!" | TODO | TODO | TODO |
+| sfx_door_knock | Mira knocks (Day 10) | TODO | TODO | TODO |
+| sfx_paper | Notes, calendar flip | TODO | TODO | TODO |
+| sfx_footsteps_leaves | Day 20 walk across the courtyard | TODO | TODO | TODO |
+| sfx_ui_click | Title screen | TODO | TODO | TODO |

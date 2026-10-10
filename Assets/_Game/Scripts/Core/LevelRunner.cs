@@ -100,7 +100,8 @@ namespace Courtyard.Core
         private IEnumerator Run()
         {
             hint.Hide();
-            AudioManager.SetAmbience(_level.Ambience);
+            AudioManager.SetMusic(_level.Music);
+            AudioManager.SetAmbience(_level.Ambience, _level.AmbienceVolume);
             yield return dayCard.Show(_level);
             yield return fader.FadeIn(fadeDuration);
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelStart));
@@ -230,7 +231,7 @@ namespace Courtyard.Core
         /// <summary>A badly made drink: frost on the mug, a shiver, and the meters drop.</summary>
         private IEnumerator Chill()
         {
-            AudioManager.Play(SfxId.Fail);
+            AudioManager.ColdSwell(1.2f, 0.5f); // a gust of cold
             yield return fx.Chill(counter.Mug.transform.position, worldCamera.transform);
         }
 
@@ -258,7 +259,7 @@ namespace Courtyard.Core
             counter.SetAllInteractable(false);
             hint.Hide();
             AudioManager.StopAllLoops();
-            AudioManager.Play(SfxId.Fail);
+            AudioManager.ColdSwell(); // the wind swells and the music closes in
 
             yield return fader.FadeOut(colour, fadeDuration, message);
             yield return new WaitForSeconds(failHoldSeconds);

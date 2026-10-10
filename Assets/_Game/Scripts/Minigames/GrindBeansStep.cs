@@ -24,10 +24,19 @@ namespace Courtyard.Minigames
         [Tooltip("Distance from the target at which quality reaches 0.")]
         [SerializeField, Min(0.01f)] private float qualityFalloff = 0.35f;
 
+        [Header("Sound follows the crank")]
+        [Tooltip("Crank speed (degrees/s) that sounds like full-speed grinding.")]
+        [SerializeField, Min(1f)] private float fullSpeedDegrees = 720f;
+        [Tooltip("Seconds without crank movement before the grinding sound fades out.")]
+        [SerializeField, Min(0f)] private float stillSeconds = 0.12f;
+        [SerializeField, Min(0.1f)] private float speedSmoothing = 10f;
+
         private CounterStation _counter;
         private FeedbackFx _fx;
         private float _lastAngle;
         private float _dustDegrees;
+        private float _speed;
+        private float _sinceMoved = float.MaxValue;
 
         public override void Begin(MinigameContext ctx)
         {
@@ -53,7 +62,24 @@ namespace Courtyard.Minigames
             handle.DragStarted -= OnDragStarted;
             handle.Dragged -= OnDragged;
             handle.DragEnded -= OnDragEnded;
-            AudioManager.StopLoop(SfxId.Grind);
+            AudioManager.StopLoop(SfxId.Grind, 0.1f);
+        }
+
+        private void Update()
+        {
+            // Grinding sound only while the crank turns; volume and pitch (±10%) follow its speed.
+            _sinceMoved += Time.deltaTime;
+            var moving = _sinceMoved <= stillSeconds && !IsComplete;
+            if (!moving)
+            {
+                _speed = 0f;
+                AudioManager.StopLoop(SfxId.Grind, 0.1f);
+                return;
+            }
+
+            AudioManager.StartLoop(SfxId.Grind, 0.05f); // no-op while already playing / fading in
+            AudioManager.SetLoopVolume(SfxId.Grind, Mathf.Lerp(0.45f, 1f, _speed));
+            AudioManager.SetLoopPitch(SfxId.Grind, Mathf.Lerp(0.9f, 1.1f, _speed));
         }
 
         private float AngleTo(Vector2 world)
@@ -65,7 +91,6 @@ namespace Courtyard.Minigames
         private void OnDragStarted(Vector2 world)
         {
             _lastAngle = AngleTo(world);
-            AudioManager.StartLoop(SfxId.Grind);
         }
 
         private void OnDragged(Vector2 world)
@@ -77,6 +102,12 @@ namespace Courtyard.Minigames
             _lastAngle = angle;
 
             _counter.GrinderArm.localRotation = Quaternion.Euler(0f, 0f, angle);
+            if (delta > 0.5f)
+            {
+                var instant = Mathf.Clamp01(delta / Mathf.Max(Time.deltaTime, 0.0001f) / fullSpeedDegrees);
+                _speed = Mathf.Lerp(_speed, instant, 1f - Mathf.Exp(-speedSmoothing * Time.deltaTime));
+                _sinceMoved = 0f;
+            }
             meter.SetValue(meter.Value + delta / 360f * fillPerTurn);
 
             // Coffee dust and a little shake every so often while grinding.
@@ -95,7 +126,8 @@ namespace Courtyard.Minigames
 
         private void OnDragEnded(Vector2 world)
         {
-            AudioManager.StopLoop(SfxId.Grind);
+            _sinceMoved = float.MaxValue;
+            AudioManager.StopLoop(SfxId.Grind, 0.1f);
             // Let go before the green zone and you simply keep grinding; inside or past it, that's the grind.
             if (!IsComplete && meter.Value >= Mathf.Max(minLevelToFinish, targetLevel - zoneHalfWidth)) Finish();
         }
@@ -104,7 +136,7 @@ namespace Courtyard.Minigames
         {
             _counter.GrinderHandle.Interactable = false;
             _counter.SetDripperGrounds(true);
-            AudioManager.StopLoop(SfxId.Grind);
+            AudioManager.StopLoop(SfxId.Grind, 0.1f);
             Complete(1f - Mathf.Abs(meter.Value - targetLevel) / qualityFalloff);
         }
     }

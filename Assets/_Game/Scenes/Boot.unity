@@ -252,13 +252,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Audio.AudioManager
   library: {fileID: 11400000, guid: 8a05ada51a7904e56b40d6c14e2895b2, type: 2}
-  music: {fileID: 0}
-  musicVolume: 0.6
+  mixer: {fileID: 24100000, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  musicGroup: {fileID: -5021596973808864783, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  ambienceGroup: {fileID: 8214023234049042654, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  sfxGroup: {fileID: 3710202660124574611, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  uiGroup: {fileID: 1150290139741891243, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  musicVolume: 0.25
+  musicCrossfadeSeconds: 2
   ambienceVolume: 0.5
+  roomTone: {fileID: 8300000, guid: 94b0c8018e9974e47b39a1de5f1d6120, type: 3}
+  roomToneVolume: 0.12
+  ambienceCrossfadeSeconds: 2
   warmCutoff: 22000
   coldCutoff: 1200
   coldThreshold: 0.3
   cutoffSmoothing: 3
+  coldMusicDuck: 0.45
+  coldWind: {fileID: 8300000, guid: 1c9bc662a06514aa2af78e866fc6abb7, type: 3}
+  swellCutoff: 800
+  voices: 8
 --- !u!4 &99023276
 Transform:
   m_ObjectHideFlags: 0

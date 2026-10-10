@@ -26,6 +26,7 @@ namespace Courtyard.UI
             }
 
             _started = true;
+            Audio.AudioManager.Play(Audio.SfxId.UiClick);
             GameManager.Instance.StartGame();
         }
     }

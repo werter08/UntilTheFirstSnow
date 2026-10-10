@@ -56,7 +56,11 @@ namespace Courtyard.Core
         [SerializeField] private List<DrinkResult> drinkResults = new();
 
         [Header("Audio")]
+        [Tooltip("Level music (none = silence; Day 1 is rain and the clock). Crossfades between days.")]
+        [SerializeField] private AudioClip music;
         [SerializeField] private AudioClip ambience;
+        [Tooltip("Ambience loudness 0..1 (the room tone always plays underneath).")]
+        [SerializeField, Range(0f, 1f)] private float ambienceVolume = 1f;
 
         [Header("Outro")]
         [Tooltip("Played over black after the last line (Day 20: footsteps across the courtyard).")]
@@ -102,6 +106,8 @@ namespace Courtyard.Core
         public string FailText => failText;
         public string RuinedText => ruinedText;
         public AudioClip Ambience => ambience;
+        public AudioClip Music => music;
+        public float AmbienceVolume => ambienceVolume;
         public IReadOnlyList<DrinkResult> DrinkResults => drinkResults;
         public AudioClip OutroClip => outroClip;
         public float OutroHoldSeconds => outroHoldSeconds;

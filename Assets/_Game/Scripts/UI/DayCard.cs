@@ -29,6 +29,7 @@ namespace Courtyard.UI
             yield return new WaitForSeconds(holdSeconds);
 
             // Page flip: tear upwards, folding away over the top edge.
+            Audio.AudioManager.Play(Audio.SfxId.PaperNote);
             yield return Tweens.Run(flipSeconds, t =>
             {
                 page.localScale = new Vector3(1f, Mathf.Lerp(1f, 0f, t), 1f);

@@ -58,11 +58,9 @@ namespace Courtyard.Minigames
             var boil = _heat >= bandMin ? 1f : Mathf.InverseLerp(trembleFrom, bandMin, _heat) * 0.6f;
             _counter.KettleView.SetBoil(boil);
 
-            if (!_boiling && _heat >= bandMin)
-            {
-                _boiling = true;
-                AudioManager.StartLoop(SfxId.KettleBubble);
-            }
+            if (!_boiling && _heat >= bandMin) _boiling = true;
+            // The boil rises in pitch as the water heats (+8% at the top of the band).
+            AudioManager.SetLoopPitch(SfxId.KettleBoil, Mathf.Lerp(1f, 1.08f, Mathf.InverseLerp(startTemperature, bandMax, _heat)));
 
             // Boiled dry: the kettle switches itself off.
             if (_heat >= bandMax + qualityFalloff) Stop();
@@ -76,7 +74,7 @@ namespace Courtyard.Minigames
                     _state = State.Heating;
                     _counter.KettleView.SetHeating(true);
                     AudioManager.Play(SfxId.KettleSwitch);
-                    AudioManager.StartLoop(SfxId.KettleBoil);
+                    AudioManager.StartLoop(SfxId.KettleBoil, 0.3f);
                     _fx.Punch(_counter.SwitchLight.transform);
                     break;
                 case State.Heating:
@@ -91,18 +89,14 @@ namespace Courtyard.Minigames
             _counter.KettleSwitch.Interactable = false;
             _counter.KettleView.SetHeating(false);
             _counter.KettleView.SetBoil(0f);
-            StopSounds();
-            AudioManager.Play(SfxId.KettleSwitch);
+            AudioManager.StopLoop(SfxId.KettleBoil, 0.1f);
+            AudioManager.Play(SfxId.KettleDone);
             _fx.Punch(_counter.KettleBody.transform);
 
             var distance = _heat < bandMin ? bandMin - _heat : _heat > bandMax ? _heat - bandMax : 0f;
             Complete(1f - distance / qualityFalloff);
         }
 
-        private static void StopSounds()
-        {
-            AudioManager.StopLoop(SfxId.KettleBoil);
-            AudioManager.StopLoop(SfxId.KettleBubble);
-        }
+        private static void StopSounds() => AudioManager.StopLoop(SfxId.KettleBoil, 0.1f);
     }
 }

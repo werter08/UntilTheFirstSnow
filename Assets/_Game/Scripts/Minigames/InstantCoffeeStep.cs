@@ -89,7 +89,7 @@ namespace Courtyard.Minigames
             _counter.KettleView.SetPouring(false);
             _counter.KettleStream.enabled = false;
             _counter.Kettle.position = _counter.KettleRest;
-            AudioManager.StopLoop(SfxId.Pour);
+            AudioManager.StopTrack(SfxId.Pour);
         }
 
         // ---------------------------------------------------------------- spoon
@@ -120,7 +120,7 @@ namespace Courtyard.Minigames
                 spoonLoad.enabled = false;
                 _spoons++;
                 _counter.ShowSpoons(_spoons);
-                AudioManager.Play(SfxId.Spoon);
+                AudioManager.Play(SfxId.SpoonTink);
                 _fx.Punch(_counter.Mug.transform);
                 _fx.Burst(_counter.MugTop, coffeeColor, 8, 0.9f, 0.06f);
 
@@ -187,8 +187,9 @@ namespace Courtyard.Minigames
             if (_streamOn == on) return;
             _streamOn = on;
             _counter.KettleStream.enabled = on;
-            if (on) AudioManager.StartLoop(SfxId.Pour);
-            else AudioManager.StopLoop(SfxId.Pour);
+            // The pour is a one-shot: pausing keeps its place, so tipping the kettle again continues the same pour.
+            if (on) AudioManager.ResumeTrack(SfxId.Pour);
+            else AudioManager.PauseTrack(SfxId.Pour);
         }
 
         private void ReturnKettle()

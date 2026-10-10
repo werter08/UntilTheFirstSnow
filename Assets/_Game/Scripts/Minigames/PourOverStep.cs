@@ -31,6 +31,9 @@ namespace Courtyard.Minigames
         [SerializeField, Min(0.1f)] private float pourRadius = 1.4f;
         [SerializeField, Range(0f, 1f)] private float bandWeight = 0.6f;
         [SerializeField, Range(0f, 1f)] private float minFillToFinish = 0.1f;
+        [Tooltip("Seconds of pouring the kettle holds (matches the ~8 s pour sound); then the stream fades and the pour ends.")]
+        [SerializeField, Min(1f)] private float waterSeconds = 8f;
+        [SerializeField, Min(0f)] private float streamFadeSeconds = 0.35f;
         [Tooltip("How quickly the kettle catches up with the pointer (higher = snappier).")]
         [SerializeField, Min(0.1f)] private float kettleFollow = 14f;
 
@@ -45,12 +48,16 @@ namespace Courtyard.Minigames
         private float _flow;
         private float _pourTime;
         private float _bandTime;
+        private float _pouredSeconds;
+        private bool _runningDry;
+        private Color _streamColour;
 
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
             _fx = ctx.Fx;
             _camera = ctx.WorldCamera;
+            _streamColour = _counter.KettleStream.color;
             NudgeTarget = _counter.Dripper;
             pourZone.Pressed += OnPressed;
             pourZone.Released += OnReleased;
@@ -77,6 +84,8 @@ namespace Courtyard.Minigames
             ReturnKettle();
             _counter.HideFillLine();
             _counter.SetMugGauge(false);
+            _counter.KettleStream.color = _streamColour;
+            AudioManager.StopTrack(SfxId.Pour);
         }
 
         private void OnPressed()
@@ -93,8 +102,9 @@ namespace Courtyard.Minigames
             if (_streamOn == on) return;
             _streamOn = on;
             _counter.KettleStream.enabled = on;
-            if (on) AudioManager.StartLoop(SfxId.Pour);
-            else AudioManager.StopLoop(SfxId.Pour);
+            // One-shot pour: pausing keeps its place, so tipping the kettle again continues the same pour.
+            if (on) AudioManager.ResumeTrack(SfxId.Pour);
+            else AudioManager.PauseTrack(SfxId.Pour);
         }
 
         private void OnReleased()
@@ -105,7 +115,7 @@ namespace Courtyard.Minigames
 
         private void Update()
         {
-            if (IsComplete || !pourZone.IsHeld) return;
+            if (IsComplete || _runningDry || !pourZone.IsHeld) return;
 
             var pointer = PointerWorld();
             var speed = (pointer - _lastPointer).magnitude / Mathf.Max(Time.deltaTime, 0.0001f);
@@ -121,6 +131,14 @@ namespace Courtyard.Minigames
             if (!overDripper) return;
 
             _pourTime += Time.deltaTime;
+            _pouredSeconds += Time.deltaTime;
+            AudioManager.SetTrackVolume(SfxId.Pour, Mathf.Lerp(0.35f, 1f, _flow)); // louder with more flow
+            if (_pouredSeconds >= waterSeconds)
+            {
+                StartCoroutine(RunDry());
+                return;
+            }
+
             if (_flow >= bandMin && _flow <= bandMax) _bandTime += Time.deltaTime;
 
             _counter.SetMugLevel(_counter.MugLevel + fillPerSecond * Time.deltaTime);
@@ -158,6 +176,17 @@ namespace Courtyard.Minigames
         }
 
         private Coroutine _kettleReturn;
+
+        /// <summary>The kettle is empty: the stream thins out and fades, then the pour ends.</summary>
+        private System.Collections.IEnumerator RunDry()
+        {
+            _runningDry = true;
+            var stream = _counter.KettleStream;
+            var from = _streamColour;
+            yield return Tweens.Run(streamFadeSeconds, t => stream.color = new Color(from.r, from.g, from.b, from.a * (1f - t)));
+            Finish();
+            stream.color = from;
+        }
 
         private void Finish()
         {

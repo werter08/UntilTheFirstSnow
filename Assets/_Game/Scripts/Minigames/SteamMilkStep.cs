@@ -71,15 +71,15 @@ namespace Courtyard.Minigames
 
         private void OnPressed()
         {
-            AudioManager.StartLoop(SfxId.Steam);
+            AudioManager.StartLoop(SfxId.Steam, 0.05f);
             _counter.SetFrothing(true);
         }
 
         private void StopSounds()
         {
             if (_counter != null) _counter.SetFrothing(false);
-            AudioManager.StopLoop(SfxId.Steam);
-            AudioManager.StopLoop(SfxId.Squeal);
+            AudioManager.StopLoop(SfxId.Steam, 0.1f);
+            AudioManager.StopLoop(SfxId.Squeal, 0.1f);
         }
 
         private void OnReleased()
