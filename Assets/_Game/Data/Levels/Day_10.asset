@@ -24,6 +24,8 @@ MonoBehaviour:
     miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
     vignetteTint: {r: 0, g: 0, b: 0, a: 0}
   treeStage: 2
+  treeCrownSprite: {fileID: 0}
+  skyColor: {r: 0.65882355, g: 0.78431374, b: 0.8784314, a: 1}
   miraWindow: 1
   props:
     beans: 1
@@ -55,36 +57,48 @@ MonoBehaviour:
     style: 0
     speaker: 
     text: Sunday. The light is different today.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 1
     stepIndex: 3
     condition: 0
     style: 2
     speaker: Mira
     text: "Hi\u2026 I'm Mira, from across. I ran out of coffee. Could I borrow some?"
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 1
     stepIndex: 4
     condition: 0
     style: 2
     speaker: Mira
     text: "Something sweet\u2026 with cinnamon? Surprise me."
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 1
     style: 2
     speaker: Mira
     text: Okay. That's the best cup I've had this month.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 2
     style: 2
     speaker: Mira
     text: "It's\u2026 nice. Thank you."
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
     text: I think I'm smiling. Weird feeling.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   twoMeters: 0
   startWarmth: 70
   drainPerSecond: 1.2

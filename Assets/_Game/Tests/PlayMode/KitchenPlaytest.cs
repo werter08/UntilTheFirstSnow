@@ -30,6 +30,9 @@ namespace Courtyard.Tests
         public override void Setup()
         {
             base.Setup();
+            // URP's Rendering Debugger reads input through its own actions; with the virtual test mouse that logs
+            // "Cached unprocessed value unexpectedly became outdated" errors. It's an editor tool: off for playtests.
+            UnityEngine.Rendering.DebugManager.instance.enableRuntimeUI = false;
             Mouse = InputSystem.AddDevice<Mouse>();
             _previousTimeScale = Time.timeScale;
             Time.timeScale = TimeScale;

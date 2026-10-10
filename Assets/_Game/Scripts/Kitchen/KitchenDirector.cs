@@ -23,6 +23,11 @@ namespace Courtyard.Kitchen
         [SerializeField] private Color eveningCourtyard = new(0.42f, 0.4f, 0.48f);
         [SerializeField] private Color nightCourtyard = new(0.16f, 0.18f, 0.28f);
         [SerializeField] private SpriteRenderer treeCrown;
+        [Tooltip("Outside pieces shaded by the time of day (Mira's window is not: it stays the warm spot at night).")]
+        [SerializeField] private SpriteRenderer[] outsideShaded;
+        [SerializeField] private Color morningOutside = Color.white;
+        [SerializeField] private Color eveningOutside = new(0.82f, 0.8f, 0.86f);
+        [SerializeField] private Color nightOutside = new(0.38f, 0.42f, 0.6f);
         [Tooltip("One colour per TreeStage, in enum order.")]
         [SerializeField] private Color[] treeStageColors =
         {
@@ -33,6 +38,8 @@ namespace Courtyard.Kitchen
         [SerializeField] private WeatherPreset[] weatherPresets;
 
         [Header("Mira's window")]
+        [Tooltip("The drawn window (Lit/Dark/Silhouette/Wave/Note); without its sprites the placeholder below is used.")]
+        [SerializeField] private MiraWindow miraWindowArt;
         [SerializeField] private SpriteRenderer miraWindow;
         [SerializeField] private Color miraWindowDark = new(0.2f, 0.22f, 0.3f);
         [SerializeField] private GameObject miraSilhouette;
@@ -105,13 +112,33 @@ namespace Courtyard.Kitchen
             lampLight.intensity = palette.lampIntensity;
             ApplyLamp(level.Props.lampOff, palette.lampColor);
 
-            courtyard.color = level.TimeOfDay switch
+            // Sky behind the opposite building: the level's colour, or a time-of-day fallback.
+            courtyard.color = level.SkyColor.a > 0f
+                ? level.SkyColor
+                : level.TimeOfDay switch
+                {
+                    TimeOfDay.Evening => eveningCourtyard,
+                    TimeOfDay.Night => nightCourtyard,
+                    _ => morningCourtyard,
+                };
+            ApplyTreeCrown(level);
+            var shade = level.TimeOfDay switch
             {
-                TimeOfDay.Evening => eveningCourtyard,
-                TimeOfDay.Night => nightCourtyard,
-                _ => morningCourtyard,
+                TimeOfDay.Evening => eveningOutside,
+                TimeOfDay.Night => nightOutside,
+                _ => morningOutside,
             };
-            treeCrown.color = PickColor(treeStageColors, (int)level.TreeStage);
+            if (outsideShaded != null)
+            {
+                _outsideBase ??= System.Array.ConvertAll(outsideShaded, p => p != null ? p.color : Color.white);
+                for (var i = 0; i < outsideShaded.Length; i++)
+                {
+                    var piece = outsideShaded[i];
+                    if (piece == null) continue;
+                    var baseColour = piece == treeCrown ? treeCrown.color : _outsideBase[i]; // crown: this day's colour
+                    piece.color = baseColour * shade;
+                }
+            }
 
             calendarDay.text = level.DayNumber.ToString();
             clockTime.text = level.ClockTime;
@@ -154,15 +181,21 @@ namespace Courtyard.Kitchen
         public void SetMiraWindow(MiraWindowState state)
         {
             _windowState = state;
-            var lit = state is MiraWindowState.LitWarm or MiraWindowState.LitWarmSilhouette
-                or MiraWindowState.Waving or MiraWindowState.NoteOnGlass;
+            if (miraWindowArt != null && miraWindowArt.HasArt)
+            {
+                miraWindowArt.SetState(state); // drawn window: sprite per state, and it switches its own light
+                return;
+            }
+
+            var lit = state is MiraWindowState.Lit or MiraWindowState.Silhouette
+                or MiraWindowState.Wave or MiraWindowState.Note;
             var windowColor = _level != null ? _level.Palette.miraWindowColor : Color.white;
 
             miraWindow.color = lit ? windowColor : miraWindowDark;
             miraLight.enabled = lit;
             miraLight.color = windowColor;
-            miraSilhouette.SetActive(state is MiraWindowState.LitWarmSilhouette or MiraWindowState.Waving);
-            miraNote.SetActive(state == MiraWindowState.NoteOnGlass);
+            miraSilhouette.SetActive(state is MiraWindowState.Silhouette or MiraWindowState.Wave);
+            miraNote.SetActive(state == MiraWindowState.Note);
 
             _waveTimer = 0f;
             SetArm(false);
@@ -213,21 +246,63 @@ namespace Courtyard.Kitchen
         private void OnMiraWindowPoked()
         {
             if (_level == null || _level.DayNumber < waveBackFromDay) return;
-            if (_windowState != MiraWindowState.LitWarmSilhouette || _waveBack != null) return;
-            _waveBack = StartCoroutine(WaveBackOnce());
+            // She's home (light on, or at the window): she comes to the window and waves.
+            if (_windowState is not (MiraWindowState.Lit or MiraWindowState.Silhouette) || _waveBack != null) return;
+            _waveBack = StartCoroutine(WaveBackOnce(_windowState));
         }
 
-        private System.Collections.IEnumerator WaveBackOnce()
+        private System.Collections.IEnumerator WaveBackOnce(MiraWindowState before)
         {
-            SetMiraWindow(MiraWindowState.Waving);
+            SetMiraWindow(MiraWindowState.Wave);
             yield return new WaitForSeconds(waveBackSeconds);
-            if (_windowState == MiraWindowState.Waving) SetMiraWindow(MiraWindowState.LitWarmSilhouette);
+            if (_windowState == MiraWindowState.Wave) SetMiraWindow(before);
             _waveBack = null;
+        }
+
+        /// <summary>Mira waves (silhouette ↔ waving frame) for a while, then stands at her window again.</summary>
+        public System.Collections.IEnumerator MiraWaves(float seconds)
+        {
+            SetMiraWindow(MiraWindowState.Wave);
+            yield return new WaitForSeconds(seconds);
+            if (_windowState == MiraWindowState.Wave) SetMiraWindow(MiraWindowState.Silhouette);
+        }
+
+        [Header("Chestnut tree")]
+        [Tooltip("Crown rest position; it slides left (never the window) if a drawn crown would cover Mira's window.")]
+        [SerializeField] private float crownClearance = 0.1f;
+
+        private Vector3? _crownRest;
+        private Color[] _outsideBase;
+
+        private void ApplyTreeCrown(LevelDefinition level)
+        {
+            _crownRest ??= treeCrown.transform.position;
+            treeCrown.transform.position = _crownRest.Value;
+            if (level.TreeCrownSprite != null)
+            {
+                treeCrown.sprite = level.TreeCrownSprite;
+                treeCrown.drawMode = SpriteDrawMode.Simple;
+                treeCrown.color = Color.white;
+            }
+            else
+            {
+                treeCrown.color = PickColor(treeStageColors, (int)level.TreeStage);
+            }
+
+            // The crown must never cover Mira's window: if it overlaps, move the crown left.
+            var windowRenderer = miraWindowArt != null && miraWindowArt.HasArt ? miraWindowArt.GetComponent<SpriteRenderer>() : miraWindow;
+            if (windowRenderer == null) return;
+            var crown = treeCrown.bounds;
+            var window = windowRenderer.bounds;
+            var overlapsVertically = crown.min.y < window.max.y && crown.max.y > window.min.y;
+            var overlap = crown.max.x + crownClearance - window.min.x;
+            if (overlapsVertically && overlap > 0f) treeCrown.transform.position += Vector3.left * overlap;
         }
 
         private void Update()
         {
-            if (_windowState != MiraWindowState.Waving) return;
+            if (miraWindowArt != null && miraWindowArt.HasArt) return; // the drawn window animates itself
+            if (_windowState != MiraWindowState.Wave) return;
 
             _waveTimer += Time.deltaTime;
             if (_waveTimer < waveFrameSeconds) return;

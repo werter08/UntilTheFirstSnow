@@ -236,7 +236,7 @@ namespace Courtyard.Editor
             yield return new Spec
             {
                 Day = 1, Clock = "06:40", Time = TimeOfDay.Morning, Weather = Weather.LightRain, Tree = TreeStage.GreenYellow,
-                Window = MiraWindowState.LitWarmSilhouette,
+                Window = MiraWindowState.Silhouette,
                 Palette = Palette(new Color(0.78f, 0.82f, 0.9f), 1f, new Color(0.85f, 0.92f, 1f), 0.6f),
                 Props = new KitchenProps { plantStage = PlantStage.Wilted, lampOff = true },
                 Steps = new[] { P.KettleBoil, P.InstantCoffee },
@@ -253,7 +253,7 @@ namespace Courtyard.Editor
             yield return new Spec
             {
                 Day = 5, Clock = "19:30", Time = TimeOfDay.Evening, Weather = Weather.HeavyRain, Tree = TreeStage.Orange,
-                Window = MiraWindowState.LitWarmSilhouette,
+                Window = MiraWindowState.Lit, // she waves from the WaveBack beat
                 Palette = Palette(new Color(0.7f, 0.68f, 0.75f), 0.9f, new Color(1f, 0.85f, 0.65f), 0.6f),
                 Props = new KitchenProps { beans = true, grinder = true, brewMug = MugStyle.His, plantStage = PlantStage.Wilted },
                 Rack = new[] { MugStyle.Chipped },
@@ -271,7 +271,7 @@ namespace Courtyard.Editor
             yield return new Spec
             {
                 Day = 10, Clock = "09:15", Time = TimeOfDay.Morning, Weather = Weather.Leaves, Tree = TreeStage.Golden,
-                Window = MiraWindowState.LitWarm,
+                Window = MiraWindowState.Lit,
                 Palette = Palette(new Color(1f, 0.92f, 0.78f), 1.1f, new Color(1f, 0.82f, 0.55f), 0.5f),
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Hers, plantStage = PlantStage.Recovering, fridgeNotes = 1, sweater = Sweater.Grey },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His },
@@ -293,7 +293,7 @@ namespace Courtyard.Editor
             yield return new Spec
             {
                 Day = 20, Clock = "23:40", Time = TimeOfDay.Night, Weather = Weather.Wind, Tree = TreeStage.HalfBare,
-                Window = MiraWindowState.NoteOnGlass,
+                Window = MiraWindowState.Note,
                 Palette = Palette(new Color(0.45f, 0.5f, 0.75f), 0.7f, new Color(1f, 0.75f, 0.45f), 1f),
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, brewMug = MugStyle.Yellow, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers }, // ChooseMug picks hers from here
@@ -315,7 +315,7 @@ namespace Courtyard.Editor
             yield return new Spec
             {
                 Day = 30, Clock = "17:00", Time = TimeOfDay.Evening, Weather = Weather.Snow, Tree = TreeStage.BareSnow,
-                Window = MiraWindowState.Empty,
+                Window = MiraWindowState.Dark, // she is in his kitchen
                 Palette = Palette(new Color(1f, 0.85f, 0.7f), 0.95f, new Color(1f, 0.72f, 0.42f), 1.1f),
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Green, mugsOnSill = true, herMug = true, scarf = true, blanket = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers, MugStyle.Yellow },

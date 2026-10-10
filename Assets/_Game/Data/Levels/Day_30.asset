@@ -24,7 +24,9 @@ MonoBehaviour:
     miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
     vignetteTint: {r: 0, g: 0, b: 0, a: 0}
   treeStage: 4
-  miraWindow: 5
+  treeCrownSprite: {fileID: 0}
+  skyColor: {r: 0.78431374, g: 0.8, b: 0.83137256, a: 1}
+  miraWindow: 0
   props:
     beans: 1
     grinder: 1
@@ -52,24 +54,32 @@ MonoBehaviour:
     style: 2
     speaker: Mira
     text: It's snowing! Make me the usual?
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 1
     stepIndex: 2
     condition: 0
     style: 0
     speaker: 
     text: I don't need the recipe anymore.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
     text: Autumn's over.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
     text: "For the first time in a long while \u2014 I'm warm."
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   twoMeters: 0
   startWarmth: 70
   drainPerSecond: 0

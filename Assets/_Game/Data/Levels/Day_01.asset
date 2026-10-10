@@ -24,6 +24,8 @@ MonoBehaviour:
     miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
     vignetteTint: {r: 0, g: 0, b: 0, a: 0}
   treeStage: 0
+  treeCrownSprite: {fileID: 0}
+  skyColor: {r: 0.6039216, g: 0.6509804, b: 0.6901961, a: 1}
   miraWindow: 2
   props:
     beans: 0
@@ -51,18 +53,24 @@ MonoBehaviour:
     style: 0
     speaker: 
     text: 6:40. Again.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 1
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
     text: Instant coffee. It tastes like Monday.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
     text: "\u2026Someone across the courtyard is already awake."
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   twoMeters: 0
   startWarmth: 70
   drainPerSecond: 0.8

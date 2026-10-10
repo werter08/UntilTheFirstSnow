@@ -39,6 +39,9 @@ namespace Courtyard.Story
             box.blocksRaycasts = false;
         }
 
+        /// <summary>Raised when the player has read a beat (after the click that dismisses it).</summary>
+        public event System.Action<StoryBeat> BeatRead;
+
         public IEnumerator Play(IReadOnlyList<StoryBeat> beats)
         {
             if (beats == null || beats.Count == 0) yield break;
@@ -47,7 +50,10 @@ namespace Courtyard.Story
             yield return Tweens.Run(fadeDuration, t => box.alpha = t);
 
             foreach (var beat in beats)
+            {
                 yield return ShowBeat(beat);
+                BeatRead?.Invoke(beat);
+            }
 
             yield return Tweens.Run(fadeDuration, t => box.alpha = 1f - t);
             box.blocksRaycasts = false;

@@ -17,9 +17,11 @@ namespace Courtyard.Tests
             yield return LoadDay(5);
             yield return AdvanceTo<KettleBoilStep>();
             var director = Object.FindAnyObjectByType<KitchenDirector>();
-            Assert.That(director.WindowState, Is.EqualTo(MiraWindowState.LitWarmSilhouette));
+            Assert.That(director.WindowState, Is.EqualTo(MiraWindowState.Lit), "Day 5 starts with her light on.");
             yield return Click(FindDeep("MiraWindow"));
-            Assert.That(director.WindowState, Is.EqualTo(MiraWindowState.Waving), "Mira should wave back on Day 5.");
+            Assert.That(director.WindowState, Is.EqualTo(MiraWindowState.Wave), "Mira should wave back on Day 5.");
+            yield return Wait(3f);
+            Assert.That(director.WindowState, Is.EqualTo(MiraWindowState.Lit), "…then her window is as it was.");
         }
 
         [UnityTest, Timeout(120000)]
@@ -29,7 +31,7 @@ namespace Courtyard.Tests
             yield return AdvanceTo<KettleBoilStep>();
             var director = Object.FindAnyObjectByType<KitchenDirector>();
             yield return Click(FindDeep("MiraWindow"));
-            Assert.That(director.WindowState, Is.Not.EqualTo(MiraWindowState.Waving), "They haven't met yet on Day 1.");
+            Assert.That(director.WindowState, Is.Not.EqualTo(MiraWindowState.Wave), "They haven't met yet on Day 1.");
         }
 
         [UnityTest, Timeout(120000)]

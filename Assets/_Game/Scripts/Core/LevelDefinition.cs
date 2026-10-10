@@ -21,6 +21,10 @@ namespace Courtyard.Core
         [Header("Kitchen")]
         [SerializeField] private LevelPalette palette = LevelPalette.Default;
         [SerializeField] private TreeStage treeStage;
+        [Tooltip("Drawn chestnut crown for this day (tree_1_green … tree_5_snow); empty = coloured placeholder.")]
+        [SerializeField] private Sprite treeCrownSprite;
+        [Tooltip("Solid sky colour behind the opposite building (alpha 0 = time-of-day fallback).")]
+        [SerializeField] private Color skyColor = Color.clear;
         [SerializeField] private MiraWindowState miraWindow;
         [SerializeField] private KitchenProps props;
 
@@ -79,6 +83,8 @@ namespace Courtyard.Core
         public Weather Weather => weather;
         public LevelPalette Palette => palette;
         public TreeStage TreeStage => treeStage;
+        public Sprite TreeCrownSprite => treeCrownSprite;
+        public Color SkyColor => skyColor;
         public MiraWindowState MiraWindow => miraWindow;
         public KitchenProps Props => props;
         public IReadOnlyList<MinigameStep> Steps => steps;

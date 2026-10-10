@@ -73,6 +73,7 @@ namespace Courtyard.Core
             counter.Prepare(_level);
             hands.SetSweater(_level.Props.sweater);
             CreateMeters();
+            story.BeatRead += OnBeatRead;
             _run = StartCoroutine(Run());
         }
 
@@ -86,6 +87,7 @@ namespace Courtyard.Core
         private void OnDestroy()
         {
             if (_warmth != null) _warmth.Depleted -= OnMeterDepleted;
+            if (story != null) story.BeatRead -= OnBeatRead;
         }
 
         private void CreateMeters()
@@ -233,6 +235,11 @@ namespace Courtyard.Core
         {
             AudioManager.ColdSwell(1.2f, 0.5f); // a gust of cold
             yield return fx.Chill(counter.Mug.transform.position, worldCamera.transform);
+        }
+
+        private void OnBeatRead(Story.StoryBeat beat)
+        {
+            if (beat.SetsMiraWindow) kitchen.SetMiraWindow(beat.MiraWindowAfter);
         }
 
         private bool IsGood(float quality) => quality >= _level.GoodResultThreshold;

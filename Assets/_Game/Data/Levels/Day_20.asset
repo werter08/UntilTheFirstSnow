@@ -24,6 +24,8 @@ MonoBehaviour:
     miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
     vignetteTint: {r: 0, g: 0, b: 0, a: 0}
   treeStage: 3
+  treeCrownSprite: {fileID: 0}
+  skyColor: {r: 0.11764706, g: 0.14117648, b: 0.21960784, a: 1}
   miraWindow: 4
   props:
     beans: 1
@@ -54,24 +56,32 @@ MonoBehaviour:
     style: 1
     speaker: 
     text: Heating broke.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 1
     stepIndex: 0
     condition: 0
     style: 1
     speaker: 
     text: Hold on.
+    setsMiraWindow: 1
+    miraWindowAfter: 1
   - trigger: 1
     stepIndex: 3
     condition: 0
     style: 0
     speaker: 
     text: Two cups. Hers first.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
     text: Funny. A month ago I couldn't keep myself warm.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   twoMeters: 1
   startWarmth: 70
   drainPerSecond: 1.4

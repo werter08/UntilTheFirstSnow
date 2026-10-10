@@ -24,7 +24,9 @@ MonoBehaviour:
     miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
     vignetteTint: {r: 0, g: 0, b: 0, a: 0}
   treeStage: 1
-  miraWindow: 2
+  treeCrownSprite: {fileID: 0}
+  skyColor: {r: 0.36078432, g: 0.40784314, b: 0.47058824, a: 1}
+  miraWindow: 1
   props:
     beans: 1
     grinder: 1
@@ -53,18 +55,24 @@ MonoBehaviour:
     style: 0
     speaker: 
     text: Bought real beans today. No idea why.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 1
     stepIndex: 1
     condition: 0
     style: 0
     speaker: 
     text: Grind. Pour slowly. Breathe.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
     text: She waved. I waved back with my mug. Smooth.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   twoMeters: 0
   startWarmth: 70
   drainPerSecond: 1

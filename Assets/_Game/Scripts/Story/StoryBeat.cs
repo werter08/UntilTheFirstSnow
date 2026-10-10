@@ -14,6 +14,9 @@ namespace Courtyard.Story
         [Tooltip("Shown for Dialogue beats.")]
         [SerializeField] private string speaker;
         [SerializeField, TextArea(2, 5)] private string text;
+        [Tooltip("After this beat is read, Mira's window changes (e.g. Day 20: 'Hold on.' → Lit).")]
+        [SerializeField] private bool setsMiraWindow;
+        [SerializeField] private Core.MiraWindowState miraWindowAfter;
 
         public BeatTrigger Trigger => trigger;
         public int StepIndex => stepIndex;
@@ -21,6 +24,8 @@ namespace Courtyard.Story
         public BeatStyle Style => style;
         public string Speaker => speaker;
         public string Text => text;
+        public bool SetsMiraWindow => setsMiraWindow;
+        public Core.MiraWindowState MiraWindowAfter => miraWindowAfter;
 
         public bool Matches(BeatTrigger when, int step, bool goodResult)
         {

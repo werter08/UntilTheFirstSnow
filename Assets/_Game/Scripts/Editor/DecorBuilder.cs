@@ -77,6 +77,8 @@ namespace Courtyard.Editor
 
         public static void Apply()
         {
+            AssetDatabase.Refresh(); // art dropped in from outside the Editor
+            OutsideBuilder.ConfigureImports();
             MugOutlineBuilder.Build(PropsFolder, "mug_chipped", "mug_his", "mug_hers", "mug_decoy_2", "mug_decoy_1");
             ConfigureArtImports();
             ArtManifestBuilder.EnsureSortingLayers();
@@ -90,10 +92,30 @@ namespace Courtyard.Editor
             ConfigureImports(DrinksFolder);
             SetPivot(KettleFolder + "Kettle_HandGrey.png", PourSpoutPivot);
             SetPivot(KettleFolder + "Kettle_HandBeige.png", PourSpoutPivot);
+            OutsideBuilder.PatchLevels();
             EditScene(BuildScript.Scenes[1], ApplyToKitchen);
             EditScene(BuildScript.Scenes[0], ApplyToBoot);
             EditScene(BuildScript.Scenes[2], ApplyToEnding);
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>
+        /// Applies only the outside art, the coffee bag / spoon and the shadows to the Kitchen scene that is already
+        /// open, without saving it — leaves everything else (and any unsaved edits) as it is.
+        /// </summary>
+        public static void ApplyOutsideAndPropsInPlace()
+        {
+            AssetDatabase.Refresh(); // art dropped in from outside the Editor
+            ConfigureArtImports();
+            OutsideBuilder.ConfigureImports();
+            OutsideBuilder.PatchLevels();
+            var scene = SceneManager.GetSceneByPath(BuildScript.Scenes[1]);
+            if (!scene.isLoaded) throw new System.InvalidOperationException("Open the Kitchen scene first.");
+            var kitchen = scene.GetRootGameObjects().First(g => g.name == "Kitchen").transform;
+            ApplyCoffeeBagAndSpoon(kitchen);
+            OutsideBuilder.ApplyToKitchen(kitchen);
+            ApplyShadows(kitchen);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scene);
         }
 
         private static KitchenArtLayout _layout;
@@ -130,6 +152,7 @@ namespace Courtyard.Editor
                 Find(kitchen, "InstantCoffeeJar").gameObject.SetActive(false);
 
             ApplyCoffeeBagAndSpoon(kitchen);
+            OutsideBuilder.ApplyToKitchen(kitchen); // after the manifest: the outside art owns its layers
             ApplyShadows(kitchen); // last: props are in their final places
 
             // Bag of real beans from Day 5 ("Bought real beans today") stands at the left end of the counter.
@@ -999,6 +1022,9 @@ namespace Courtyard.Editor
             var tools = Find(kitchen, "Counter Tools");
             var counter = tools.GetComponent<CounterStation>();
 
+            // Closed and open bags differ in size: both stand on their bottom centre so swapping keeps the bag on the counter.
+            if (File.Exists(PropsFolder + "coffee_bag.png")) SetPivot(PropsFolder + "coffee_bag.png", new Vector2(0.5f, 0f));
+            if (File.Exists(PropsFolder + "coffee_bag_open.png")) SetPivot(PropsFolder + "coffee_bag_open.png", new Vector2(0.5f, 0f));
             var bag = Load(PropsFolder, "coffee_bag");
             var bagOpen = Load(PropsFolder, "coffee_bag_open");
             if (bag == null) Debug.LogWarning($"DecorBuilder: {PropsFolder}coffee_bag.png missing — the pack bag stays.");
@@ -1012,7 +1038,7 @@ namespace Courtyard.Editor
                 beans.localScale = Vector3.one;
                 beans.localRotation = Quaternion.identity;
                 var bottom = Px(620f, 840f);
-                beans.position = new Vector3(bottom.x, bottom.y - bag.bounds.min.y, beans.position.z);
+                beans.position = new Vector3(bottom.x, bottom.y, beans.position.z); // pivot = bottom centre
                 var collider = beans.GetComponent<BoxCollider2D>();
                 if (collider != null)
                 {

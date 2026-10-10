@@ -13,14 +13,17 @@ namespace Courtyard.Minigames
         [SerializeField, Min(0f)] private float raiseSeconds = 0.4f;
         [SerializeField, Min(0f)] private float holdSeconds = 1.2f;
 
+        [Tooltip("Mira waves this long (silhouette ↔ waving), pauses, and waves again until you raise your mug.")]
+        [SerializeField, Min(0.5f)] private float waveSeconds = 2.5f;
+        [SerializeField, Min(0f)] private float pauseSeconds = 2f;
+
         private MinigameContext _ctx;
-        private MiraWindowState _windowBefore;
+        private Coroutine _waving;
 
         public override void Begin(MinigameContext ctx)
         {
             _ctx = ctx;
-            _windowBefore = ctx.Kitchen.WindowState;
-            ctx.Kitchen.SetMiraWindow(MiraWindowState.Waving);
+            _waving = StartCoroutine(MiraKeepsWaving());
             ctx.Counter.Mug.Clicked += OnClicked;
             ctx.Counter.Mug.Interactable = true;
             NudgeTarget = ctx.Counter.Mug.transform;
@@ -33,8 +36,18 @@ namespace Courtyard.Minigames
             _ctx.Hands.Detach();
         }
 
+        private IEnumerator MiraKeepsWaving()
+        {
+            while (true)
+            {
+                yield return _ctx.Kitchen.MiraWaves(waveSeconds);
+                yield return new WaitForSeconds(pauseSeconds);
+            }
+        }
+
         private void OnClicked()
         {
+            if (_waving != null) StopCoroutine(_waving);
             _ctx.Counter.Mug.Interactable = false;
             AudioManager.Play(SfxId.MugClink);
             StartCoroutine(WaveBack());
@@ -51,7 +64,7 @@ namespace Courtyard.Minigames
             yield return Tweens.Run(raiseSeconds, t => mug.localPosition = Vector3.Lerp(end, start, t));
             _ctx.Hands.Detach();
 
-            _ctx.Kitchen.SetMiraWindow(_windowBefore == MiraWindowState.Waving ? MiraWindowState.LitWarmSilhouette : _windowBefore);
+            _ctx.Kitchen.SetMiraWindow(MiraWindowState.Silhouette); // she stays at her window
             Complete(1f);
         }
     }
