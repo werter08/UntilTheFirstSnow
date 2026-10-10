@@ -5201,6 +5201,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 834560757}
     m_Modifications:
+    - target: {fileID: 583801196732541243, guid: c9eb133686bbd477da052ac7313387c0, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 5a917d94b0c63497395898cf2caf6d08, type: 2}
+    - target: {fileID: 583801196732541243, guid: c9eb133686bbd477da052ac7313387c0, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -651629221142799008, guid: 5a917d94b0c63497395898cf2caf6d08, type: 2}
     - target: {fileID: 1717833382452070275, guid: c9eb133686bbd477da052ac7313387c0, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -5405,6 +5413,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 834560757}
     m_Modifications:
+    - target: {fileID: 1675598571620552263, guid: ae4cb03ddaa284f73869a8afc6847797, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 5a917d94b0c63497395898cf2caf6d08, type: 2}
+    - target: {fileID: 1675598571620552263, guid: ae4cb03ddaa284f73869a8afc6847797, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -651629221142799008, guid: 5a917d94b0c63497395898cf2caf6d08, type: 2}
+    - target: {fileID: 4413388362795769075, guid: ae4cb03ddaa284f73869a8afc6847797, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 5a917d94b0c63497395898cf2caf6d08, type: 2}
+    - target: {fileID: 4413388362795769075, guid: ae4cb03ddaa284f73869a8afc6847797, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -651629221142799008, guid: 5a917d94b0c63497395898cf2caf6d08, type: 2}
     - target: {fileID: 6584104181563656141, guid: ae4cb03ddaa284f73869a8afc6847797, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -5485,6 +5509,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7198661298387116388, guid: ae4cb03ddaa284f73869a8afc6847797, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 5a917d94b0c63497395898cf2caf6d08, type: 2}
+    - target: {fileID: 7198661298387116388, guid: ae4cb03ddaa284f73869a8afc6847797, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -651629221142799008, guid: 5a917d94b0c63497395898cf2caf6d08, type: 2}
     - target: {fileID: 8531190026581399875, guid: ae4cb03ddaa284f73869a8afc6847797, type: 3}
       propertyPath: m_Name
       value: StoryBox

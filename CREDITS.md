@@ -12,6 +12,13 @@ Hands (all poses, grey and beige sweaters), window frame, curtains, curtain rod,
 |---|---|---|---|
 | [FREE Basic Coffee Shop](https://oddblotstudios.itch.io/basic-coffee-shop-pack) | Rebecca H / ODDBLOT | Free, commercial use OK, edits allowed, credit optional, no AI training (see `Assets/_Game/Art/Sprites/Decor/ODDBLOT/LICENSE_ODDBLOT.txt`) | Wall shelf, coffee bag, wall picture |
 
+## Fonts
+
+| Font | Author | Licence | Used for |
+|---|---|---|---|
+| [Amaranth](https://fonts.google.com/specimen/Amaranth) | The Amaranth Project Authors | [SIL Open Font License 1.1](https://openfontlicense.org) (`Assets/_Game/Art/Fonts/OFL_Amaranth.txt`) | All game text |
+| [Playpen Sans](https://fonts.google.com/specimen/Playpen+Sans) | The Playpen Sans Project Authors (TypeTogether) | SIL Open Font License 1.1 (`Assets/_Game/Art/Fonts/OFL_PlaypenSans.txt`) | Handwritten fridge notes |
+
 ## Audio
 
 Edited with ffmpeg (cuts, fades, seamless loops; see `Tools/process_audio.sh`). No generative AI.
