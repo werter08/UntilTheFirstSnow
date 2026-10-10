@@ -19,13 +19,47 @@ namespace Courtyard.Kitchen
         [SerializeField, Min(0.005f)] private float spicePerPortion = 0.06f;
         [SerializeField] private float spiceWidth = 0.96f;
 
+        [Tooltip("Drink tiles clipped to the round mugs, and the same tiles clipped to the chipped mug's notch.")]
+        [SerializeField] private Sprite[] roundTiles;
+        [SerializeField] private Sprite[] chippedTiles;
+
         private int _portions;
+        private bool _chipped;
+        private Sprite _drink;
+        private Sprite _empty;
 
         public float RegionHeight => regionHeight;
 
         public void SetSprite(Sprite drink)
         {
-            if (drink != null) liquid.sprite = drink;
+            if (drink == null) return;
+            _drink = drink;
+            liquid.sprite = ForMug(drink);
+        }
+
+        /// <summary>The chipped mug (Day 1) has a notch in its rim: its tiles are cut to match.</summary>
+        public void SetChipped(bool chipped)
+        {
+            _chipped = chipped;
+            if (emptyCap != null)
+            {
+                if (_empty == null) _empty = emptyCap.sprite;
+                emptyCap.sprite = ForMug(_empty);
+            }
+
+            if (_drink != null) liquid.sprite = ForMug(_drink);
+        }
+
+        private Sprite ForMug(Sprite tile)
+        {
+            if (roundTiles == null || chippedTiles == null) return tile;
+            for (var i = 0; i < roundTiles.Length && i < chippedTiles.Length; i++)
+            {
+                if (roundTiles[i] == tile || chippedTiles[i] == tile)
+                    return _chipped && chippedTiles[i] != null ? chippedTiles[i] : roundTiles[i];
+            }
+
+            return tile;
         }
 
         public void SetLevel(float level)

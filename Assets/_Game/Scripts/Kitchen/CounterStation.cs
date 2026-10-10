@@ -148,6 +148,7 @@ namespace Courtyard.Kitchen
             var style = (int)props.brewMug;
             var hasArt = mugSprites != null && style < mugSprites.Length && mugSprites[style] != null;
             if (hasArt) mugBody.sprite = mugSprites[style];
+            if (mugContents != null) mugContents.SetChipped(props.brewMug == MugStyle.Chipped);
             if (mugOutline != null)
                 mugOutline.sprite = hasArt && mugOutlineSprites != null && style < mugOutlineSprites.Length ? mugOutlineSprites[style] : null;
             mugLeafPrint.SetActive(!hasArt && props.brewMug == MugStyle.Hers);

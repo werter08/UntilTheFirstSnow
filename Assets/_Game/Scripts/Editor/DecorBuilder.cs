@@ -379,7 +379,7 @@ namespace Courtyard.Editor
             mugRenderer.sprite = chipped;
             mugRenderer.drawMode = SpriteDrawMode.Simple;
             mugRenderer.color = Color.white;
-            mug.localScale = Vector3.one;
+            mug.localScale = new Vector3(1f, CupStretch, 1f); // a bit taller than drawn
             var collider = mug.GetComponent<BoxCollider2D>();
             collider.size = chipped.bounds.size;
             collider.offset = chipped.bounds.center;
@@ -412,12 +412,17 @@ namespace Courtyard.Editor
             // body top 3 px below the sprite top, body centre 23.5 px left of the sprite centre (handle on the right).
             // As in the team's mockup: the cap's top edge and outline sit exactly on the mug's rim and outline.
             // Both PNGs carry 2 px of padding; caps are 110×66 px, the mug body is 110 px wide from its left edge.
-            const float region = 0.66f;
-            var regionCentre = new Vector2(chipped.bounds.min.x + 0.02f + 0.55f, chipped.bounds.max.y + 0.07f - region * 0.5f);
+            // The inside takes the top third of the cup (body = sprite minus 2 px padding top and bottom); the 66 px drink
+            // tiles are squeezed to fit.
+            var region = (chipped.bounds.size.y - 0.04f) / 3f;
+            var tileScale = region / 0.66f;
+            var regionCentre = new Vector2(chipped.bounds.min.x + 0.02f + 0.55f, chipped.bounds.max.y + 0.05f - region * 0.5f);
 
             // Drink tiles clipped to the mug's silhouette for this exact placement (no square corners past the rim).
-            MugOutlineBuilder.ClipDrinks(PropsFolder + "mug_chipped.png", DrinksFolder, regionCentre,
-                "drink_instant", "drink_black", "drink_pourover", "drink_latte", "drink_latte_heart", "drink_cinnamon");
+            // Two sets: round mugs, and the chipped mug with its notch.
+            var drinkNames = new[] { "drink_instant", "drink_black", "drink_pourover", "drink_latte", "drink_latte_heart", "drink_cinnamon" };
+            MugOutlineBuilder.ClipDrinks(PropsFolder + "mug_his.png", "", DrinksFolder, regionCentre, tileScale, drinkNames);
+            MugOutlineBuilder.ClipDrinks(PropsFolder + "mug_chipped.png", "_chipped", DrinksFolder, regionCentre, tileScale, drinkNames);
             AssetDatabase.Refresh();
             ConfigureImports(DrinksFolder);
             Sprite Drink(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(MugOutlineBuilder.InMugPath(n))
@@ -453,13 +458,14 @@ namespace Courtyard.Editor
             // Empty mug: the plain dark cap (the inside of an empty mug), always under the drink.
             var empty = SpriteChild(contents, "EmptyCap");
             PlaceAtScreenScale(empty, Drink("drink_instant"), Vector2.zero, "Props", 2);
+            empty.localScale = new Vector3(1f, tileScale, 1f);
             var liquid = SpriteChild(contents, "Liquid");
             var liquidRenderer = liquid.GetComponent<SpriteRenderer>();
             liquidRenderer.sprite = Drink("drink_black");
             liquidRenderer.drawMode = SpriteDrawMode.Simple;
             liquidRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             liquid.localPosition = Vector3.zero;
-            liquid.localScale = Vector3.one;
+            liquid.localScale = new Vector3(1f, tileScale, 1f);
             SetLayer(liquid, "Props", 3);
             var spice = SpriteChild(contents, "Spice");
             var spiceRenderer = spice.GetComponent<SpriteRenderer>();
@@ -485,6 +491,8 @@ namespace Courtyard.Editor
             Wire(mugContents, "regionHeight", region);
             Wire(mugContents, "regionWidth", 1.2f);
             Wire(counter, "mugContents", mugContents);
+            WireArray(mugContents, "roundTiles", drinkNames.Select(n => (Object)Drink(n)).ToArray());
+            WireArray(mugContents, "chippedTiles", drinkNames.Select(n => (Object)AssetDatabase.LoadAssetAtPath<Sprite>(MugOutlineBuilder.InMugPath(n, "_chipped"))).ToArray());
             Edit(counter, so =>
             {
                 var drinks = Property(so, "mugDrinkSprites");
@@ -1137,6 +1145,9 @@ namespace Courtyard.Editor
             });
             return fidget;
         }
+
+        /// <summary>The counter mug is drawn this much taller than the art (vertical stretch).</summary>
+        private const float CupStretch = 1.2f;
 
         private const float RackCentreX = 5.05f;
         private const float RackY = 0.75f;

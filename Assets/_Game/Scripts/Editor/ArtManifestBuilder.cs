@@ -163,12 +163,14 @@ namespace Courtyard.Editor
             // Mug (main focus) and the V60 on top of it.
             var mug = Find(tools, "Mug");
             var mugSprite = mug.GetComponent<SpriteRenderer>().sprite;
-            var mugHalf = mugSprite.bounds.extents.y;
-            mug.localPosition = new Vector3(layout.ZoneX(CounterZone.Brew), mugBottom + mugHalf - mugSprite.bounds.center.y, 0f);
+            var stretch = mug.localScale.y; // the counter mug is drawn a bit taller (DecorBuilder.CupStretch)
+            var mugHalf = mugSprite.bounds.extents.y * stretch;
+            mug.localPosition = new Vector3(layout.ZoneX(CounterZone.Brew), mugBottom + mugHalf - mugSprite.bounds.center.y * stretch, 0f);
             var v60 = Find(tools, "V60");
             var v60Sprite = v60.GetComponent<SpriteRenderer>().sprite;
             v60.localPosition = v60Sprite != null && v60Sprite.name.StartsWith("v60")
                 ? mug.localPosition + (Vector3)(layout.dripperOnMugPx / KitchenArtLayout.PixelsPerUnit)
+                  + Vector3.up * (mugSprite.bounds.extents.y * (stretch - 1f)) // rim rises with the taller mug
                 : new Vector3(layout.ZoneX(CounterZone.Brew), mugBottom + mugHalf * 2f + 0.35f, 0f);
 
             // Loose props on the left end of the counter.

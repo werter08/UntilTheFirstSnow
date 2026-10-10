@@ -48,14 +48,14 @@ namespace Courtyard.Editor
 
         public const string InMugFolder = "Assets/_Game/Art/Drinks/InMug";
 
-        public static string InMugPath(string drinkName) => $"{InMugFolder}/{drinkName}.png";
+        public static string InMugPath(string drinkName, string suffix = "") => $"{InMugFolder}/{drinkName}{suffix}.png";
 
         /// <summary>
         /// Clips each drink tile to the mug's silhouette (the art's own alpha), so the square tile never pokes out past
         /// the rounded rim. <paramref name="tileCentre"/> is the tile centre in the mug's local units (mug pivot = centre,
         /// 100 px per unit). Rebuilt every time: it depends on where the tile sits.
         /// </summary>
-        public static void ClipDrinks(string mugPath, string drinksFolder, Vector2 tileCentre, params string[] drinkNames)
+        public static void ClipDrinks(string mugPath, string suffix, string drinksFolder, Vector2 tileCentre, float tileScaleY, params string[] drinkNames)
         {
             if (!AssetDatabase.IsValidFolder(InMugFolder)) AssetDatabase.CreateFolder(drinksFolder.TrimEnd('/'), "InMug");
             if (!File.Exists(mugPath)) return;
@@ -73,13 +73,12 @@ namespace Courtyard.Editor
                 tile.LoadImage(File.ReadAllBytes(source));
                 var pixels = tile.GetPixels32();
                 int tw = tile.width, th = tile.height;
-                // Tile pixel (x, y) (y up, as in Texture2D) → mug pixel.
+                // Tile pixel (x, y) (y up, as in Texture2D) → mug pixel; the tile is drawn squeezed by tileScaleY.
                 var offsetX = Mathf.RoundToInt(mw * 0.5f + tileCentre.x * 100f - tw * 0.5f);
-                var offsetY = Mathf.RoundToInt(mh * 0.5f + tileCentre.y * 100f - th * 0.5f);
                 for (var y = 0; y < th; y++)
                 for (var x = 0; x < tw; x++)
                 {
-                    int mx = x + offsetX, my = y + offsetY;
+                    int mx = x + offsetX, my = Mathf.RoundToInt(mh * 0.5f + tileCentre.y * 100f + (y + 0.5f - th * 0.5f) * tileScaleY);
                     var mugAlpha = mx >= 0 && my >= 0 && mx < mw && my < mh ? mugPixels[my * mw + mx].a : (byte)0;
                     var p = pixels[y * tw + x];
                     p.a = (byte)(p.a * mugAlpha / 255);
@@ -88,7 +87,7 @@ namespace Courtyard.Editor
 
                 tile.SetPixels32(pixels);
                 tile.Apply();
-                var target = InMugPath(name);
+                var target = InMugPath(name, suffix);
                 var bytes = tile.EncodeToPNG();
                 if (!File.Exists(target) || !File.ReadAllBytes(target).AsSpan().SequenceEqual(bytes))
                 {
