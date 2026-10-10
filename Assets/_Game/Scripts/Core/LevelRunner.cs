@@ -165,6 +165,7 @@ namespace Courtyard.Core
             if (drinks.Count > 0) counter.ShowServedDrink(drinks[drinks.Count - 1]);
             yield return fx.ServeDrink(counter.Mug.transform, counter.MugTop, counter.MugSteam);
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
+            yield return NewNote();
             if (_level.Finale) yield return Finale();
 
             yield return fader.FadeOut(endColor, fadeDuration);
@@ -239,6 +240,34 @@ namespace Courtyard.Core
         {
             AudioManager.ColdSwell(1.2f, 0.5f); // a gust of cold
             yield return fx.Chill(counter.Mug.transform.position, worldCamera.transform);
+        }
+
+        [Header("End-of-day note")]
+        [SerializeField] private string newNoteHint = "A new note on the fridge. Click it to read.";
+        [Tooltip("How long the new note waits to be opened before the day moves on (it stays on the fridge).")]
+        [SerializeField, Min(0f)] private float newNoteWaitSeconds = 5f;
+
+        /// <summary>The day's note pops onto the fridge; if the player opens it, the day waits until it's put back.</summary>
+        private IEnumerator NewNote()
+        {
+            var slot = kitchen.PinNoteAfter(_level.DayNumber);
+            var card = kitchen.NoteCard;
+            if (slot == null || card == null) yield break;
+
+            var opened = false;
+            void OnOpened() => opened = true;
+            card.Opened += OnOpened;
+            hint.Show(newNoteHint);
+            fx.Burst(slot.position, new Color(1f, 0.92f, 0.6f), 10, 1.2f, 0.07f, -0.2f);
+            for (var t = 0f; t < newNoteWaitSeconds && !opened; t += Time.deltaTime)
+            {
+                if (t > 1.5f && Mathf.Repeat(t, 1.5f) < Time.deltaTime) fx.Punch(slot, 0.6f); // a gentle nudge
+                yield return null;
+            }
+
+            while (card.IsOpen) yield return null;
+            card.Opened -= OnOpened;
+            hint.Hide();
         }
 
         private void OnBeatRead(Story.StoryBeat beat)

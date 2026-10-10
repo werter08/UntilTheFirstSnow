@@ -117,6 +117,8 @@ export PROJ="$(pwd)"
 | 20 | Late night, cold, windy | KettleBoil → GrindBeans → PourOver → SteamMilk → ChooseMug (hers) | **fast drain, 2 meters** (him + her) | **Note on her window**: "Heating broke 🥶". He replies "Hold on." The level ends with him carrying two mugs across the courtyard (fade to black, footsteps on leaves) | Dark blue night, warm lamp pocket |
 | 30 | Last evening of autumn, first snow | KettleBoil → SteamMilk → HerDrinkFromMemory | **no drain** (meter full and glowing) | She's **in his kitchen**: scarf on the chair, second mug, blanket. Her window across is `Empty`/dark | Warmest palette, snow outside |
 
+**Fridge notes:** at the end of every day a paper note pops onto the fridge (paper sound, sparkle, hint "A new note on the fridge. Click it to read."). Clicking a note opens it as a card in the middle of the screen; any click puts it back. If not opened within ~5 s the day moves on; all earlier notes stay on the fridge and can be read any time. Texts live in `Data/Story/FridgeNotes.asset` (`afterDay`, `from`, `text`); Day 10's note from Mira records her usual (cinnamon + honey) for Day 30.
+
 Then the **Ending scene**: two mugs on the window sill, snow falling, music fades, final lines, credits.
 
 ## 5. Story text (Data/Levels, `storyBeats`)

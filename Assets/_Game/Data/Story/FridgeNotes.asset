@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58f1b7e66b0944ba6a0e4063902f4922, type: 3}
+  m_Name: FridgeNotes
+  m_EditorClassIdentifier: Courtyard::Courtyard.Story.NotesBook
+  notes:
+  - afterDay: 1
+    from: 
+    text: 'Buy real coffee.
+
+      Instant tastes like Monday.'
+  - afterDay: 5
+    from: 
+    text: 'She waved first.
+
+      Next time, wave back sooner.'
+  - afterDay: 10
+    from: Mira
+    text: 'Thank you for the coffee!
+
+      My usual: cinnamon and honey.'
+  - afterDay: 20
+    from: Mira
+    text: 'The heating''s fixed.
+
+      Thank you for staying up with me.'
+  - afterDay: 30
+    from: 
+    text: 'First snow.
+
+      Two mugs on the sill.
+
+      Warm.'

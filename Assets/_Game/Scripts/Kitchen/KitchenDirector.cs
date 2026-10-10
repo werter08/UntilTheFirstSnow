@@ -87,6 +87,9 @@ namespace Courtyard.Kitchen
         [Tooltip("Optional drawn plant per PlantStage (Wilted, Recovering, Healthy, Blooming); replaces the tint.")]
         [SerializeField] private Sprite[] plantStageSprites;
         [SerializeField] private GameObject[] fridgeNotes;
+        [Tooltip("The notes pinned at the end of each day (one slot per note, in order). Empty = the old per-day count.")]
+        [SerializeField] private Story.NotesBook notesBook;
+        [SerializeField] private UI.NoteCard noteCard;
         [Tooltip("Day 30: his and her mugs side by side on the window sill.")]
         [SerializeField] private GameObject sillMugs;
         [Tooltip("Wall rack slots, left to right; filled with earlier days' mugs.")]
@@ -162,8 +165,10 @@ namespace Courtyard.Kitchen
             {
                 plant.color = PickColor(plantStageColors, stage);
             }
-            for (var i = 0; i < fridgeNotes.Length; i++)
-                fridgeNotes[i].SetActive(i < props.fridgeNotes);
+            if (notesBook != null) ShowPinnedNotes(level.DayNumber);
+            else
+                for (var i = 0; i < fridgeNotes.Length; i++)
+                    fridgeNotes[i].SetActive(i < props.fridgeNotes);
             // On the finale day the two mugs reach the sill only once the drink is served (LevelRunner.Finale).
             if (sillMugs != null) sillMugs.SetActive(props.mugsOnSill && !level.Finale);
 
@@ -202,6 +207,51 @@ namespace Courtyard.Kitchen
         }
 
         public void SetMiraAtDoor(bool visible) => miraAtDoor.SetActive(visible);
+
+        private int _pinned;
+
+        /// <summary>Every note written after an earlier day hangs on the fridge and can be clicked to read.</summary>
+        private void ShowPinnedNotes(int day)
+        {
+            var pinned = notesBook.PinnedBefore(day);
+            _pinned = Mathf.Min(pinned.Count, fridgeNotes.Length);
+            for (var i = 0; i < fridgeNotes.Length; i++)
+            {
+                var has = i < _pinned;
+                fridgeNotes[i].SetActive(has);
+                if (has && fridgeNotes[i].TryGetComponent<ReadableNote>(out var readable)) readable.Set(pinned[i], noteCard);
+            }
+        }
+
+        /// <summary>
+        /// End of the day: the note written today pops onto the fridge (paper sound, a little sparkle) in the next free
+        /// slot. Returns that slot, or null when there is no note for today (or no room).
+        /// </summary>
+        public Transform PinNoteAfter(int day)
+        {
+            var note = notesBook != null ? notesBook.WrittenAfter(day) : null;
+            if (note == null || _pinned >= fridgeNotes.Length) return null;
+
+            var slot = fridgeNotes[_pinned++];
+            slot.SetActive(true);
+            if (slot.TryGetComponent<ReadableNote>(out var readable)) readable.Set(note, noteCard);
+            StartCoroutine(PopIn(slot.transform));
+            Audio.AudioManager.Play(Audio.SfxId.PaperNote);
+            return slot.transform;
+        }
+
+        private System.Collections.IEnumerator PopIn(Transform note)
+        {
+            var size = note.localScale;
+            yield return Tweens.RunLinear(0.35f, t =>
+            {
+                var overshoot = 1f + Mathf.Sin(t * Mathf.PI) * 0.25f;
+                note.localScale = size * (t * overshoot);
+            });
+            note.localScale = size;
+        }
+
+        public UI.NoteCard NoteCard => noteCard;
 
         [Header("Day 10: at the front door")]
         [Tooltip("The door scene (Mira with her cup), placed away from the kitchen; the camera visits it.")]

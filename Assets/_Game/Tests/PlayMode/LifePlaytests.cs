@@ -24,6 +24,27 @@ namespace Courtyard.Tests
             Assert.That(director.WindowState, Is.EqualTo(MiraWindowState.Lit), "…then her window is as it was.");
         }
 
+        /// <summary>Day 5: yesterday's note hangs on the fridge — click it to read, click again to put it back.</summary>
+        [UnityTest, Timeout(120000)]
+        public IEnumerator Day05_ClickTheFridgeNote_ToReadIt()
+        {
+            yield return LoadDay(5);
+            yield return AdvanceTo<KettleBoilStep>();
+            var director = Object.FindAnyObjectByType<KitchenDirector>();
+            var note = FindDeep("FridgeNote0");
+            Assert.That(note.gameObject.activeInHierarchy, Is.True, "Day 1's note should be on the fridge on Day 5.");
+            Assert.That(FindDeep("FridgeNote1").gameObject.activeInHierarchy, Is.False, "Only earlier days' notes are pinned.");
+
+            yield return Click(note);
+            yield return Wait(0.3f);
+            Assert.That(director.NoteCard.IsOpen, Is.True, "Clicking the note should open it.");
+            StringAssert.Contains("coffee", director.NoteCard.GetComponentInChildren<TMPro.TMP_Text>().text);
+
+            yield return ClickScreen(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+            yield return Wait(0.3f);
+            Assert.That(director.NoteCard.IsOpen, Is.False, "Another click puts the note back.");
+        }
+
         [UnityTest, Timeout(120000)]
         public IEnumerator Day01_HerWindowDoesNotWaveYet()
         {

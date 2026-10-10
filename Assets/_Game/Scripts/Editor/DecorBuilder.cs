@@ -155,6 +155,7 @@ namespace Courtyard.Editor
             OutsideBuilder.ApplyToKitchen(kitchen); // after the manifest: the outside art owns its layers
             ApplyPourStream(kitchen);
             ApplyDoorScene(kitchen);
+            NotesBuilder.ApplyToKitchen(scene, kitchen);
             ApplyShadows(kitchen); // last: props are in their final places
 
             // Bag of real beans from Day 5 ("Bought real beans today") stands at the left end of the counter.
@@ -1294,8 +1295,9 @@ namespace Courtyard.Editor
             SetOrder(kitchen, "Shelf", 2);
             SetOrder(kitchen, "WallPicture", 2);
             foreach (var name in new[] { "Clock", "Calendar", "CeilingLamp", "MugRack", "Shelf", "WallPicture" }) Drop(kitchen, name);
-            for (var i = 0; i < 3; i++)
+            for (var i = 0; i < 5; i++)
             {
+                if (Find(kitchen, $"FridgeNote{i}", false) == null) continue;
                 SetOrder(kitchen, $"FridgeNote{i}", 22);
                 var magnet = Find(kitchen, $"FridgeNote{i}", false)?.Find("Magnet");
                 if (magnet != null) SetOrder(magnet, 23);
