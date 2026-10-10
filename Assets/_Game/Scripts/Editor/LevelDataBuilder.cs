@@ -156,8 +156,7 @@ namespace Courtyard.Editor
             {
                 var element = list.GetArrayElementAtIndex(i);
                 element.FindPropertyRelative("icon").objectReferenceValue =
-                    AssetDatabase.LoadAssetAtPath<Sprite>(MugOutlineBuilder.InMugPath(drinks[i].icon)) // clipped to the mug
-                    ?? AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/Drinks/{drinks[i].icon}.png");
+                    AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/Drinks/{drinks[i].icon}.png");
                 element.FindPropertyRelative("condition").enumValueIndex = (int)drinks[i].condition;
             }
         }

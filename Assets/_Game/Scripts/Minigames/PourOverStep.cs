@@ -192,6 +192,7 @@ namespace Courtyard.Minigames
         {
             pourZone.Interactable = false;
             ReturnKettle();
+            _counter.StartCoroutine(_counter.LiftDripper()); // runs on the counter: this step is destroyed right after
 
             var bandScore = _pourTime > 0f ? _bandTime / _pourTime : 0f;
             var fillScore = Mathf.Clamp01(1f - Mathf.Abs(_counter.MugLevel - targetFill) / fillTolerance);

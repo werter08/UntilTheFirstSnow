@@ -117,6 +117,35 @@ namespace Courtyard.Kitchen
         public GameObject MugFoam => mugFoam;
         public SpriteRenderer[] SpoonMarkers => spoonMarkers;
         public Transform Dripper => dripper.transform;
+
+        private Vector3? _dripperRest;
+
+        /// <summary>Brewing done: the V60 lifts off the cup and fades away, so the drink inside shows.</summary>
+        public System.Collections.IEnumerator LiftDripper(float seconds = 0.5f, float height = 0.8f)
+        {
+            if (!dripper.activeSelf) yield break;
+            var t = dripper.transform;
+            _dripperRest ??= t.localPosition;
+            var from = _dripperRest.Value;
+            yield return Tweens.Run(seconds, k =>
+            {
+                t.localPosition = from + Vector3.up * (height * k);
+                SetDripperAlpha(1f - k);
+            });
+            dripper.SetActive(false);
+            t.localPosition = from;
+            SetDripperAlpha(1f);
+        }
+
+        private void SetDripperAlpha(float alpha)
+        {
+            foreach (var r in dripper.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                var c = r.color;
+                c.a = alpha;
+                r.color = c;
+            }
+        }
         public PointerTarget MilkJug => milkJug;
         public SpriteRenderer MilkJugBody => milkJugBody;
         public SpriteBar MilkFoam => milkFoam;
@@ -150,6 +179,8 @@ namespace Courtyard.Kitchen
             var props = level.Props;
             grinder.SetActive(props.grinder);
             dripper.SetActive(HasStep<Minigames.PourOverStep>(level)); // only on days that actually pour over
+            if (_dripperRest.HasValue) dripper.transform.localPosition = _dripperRest.Value;
+            SetDripperAlpha(1f);
             if (restingSpoon != null) restingSpoon.gameObject.SetActive(HasStep<Minigames.InstantCoffeeStep>(level));
             SetCoffeeBagOpen(false);
             milkStation.SetActive(props.milk);

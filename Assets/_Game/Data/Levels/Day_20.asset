@@ -97,9 +97,9 @@ MonoBehaviour:
   coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   drinkResults:
-  - icon: {fileID: 21300000, guid: 75f09c98a057e4c7295add8dbf65324d, type: 3}
+  - icon: {fileID: 21300000, guid: 722a94e002662491386aea713d5f2d88, type: 3}
     condition: 0
-  - icon: {fileID: 21300000, guid: 75f09c98a057e4c7295add8dbf65324d, type: 3}
+  - icon: {fileID: 21300000, guid: 722a94e002662491386aea713d5f2d88, type: 3}
     condition: 0
   music: {fileID: 8300000, guid: 0a8ac468af9b1496ba0a0e30a6791deb, type: 3}
   ambience: {fileID: 8300000, guid: 1c9bc662a06514aa2af78e866fc6abb7, type: 3}

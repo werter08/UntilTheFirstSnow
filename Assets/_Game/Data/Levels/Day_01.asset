@@ -86,7 +86,7 @@ MonoBehaviour:
   coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   drinkResults:
-  - icon: {fileID: 21300000, guid: 91d627434fcdd4e6abf3907d0bb14040, type: 3}
+  - icon: {fileID: 21300000, guid: aa6fe5bccbf8c4a9f87bbebfdd118db9, type: 3}
     condition: 0
   music: {fileID: 0}
   ambience: {fileID: 8300000, guid: db14c8867a0f84059879f09eef722958, type: 3}
