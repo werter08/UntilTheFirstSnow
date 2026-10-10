@@ -21,6 +21,8 @@ namespace Courtyard.Core
     {
         [Tooltip("Used when the Kitchen scene is played directly, without the Boot scene.")]
         [SerializeField] private LevelDefinition fallbackLevel;
+        [Tooltip("All days in order, so playing the Kitchen scene directly still goes on to the next day.")]
+        [SerializeField] private LevelDefinition[] allLevels;
 
         [Header("Scene refs")]
         [SerializeField] private Camera worldCamera;
@@ -58,6 +60,9 @@ namespace Courtyard.Core
 
         private void Start()
         {
+            if (GameManager.Instance == null && fallbackLevel != null && allLevels != null && System.Array.IndexOf(allLevels, fallbackLevel) >= 0)
+                GameManager.CreateForDirectPlay(allLevels, fallbackLevel);
+
             _level = GameManager.Instance != null && GameManager.Instance.CurrentLevel != null
                 ? GameManager.Instance.CurrentLevel
                 : fallbackLevel;

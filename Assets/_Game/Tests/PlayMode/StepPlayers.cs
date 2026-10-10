@@ -17,7 +17,13 @@ namespace Courtyard.Tests
             yield return AdvanceTo<KettleBoilStep>();
             var step = Object.FindAnyObjectByType<KettleBoilStep>();
             var switchT = Counter.KettleSwitch.transform;
-            yield return Click(switchT);
+            // A click right after the story box closes can land while it's still fading out: click again, like a player.
+            for (var attempt = 0; attempt < 3 && GetField<object>(step, "_state").ToString() == "Idle"; attempt++)
+            {
+                yield return Click(switchT);
+                yield return Wait(0.1f);
+            }
+
             Assert.That(GetField<object>(step, "_state").ToString(), Is.EqualTo("Heating"), "Kettle switch click did not start heating.");
 
             var deadline = Time.realtimeSinceStartup + 20f;
@@ -102,8 +108,16 @@ namespace Courtyard.Tests
         protected IEnumerator PlayPourOver()
         {
             yield return AdvanceTo<PourOverStep>();
-            var centre = Counter.Dripper.position + Vector3.up * 0.4f;
-            yield return Press(centre);
+            // Grab the kettle on its base, carry it above the cup (V60), then pour in circles.
+            var from = Counter.KettleTarget.transform.position;
+            var centre = Counter.MugTop + new Vector3(0f, 0.9f, 0f);
+            yield return Press(from);
+            for (var t = 1; t <= 20; t++)
+            {
+                Move(Mouse.position, ToScreen(Vector3.Lerp(from, centre, t / 20f)));
+                yield return null;
+            }
+
             var deadline = Time.realtimeSinceStartup + 25f;
             var angle = 0f;
             while (Counter.MugLevel < 0.8f && Time.realtimeSinceStartup < deadline)

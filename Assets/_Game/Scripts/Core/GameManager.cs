@@ -33,6 +33,18 @@ namespace Courtyard.Core
             if (Instance == this) Instance = null;
         }
 
+        /// <summary>
+        /// The Kitchen scene was played directly in the Editor: set up the normal day order and continue from
+        /// <paramref name="current"/> (so Day 1 → 5 → 10 → 20 → 30 → Ending still follows).
+        /// </summary>
+        public static GameManager CreateForDirectPlay(LevelDefinition[] allLevels, LevelDefinition current)
+        {
+            var manager = new GameObject("GameManager (direct play)").AddComponent<GameManager>();
+            manager.levels = allLevels;
+            manager._currentIndex = System.Array.IndexOf(allLevels, current);
+            return manager;
+        }
+
         public void StartGame()
         {
             if (levels == null || levels.Length == 0)

@@ -200,6 +200,11 @@ namespace Courtyard.Audio
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
+            // The ears travel with the manager: exactly one AudioListener in every scene (cameras may have none).
+            if (GetComponent<AudioListener>() == null) gameObject.AddComponent<AudioListener>();
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+            SilenceOtherListeners();
+
             for (var i = 0; i < 2; i++)
             {
                 _music[i] = CreateSource("Music" + i, true, 0f, musicGroup);
@@ -230,7 +235,18 @@ namespace Courtyard.Audio
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance != this) return;
+            Instance = null;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode) =>
+            SilenceOtherListeners();
+
+        private void SilenceOtherListeners()
+        {
+            foreach (var listener in FindObjectsByType<AudioListener>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+                if (listener.gameObject != gameObject) listener.enabled = false;
         }
 
         private void Update()

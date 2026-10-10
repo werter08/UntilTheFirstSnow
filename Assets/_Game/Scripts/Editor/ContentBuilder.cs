@@ -175,7 +175,18 @@ namespace Courtyard.Editor
                 var manager = scene.GetRootGameObjects().Select(g => g.GetComponent<GameManager>()).First(m => m != null);
                 WireArray(manager, "levels", ordered);
             });
+            // Playing the Kitchen directly in the Editor follows the same order (LevelRunner creates a GameManager).
+            EditScene(BuildScript.Scenes[1], scene =>
+            {
+                var runner = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<LevelRunner>(true)).First(r => r != null);
+                WireArray(runner, "allLevels", ordered);
+            });
         }
+
+        [MenuItem("Courtyard/Setup/Sync Level Order")]
+        public static void SyncLevelOrderFromAssets() =>
+            SyncLevelOrder(AssetDatabase.FindAssets("t:" + nameof(LevelDefinition), new[] { "Assets/_Game/Data/Levels" })
+                .Select(AssetDatabase.GUIDToAssetPath).Select(AssetDatabase.LoadAssetAtPath<LevelDefinition>));
 
         // ---------------------------------------------------------------- UI prefabs
 

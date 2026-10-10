@@ -7,7 +7,8 @@ using UnityEngine.InputSystem;
 namespace Courtyard.Minigames
 {
     /// <summary>
-    /// Hold over the V60 to pour from the counter kettle and move in slow circles. Flow follows how fast the
+    /// Grab the kettle, carry it over the cup (the V60 on it) and pour in slow circles — it only pours while it is above
+    /// the cup. Flow follows how fast the
     /// pointer moves and must stay in a band. Quality = share of pouring time in the band + how close the mug
     /// fill ends to the line. Owns the pour zone and the flow meter.
     /// </summary>
@@ -27,8 +28,8 @@ namespace Courtyard.Minigames
         [SerializeField, Min(0.1f)] private float flowSmoothing = 4f;
         [SerializeField, Range(0f, 1f)] private float bandMin = 0.12f;
         [SerializeField, Range(0f, 1f)] private float bandMax = 0.55f;
-        [Tooltip("Only pours while the pointer is this close to the dripper centre.")]
-        [SerializeField, Min(0.1f)] private float pourRadius = 1.4f;
+        [Tooltip("Pours only while the kettle is above the cup, at most this far to either side of it.")]
+        [SerializeField, Min(0.1f)] private float pourReach = 0.8f;
         [SerializeField, Range(0f, 1f)] private float bandWeight = 0.6f;
         [SerializeField, Range(0f, 1f)] private float minFillToFinish = 0.1f;
         [Tooltip("Seconds of pouring the kettle holds (matches the ~8 s pour sound); then the stream fades and the pour ends.")]
@@ -58,9 +59,11 @@ namespace Courtyard.Minigames
             _fx = ctx.Fx;
             _camera = ctx.WorldCamera;
             _streamColour = _counter.KettleStream.color;
-            NudgeTarget = _counter.Dripper;
-            pourZone.Pressed += OnPressed;
-            pourZone.Released += OnReleased;
+            NudgeTarget = _counter.KettleTarget.transform;
+            pourZone.gameObject.SetActive(false); // the kettle itself is grabbed now
+            _counter.KettleTarget.Pressed += OnPressed;
+            _counter.KettleTarget.Released += OnReleased;
+            _counter.KettleTarget.Interactable = true;
 
             _counter.SetMugDrink(MugDrink.Black, coffeeColor);
             _counter.SetMugGauge(true);
@@ -74,13 +77,9 @@ namespace Courtyard.Minigames
 
         private void OnDestroy()
         {
-            if (pourZone != null)
-            {
-                pourZone.Pressed -= OnPressed;
-                pourZone.Released -= OnReleased;
-            }
-
             if (_counter == null) return;
+            _counter.KettleTarget.Pressed -= OnPressed;
+            _counter.KettleTarget.Released -= OnReleased;
             ReturnKettle();
             _counter.HideFillLine();
             _counter.SetMugGauge(false);
@@ -88,8 +87,12 @@ namespace Courtyard.Minigames
             AudioManager.StopTrack(SfxId.Pour);
         }
 
+        private bool _holding;
+
         private void OnPressed()
         {
+            if (IsComplete || _runningDry) return;
+            _holding = true;
             if (_kettleReturn != null) StopCoroutine(_kettleReturn);
             _counter.KettleView.SetPouring(true);
             _lastPointer = PointerWorld();
@@ -109,13 +112,15 @@ namespace Courtyard.Minigames
 
         private void OnReleased()
         {
+            if (!_holding) return;
+            _holding = false;
             ReturnKettle();
             if (!IsComplete && _counter.MugLevel >= minFillToFinish) Finish();
         }
 
         private void Update()
         {
-            if (IsComplete || _runningDry || !pourZone.IsHeld) return;
+            if (IsComplete || _runningDry || !_holding) return;
 
             var pointer = PointerWorld();
             var speed = (pointer - _lastPointer).magnitude / Mathf.Max(Time.deltaTime, 0.0001f);
@@ -126,9 +131,9 @@ namespace Courtyard.Minigames
             var kettle = _counter.Kettle;
             var follow = 1f - Mathf.Exp(-kettleFollow * Time.deltaTime);
             kettle.position = Vector3.Lerp(kettle.position, new Vector3(pointer.x, pointer.y, kettle.position.z), follow);
-            var overDripper = Vector2.Distance(kettle.position, _counter.Dripper.position) <= pourRadius;
-            SetStream(overDripper);
-            if (!overDripper) return;
+            var overCup = _counter.IsAboveMug(kettle.position, pourReach);
+            SetStream(overCup);
+            if (!overCup) return;
 
             _pourTime += Time.deltaTime;
             _pouredSeconds += Time.deltaTime;
@@ -190,7 +195,8 @@ namespace Courtyard.Minigames
 
         private void Finish()
         {
-            pourZone.Interactable = false;
+            _holding = false;
+            _counter.KettleTarget.Interactable = false;
             ReturnKettle();
             _counter.StartCoroutine(_counter.LiftDripper()); // runs on the counter: this step is destroyed right after
 

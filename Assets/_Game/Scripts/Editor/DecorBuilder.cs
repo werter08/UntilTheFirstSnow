@@ -211,10 +211,15 @@ namespace Courtyard.Editor
                 piece.size = new Vector2(GlassSize.x, piece.size.y);
             }
 
-            Find(kitchen, "MiraWindow").localPosition = new Vector3(0.85f, 2.75f, 0f);
-            Find(kitchen, "MiraWindowLight").localPosition = new Vector3(0.85f, 2.75f, 0f);
-            Find(kitchen, "TreeTrunk").localPosition = new Vector3(-1.5f, 0.5f, 0f);
-            Find(kitchen, "TreeCrown").localPosition = new Vector3(-1.5f, 2.3f, 0f);
+            // Placeholder spots only: hand-placed outside pieces keep the team's position (OutsideBuilder places the art).
+            if (!IsHandPlaced(Find(kitchen, "MiraWindow")))
+            {
+                Find(kitchen, "MiraWindow").localPosition = new Vector3(0.85f, 2.75f, 0f);
+                Find(kitchen, "MiraWindowLight").localPosition = new Vector3(0.85f, 2.75f, 0f);
+            }
+
+            if (!IsHandPlaced(Find(kitchen, "TreeTrunk"))) Find(kitchen, "TreeTrunk").localPosition = new Vector3(-1.5f, 0.5f, 0f);
+            if (!IsHandPlaced(Find(kitchen, "TreeCrown"))) Find(kitchen, "TreeCrown").localPosition = new Vector3(-1.5f, 2.3f, 0f);
 
             // Frame in front of the courtyard, its shadow just behind it.
             Fit(kitchen, "WindowFrame", "Window_Frame", WindowCenter, FrameHeight, "Wall", 9, WindowFolder);

@@ -70,6 +70,7 @@ namespace Courtyard.Kitchen
             if (quality < niceThreshold) return;
             // A good drink glows warm; a perfect one also sparkles.
             Puff(worldPosition + Vector3.down * 0.6f, warmGlow, quality >= perfectThreshold ? 10 : 5, 0.7f, 0.45f, -0.15f);
+            AudioManager.Play(SfxId.Perfect); // finished in the green zone: the little "well done" jingle
             if (quality < perfectThreshold)
             {
                 Burst(worldPosition, perfectSparkle, 6, 1.4f, 0.08f, -0.2f);
@@ -78,7 +79,6 @@ namespace Courtyard.Kitchen
 
             Popup(perfectText, worldPosition);
             Burst(worldPosition, perfectSparkle, 18, 2.2f, 0.12f, -0.2f);
-            AudioManager.Play(SfxId.Perfect);
         }
 
         /// <summary>A badly made drink: frost crystals and cold mist over the mug, "Brr…", the camera shivers.</summary>
