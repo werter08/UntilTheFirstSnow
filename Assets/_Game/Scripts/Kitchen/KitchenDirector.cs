@@ -77,7 +77,6 @@ namespace Courtyard.Kitchen
         [SerializeField] private GameObject cinnamon;
         [SerializeField] private GameObject herMug;
         [SerializeField] private GameObject scarf;
-        [SerializeField] private GameObject blanket;
         [SerializeField] private SpriteRenderer plant;
         [Tooltip("One colour per PlantStage, in enum order.")]
         [SerializeField] private Color[] plantStageColors =
@@ -153,7 +152,6 @@ namespace Courtyard.Kitchen
             if (herMug != null) herMug.SetActive(props.herMug);
             FillRack(props.rackMugs);
             scarf.SetActive(props.scarf);
-            blanket.SetActive(props.blanket);
             var stage = (int)props.plantStage;
             var drawn = plantStageSprites != null && stage < plantStageSprites.Length ? plantStageSprites[stage] : null;
             if (drawn != null)

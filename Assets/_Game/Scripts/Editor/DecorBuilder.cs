@@ -157,8 +157,6 @@ namespace Courtyard.Editor
                 Fit(kitchen, "BeansJar", "Oddblot_deco", new Vector2(-8.85f, -2.2f + CounterLift), 1.15f, "Props", 1);
             Find(kitchen, "CinnamonJar").localPosition = new Vector3(-8.1f, -2.4f + CounterLift, 0f);
             SetLayer(Find(kitchen, "CinnamonJar"), "Props", 1);
-            // Day 30: her scarf lies on the front of the counter, between the kettle and the grinder.
-            Find(kitchen, "Scarf").localPosition = new Vector3(-5.7f, -2.75f, 0f);
 
             // Window sill: flower in a glass (tinted per PlantStage by the KitchenDirector).
             if (AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "plant_wilted.png") == null
@@ -194,6 +192,7 @@ namespace Courtyard.Editor
             ApplyDoorScene(kitchen);
             NotesBuilder.ApplyToKitchen(scene, kitchen);
             ApplyHoverHighlight(kitchen);
+            ApplyScarf(kitchen);
             ApplyShadows(kitchen); // last: props are in their final places
         }
 
@@ -705,28 +704,6 @@ namespace Courtyard.Editor
                 PlaceAtScreenScale(prop, cinnamon, prop.localPosition, "Props", 1);
                 prop.localScale = new Vector3(0.7f, 0.7f, 1f);
             }
-
-            // Day 30's scarf and blanket: drawn art when it exists, otherwise nothing (no coloured placeholder boxes).
-            foreach (var (objectName, file) in new[] { ("Scarf", "scarf"), ("Blanket", "blanket") })
-            {
-                var target = kitchen.Find(objectName); // direct child (Mira's old door placeholder has its own "Scarf")
-                if (target == null) continue;
-                var renderer = target.GetComponent<SpriteRenderer>();
-                var drawn = Load(file);
-                if (drawn != null)
-                {
-                    renderer.sprite = drawn;
-                    renderer.drawMode = SpriteDrawMode.Simple;
-                    renderer.color = Color.white;
-                    target.localScale = Vector3.one;
-                    renderer.enabled = true;
-                }
-                else
-                {
-                    renderer.enabled = false;
-                    Debug.LogWarning($"DecorBuilder: {PropsFolder}{file}.png missing — the Day 30 {objectName.ToLower()} is hidden until drawn.");
-                }
-            }
         }
 
         /// <summary>Drawn wall clock above the shelf; the KitchenDirector turns the hands to the day's time.</summary>
@@ -1041,6 +1018,55 @@ namespace Courtyard.Editor
             colour.color = fade;
         }
 
+        /// <summary>
+        /// Day 30: her scarf hangs over the fridge's main handle (scarf_hanging.png, 1:1): the top of the loop at
+        /// (1680, 520), in front of the fridge and behind the notes, swaying gently from the top of the loop (±1.5°, 3 s).
+        /// The KitchenDirector shows it on scarf days only. The old blanket slot is removed.
+        /// </summary>
+        private static void ApplyScarf(Transform kitchen)
+        {
+            var blanket = kitchen.Find("Blanket");
+            if (blanket != null) Object.DestroyImmediate(blanket.gameObject);
+
+            var scarf = kitchen.Find("Scarf");
+            if (scarf == null) return;
+            var renderer = scarf.GetComponent<SpriteRenderer>();
+            const string path = PropsFolder + "scarf_hanging.png";
+            if (!File.Exists(path))
+            {
+                renderer.enabled = false;
+                Debug.LogWarning($"DecorBuilder: {path} missing — the Day 30 scarf is hidden.");
+                return;
+            }
+
+            SetPivot(path, new Vector2(0.5f, 1f)); // top of the loop
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            renderer.sprite = sprite;
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.color = Color.white;
+            renderer.enabled = true;
+            SetLayer(scarf, "Fridge", 21); // fridge 20 < scarf 21 < note shadows 22 < notes 23
+            scarf.localScale = Vector3.one;
+            scarf.localRotation = Quaternion.identity;
+            if (!IsHandPlaced(scarf))
+            {
+                var top = Px(1680f, 520f);
+                scarf.position = new Vector3(top.x, top.y, scarf.position.z);
+            }
+
+            var collider = scarf.GetComponent<BoxCollider2D>();
+            if (collider != null) Object.DestroyImmediate(collider);
+            var motion = GetOrAdd<AmbientMotion>(scarf);
+            Edit(motion, so =>
+            {
+                so.FindProperty("swayDegrees").floatValue = 1.5f;
+                so.FindProperty("bob").floatValue = 0f;
+                so.FindProperty("stretch").floatValue = 0f;
+                so.FindProperty("speed").floatValue = 2f * Mathf.PI / 3f; // one slow sway every 3 s
+                so.FindProperty("windResponse").floatValue = 0f;          // indoors: no wind
+            });
+        }
+
         /// <summary>One soft warm light that lights up whatever clickable / draggable thing the cursor is over.</summary>
         private static void ApplyHoverHighlight(Transform kitchen)
         {
@@ -1314,9 +1340,9 @@ namespace Courtyard.Editor
             for (var i = 0; i < 5; i++)
             {
                 if (Find(kitchen, $"FridgeNote{i}", false) == null) continue;
-                SetOrder(kitchen, $"FridgeNote{i}", 22);
+                SetOrder(kitchen, $"FridgeNote{i}", 23); // above the hanging scarf (21) and their shadows (22)
                 var magnet = Find(kitchen, $"FridgeNote{i}", false)?.Find("Magnet");
-                if (magnet != null) SetOrder(magnet, 23);
+                if (magnet != null) SetOrder(magnet, 24);
                 Drop(kitchen, $"FridgeNote{i}");
             }
         }

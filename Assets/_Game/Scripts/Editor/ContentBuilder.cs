@@ -474,7 +474,6 @@ namespace Courtyard.Editor
             var scarf = Box(root, "Scarf", new Vector2(-9f, -2.55f), new Vector2(1f, 0.35f), new Color(0.75f, 0.2f, 0.2f), 1);
 
             // Foreground
-            var blanket = Box(root, "Blanket", new Vector2(-7.6f, -4.6f), new Vector2(3.4f, 1.3f), new Color(0.65f, 0.45f, 0.35f), 0, false, "Foreground");
             var miraAtDoor = Box(root, "MiraAtDoor", new Vector2(8.7f, -0.4f), new Vector2(1.6f, 4.2f), new Color(0.35f, 0.3f, 0.4f), 1, false, "Foreground");
             Box(miraAtDoor.transform, "Scarf", new Vector2(-0.1f, 1.2f), new Vector2(1.7f, 0.45f), new Color(0.75f, 0.2f, 0.2f), 2, false, "Foreground");
             Box(miraAtDoor.transform, "Hand", new Vector2(-0.9f, 0f), new Vector2(0.4f, 0.3f), new Color(0.9f, 0.75f, 0.65f), 2, false, "Foreground");
@@ -515,7 +514,6 @@ namespace Courtyard.Editor
             Wire(director, "cinnamon", cinnamon.gameObject);
             Wire(director, "herMug", herMug.gameObject);
             Wire(director, "scarf", scarf.gameObject);
-            Wire(director, "blanket", blanket.gameObject);
             Wire(director, "plant", plant);
             WireArray(director, "fridgeNotes", notes);
             Edit(director, so =>

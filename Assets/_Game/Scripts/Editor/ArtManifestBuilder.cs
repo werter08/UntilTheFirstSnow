@@ -54,7 +54,7 @@ namespace Courtyard.Editor
             },
             ["Counter"] = new[] { "Counter", "CounterEdge" },
             ["Fridge"] = new[] { "Fridge", "FridgeNote0", "FridgeNote1", "FridgeNote2", "Magnet", "ShoppingList" },
-            ["PropsFront"] = new[] { "Blanket", "MiraAtDoor", "Scarf" },
+            ["PropsFront"] = new[] { "MiraAtDoor" }, // the scarf hangs on the fridge (DecorBuilder.ApplyScarf)
             ["Hands"] = new[] { "Hand", "PourGrey", "PourBeige" },
             ["FX"] = new[] { "PopupTemplate" },
         };

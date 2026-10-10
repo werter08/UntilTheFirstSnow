@@ -85,11 +85,63 @@ namespace Courtyard.Editor
                 slots[i] = slot.gameObject;
             }
 
+            ApplyNoteArt(slots);
             var card = EnsureNoteCard(scene);
+            ApplyOpenNoteArt(card);
             var director = kitchen.GetComponent<KitchenDirector>();
             WireArray(director, "fridgeNotes", slots.Cast<Object>().ToArray());
             Wire(director, "notesBook", book);
             Wire(director, "noteCard", card);
+        }
+
+        private const string NoteArt = "Assets/_Game/Art/Props/note.png";
+        private const string OpenNoteArt = "Assets/_Game/Art/Props/note_open.png";
+
+        /// <summary>The team's note drawing on the fridge (1:1); until then the sticky-note placeholders stay.</summary>
+        private static void ApplyNoteArt(GameObject[] slots)
+        {
+            var art = AssetDatabase.LoadAssetAtPath<Sprite>(NoteArt);
+            if (art == null)
+            {
+                Debug.LogWarning($"NotesBuilder: {NoteArt} missing — the fridge notes stay sticky-note placeholders.");
+                return;
+            }
+
+            foreach (var slot in slots)
+            {
+                var renderer = slot.GetComponent<SpriteRenderer>();
+                renderer.sprite = art;
+                renderer.drawMode = SpriteDrawMode.Simple;
+                renderer.color = Color.white;
+                slot.transform.localScale = Vector3.one;
+                var collider = slot.GetComponent<BoxCollider2D>();
+                if (collider != null)
+                {
+                    collider.size = art.bounds.size;
+                    collider.offset = art.bounds.center;
+                }
+
+                var magnet = slot.transform.Find("Magnet");
+                if (magnet != null) magnet.localPosition = new Vector3(0f, art.bounds.max.y - 0.05f, 0f);
+            }
+        }
+
+        /// <summary>The open note on screen: the team's paper drawing (note_open.png) behind the handwritten text.</summary>
+        private static void ApplyOpenNoteArt(NoteCard card)
+        {
+            var art = AssetDatabase.LoadAssetAtPath<Sprite>(OpenNoteArt);
+            var paper = card.transform.Find("Paper")?.GetComponent<Image>();
+            if (paper == null) return;
+            if (art == null)
+            {
+                Debug.LogWarning($"NotesBuilder: {OpenNoteArt} missing — the open note is plain paper.");
+                return;
+            }
+
+            paper.sprite = art;
+            paper.color = Color.white;
+            paper.preserveAspect = true;
+            ((RectTransform)paper.transform).sizeDelta = new Vector2(art.rect.width, art.rect.height);
         }
 
         /// <summary>The reading card: a dimmed screen with the paper note in the middle (above the story box).</summary>

@@ -20,7 +20,6 @@ namespace Courtyard.Core
         [UnityEngine.Tooltip("Day 30: his and her mugs side by side on the window sill.")]
         public bool mugsOnSill;
         public bool scarf;
-        public bool blanket;
         public PlantStage plantStage;
         [UnityEngine.Tooltip("Day 1: the ceiling lamp is off (grey bulb, no light) — overcast and empty.")]
         public bool lampOff;

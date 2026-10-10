@@ -205,7 +205,6 @@ namespace Courtyard.Editor
             props.FindPropertyRelative("brewMug").enumValueIndex = (int)value.brewMug;
             props.FindPropertyRelative("mugsOnSill").boolValue = value.mugsOnSill;
             props.FindPropertyRelative("scarf").boolValue = value.scarf;
-            props.FindPropertyRelative("blanket").boolValue = value.blanket;
             props.FindPropertyRelative("plantStage").enumValueIndex = (int)value.plantStage;
             props.FindPropertyRelative("fridgeNotes").intValue = value.fridgeNotes;
             props.FindPropertyRelative("sweater").enumValueIndex = (int)value.sweater;
@@ -342,7 +341,7 @@ namespace Courtyard.Editor
                 Day = 30, Clock = "17:00", Time = TimeOfDay.Evening, Weather = Weather.Snow, Tree = TreeStage.BareSnow,
                 Window = MiraWindowState.Dark, // she is in his kitchen
                 Palette = Palette(new Color(1f, 0.85f, 0.7f), 0.95f, new Color(1f, 0.72f, 0.42f), 1.1f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Green, mugsOnSill = true, herMug = true, scarf = true, blanket = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Green, mugsOnSill = true, herMug = true, scarf = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers, MugStyle.Yellow },
                 Steps = new[] { P.KettleBoil, P.SteamMilk, P.HerDrinkFromMemory },
                 Beats = new[]
