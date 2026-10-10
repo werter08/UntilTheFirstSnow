@@ -73,6 +73,7 @@ namespace Courtyard.Editor
             ConfigureImports(PropsFolder);
             ConfigureImports(DrinksFolder);
             ConfigureImports(FxFolder);
+            if (AssetDatabase.IsValidFolder(ScenesFolder.TrimEnd('/'))) ConfigureImports(ScenesFolder); // Day 10 door scene
         }
 
         public static void Apply()
@@ -1042,54 +1043,66 @@ namespace Courtyard.Editor
             Wire(pour, "drops", drops);
         }
 
-        private const string DoorArt = "Assets/_Game/Art/Scenes/door_mira.png";
+        private const string ScenesFolder = "Assets/_Game/Art/Scenes/";
         private static readonly Vector2 DoorViewCentre = new(40f, 0f); // far from the kitchen; the camera visits it
 
+        /// <summary>Canvas pixel centre (1920×1080, y down) → local offset inside the door view.</summary>
+        private static Vector3 DoorPx(float x, float y) => new((x - 960f) / 100f, (540f - y) / 100f, 0f);
+
         /// <summary>
-        /// Day 10's front door: the team's full-screen drawing (Art/Scenes/door_mira.png, 1920×1080) or a placeholder
-        /// hallway + door + Mira, and her cup to click (HerCup — move it onto the cup in the drawing; HandPlaced keeps it).
+        /// Day 10's front door, from the team's art in Art/Scenes (1:1, as in their mockup): door_bg behind, Mira
+        /// (mira_door_figure) in the doorway, her cup (mira_door_cup — the click target) between her hands, and her
+        /// fingers (mira_door_fingers, cut from the figure) over the cup. Placeholders while a file is missing.
+        /// Hand-placed Mira / cup keep their spots.
         /// </summary>
         private static void ApplyDoorScene(Transform kitchen)
         {
             var view = Find(kitchen, "DoorView", false) ?? Empty(kitchen, "DoorView", DoorViewCentre);
             view.position = new Vector3(DoorViewCentre.x, DoorViewCentre.y, 0f);
-            var art = AssetDatabase.LoadAssetAtPath<Sprite>(DoorArt);
+            Sprite Art(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(ScenesFolder + n + ".png");
+            var background = Art("door_bg");
+            var figure = Art("mira_door_figure");
+            var cupArt = Art("mira_door_cup");
+            var fingers = Art("mira_door_fingers");
             var square = AssetDatabase.LoadAssetAtPath<Sprite>(SquarePath);
+            var oldDoor = view.Find("Door");
+            if (oldDoor != null) oldDoor.gameObject.SetActive(false); // the placeholder door is in door_bg now
 
             var backdrop = SpriteChild(view, "Backdrop");
-            if (art != null) PlaceAtScreenScale(backdrop, art, Vector2.zero, "Wall", 0);
+            if (background != null) PlaceAtScreenScale(backdrop, background, Vector2.zero, "Wall", 0);
             else
             {
-                Debug.LogWarning($"DecorBuilder: {DoorArt} missing — the door scene uses a placeholder.");
+                Debug.LogWarning($"DecorBuilder: {ScenesFolder}door_bg.png missing — the door scene uses a placeholder.");
                 Box(backdrop, square, new Vector2(19.2f, 10.8f), new Color(0.86f, 0.74f, 0.58f), "Wall", 0);
             }
 
-            var placeholder = art == null;
-            var door = SpriteChild(view, "Door");
-            door.gameObject.SetActive(placeholder);
-            if (placeholder) { Box(door, square, new Vector2(4.4f, 8.6f), new Color(0.42f, 0.28f, 0.2f), "Wall", 1); door.localPosition = new Vector3(0f, -0.9f, 0f); }
+            // Figure placed from the mockup: top-left at (525, -55), so the scarf and jeans run off the screen.
             var mira = SpriteChild(view, "Mira");
-            mira.gameObject.SetActive(placeholder);
-            if (placeholder) { Box(mira, square, new Vector2(2.2f, 6.2f), new Color(0.93f, 0.6f, 0.42f), "Props", 1); mira.localPosition = new Vector3(0.1f, -1.9f, 0f); }
+            var miraKeep = IsHandPlaced(mira) ? mira.localPosition : (Vector3?)null;
+            if (figure != null) PlaceAtScreenScale(mira, figure, Vector2.zero, "Props", 1);
+            else Box(mira, square, new Vector2(2.2f, 6.2f), new Color(0.93f, 0.6f, 0.42f), "Props", 1);
+            mira.localPosition = miraKeep ?? (figure != null ? DoorPx(525f + figure.rect.width * 0.5f, -55f + figure.rect.height * 0.5f) : new Vector3(0.1f, -1.9f, 0f));
 
             var cup = SpriteChild(view, "HerCup");
-            var cupRenderer = cup.GetComponent<SpriteRenderer>();
-            cupRenderer.sprite = Load(PropsFolder, "mug_hers");
-            cupRenderer.drawMode = SpriteDrawMode.Simple;
-            cupRenderer.color = Color.white;
-            cupRenderer.enabled = placeholder; // in the drawing the cup is painted in her hands: only the click area remains
-            SetLayer(cup, "Props", 3);
-            if (!IsHandPlaced(cup))
+            var cupKeep = IsHandPlaced(cup) ? cup.localPosition : (Vector3?)null;
+            PlaceAtScreenScale(cup, cupArt != null ? cupArt : Load(PropsFolder, "mug_hers"), Vector2.zero, "Props", 2);
+            cup.localPosition = cupKeep ?? (cupArt != null ? DoorPx(872f + cupArt.rect.width * 0.5f, 375f + cupArt.rect.height * 0.5f) : new Vector3(1.0f, -1.2f, 0f));
+            var cupSprite = cup.GetComponent<SpriteRenderer>().sprite;
+
+            // Her fingers over the cup (cut from the figure), aligned with the figure.
+            var hands = SpriteChild(view, "Fingers");
+            hands.gameObject.SetActive(fingers != null && figure != null);
+            if (fingers != null && figure != null)
             {
-                cup.localPosition = new Vector3(1.0f, -1.2f, 0f);
-                cup.localScale = Vector3.one;
+                PlaceAtScreenScale(hands, fingers, Vector2.zero, "Props", 3);
+                hands.localPosition = mira.localPosition;
             }
 
             var collider = GetOrAdd<BoxCollider2D>(cup);
-            if (cupRenderer.sprite != null)
+            if (cupSprite != null)
             {
-                collider.size = cupRenderer.sprite.bounds.size + new Vector3(0.3f, 0.3f, 0f);
-                collider.offset = cupRenderer.sprite.bounds.center;
+                collider.size = cupSprite.bounds.size + new Vector3(0.3f, 0.3f, 0f);
+                collider.offset = cupSprite.bounds.center;
             }
 
             var target = GetOrAdd<PointerTarget>(cup);
