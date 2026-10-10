@@ -180,6 +180,15 @@ namespace Courtyard.Editor
                 sheet.AddSprite(sprite);
                 var main = particles.main;
                 main.startColor = Color.white; // the drawing carries its own colour
+                // Drawn size (1 px = 1/100 unit) scaled for the courtyard's depth, keeping the drawing's proportions.
+                var depth = system == "Leaves" ? 0.55f : system == "Snow" ? 0.5f : 0.7f;
+                var w = sprite.rect.width / 100f * depth;
+                var h = sprite.rect.height / 100f * depth;
+                main.startSize3D = true;
+                main.startSizeX = new ParticleSystem.MinMaxCurve(w * 0.75f, w);
+                main.startSizeY = new ParticleSystem.MinMaxCurve(h * 0.75f, h);
+                main.startSizeZ = 1f;
+                if (system == "Rain") main.startRotation = 0f; // drops fall straight; leaves and snow keep spinning
                 EditorUtility.SetDirty(particles);
             }
         }

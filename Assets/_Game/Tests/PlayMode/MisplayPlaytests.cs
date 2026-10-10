@@ -158,6 +158,7 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();
             yield return PlayGrindBeans();
             yield return PlayPourOver();
+            yield return PlayTakeHerCup();
             yield return PlaySteamMilk();
             yield return PlayPickToppings<PickToppingsStep>(Topping.Salt, Topping.Cocoa);
             Assert.That(LastQuality, Is.EqualTo(0f));

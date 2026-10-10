@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using Courtyard.Core;
 using Courtyard.Minigames;
@@ -133,6 +134,16 @@ namespace Courtyard.Editor
                     so.FindProperty("badDrinkChill").floatValue = spec.BadDrinkChill;
                     so.FindProperty("minWarmth").floatValue = spec.MinWarmth;
                     so.FindProperty("warmthLocked").boolValue = spec.Locked;
+
+                    // Step order (prefabs by name), so new steps reach existing levels without a full rebuild.
+                    var stepList = so.FindProperty("steps");
+                    var prefabs = spec.Steps.Select(n => AssetDatabase.LoadAssetAtPath<GameObject>($"{P.Folder}{n}.prefab")).ToArray();
+                    if (prefabs.All(p => p != null))
+                    {
+                        stepList.arraySize = prefabs.Length;
+                        for (var i = 0; i < prefabs.Length; i++)
+                            stepList.GetArrayElementAtIndex(i).objectReferenceValue = prefabs[i].GetComponent<MinigameStep>();
+                    }
                     var rack = props.FindPropertyRelative("rackMugs");
                     rack.arraySize = spec.Rack.Length;
                     for (var i = 0; i < spec.Rack.Length; i++) rack.GetArrayElementAtIndex(i).enumValueIndex = (int)spec.Rack[i];
@@ -285,10 +296,11 @@ namespace Courtyard.Editor
                 Day = 10, Clock = "09:15", Time = TimeOfDay.Morning, Weather = Weather.Leaves, Tree = TreeStage.Golden,
                 Window = MiraWindowState.Lit,
                 Palette = Palette(new Color(1f, 0.92f, 0.78f), 1.1f, new Color(1f, 0.82f, 0.55f), 0.5f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Hers, plantStage = PlantStage.Recovering, fridgeNotes = 1, sweater = Sweater.Grey },
-                Rack = new[] { MugStyle.Chipped, MugStyle.His },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.His, plantStage = PlantStage.Recovering, fridgeNotes = 1, sweater = Sweater.Grey },
+                Rack = new[] { MugStyle.Chipped }, // he brews in his mug; her cup arrives at the door (and stays: Day 20's rack)
                 // MiraVisit (knock at the door) sits between PourOver and SteamMilk so her lines follow the brief's order.
-                Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.MiraVisit, P.SteamMilk, P.GuessHerDrink },
+                // At the door (MiraVisit) he takes her cup (TakeHerCup); milk and spices then go into her cup.
+                Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.MiraVisit, P.TakeHerCup, P.SteamMilk, P.GuessHerDrink },
                 Beats = new[]
                 {
                     Start(thought, "Sunday. The light is different today."),

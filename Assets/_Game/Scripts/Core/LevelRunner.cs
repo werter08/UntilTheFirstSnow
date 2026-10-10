@@ -122,7 +122,7 @@ namespace Courtyard.Core
                 _activeStep.Completed += q => quality = q;
                 hint.Show(_activeStep.HintText);
                 counter.SetAllInteractable(false);
-                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands));
+                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader));
 
                 _draining = true;
                 yield return new WaitUntil(() => quality >= 0f);

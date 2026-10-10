@@ -132,6 +132,18 @@ namespace Courtyard.Tests
             Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.6f), "PourOver quality");
         }
 
+        /// <summary>Day 10: she knocks; at the door, take her cup. Back in the kitchen two cups stand on the counter.</summary>
+        protected IEnumerator PlayTakeHerCup()
+        {
+            yield return AdvanceTo<TakeHerCupStep>();
+            var director = Object.FindAnyObjectByType<KitchenDirector>();
+            Assert.That(director.HerCupAtDoor, Is.Not.Null, "The door scene should show her cup.");
+            yield return Wait(0.3f);
+            yield return Click(director.HerCupAtDoor.transform);
+            yield return WaitForCompletion(20f);
+            Assert.That(GameObject.Find("Mug (his)"), Is.Not.Null, "His cup should stay on the counter beside hers.");
+        }
+
         protected IEnumerator PlayWaveBack()
         {
             yield return AdvanceTo<WaveBackStep>();

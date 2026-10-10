@@ -32,7 +32,7 @@ namespace Courtyard.Minigames
         [Tooltip("Putting the kettle back below this fill doesn't end the step.")]
         [SerializeField, Range(0f, 1f)] private float minFillToFinish = 0.15f;
         [Tooltip("How far (sideways) from the cup's opening the spout may be and still pour into it.")]
-        [SerializeField, Min(0.1f)] private float pourReach = 0.55f;
+        [SerializeField, Min(0.1f)] private float pourReach = 0.5f;
         [SerializeField, Min(0.1f)] private float kettleFollow = 14f;
         [SerializeField, Min(0f)] private float spoonReturnSeconds = 0.2f;
         [SerializeField, Min(0f)] private float kettleReturnSeconds = 0.25f;

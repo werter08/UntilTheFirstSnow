@@ -203,7 +203,7 @@ MonoBehaviour:
   flowSmoothing: 4
   bandMin: 0.12
   bandMax: 0.55
-  pourRadius: 1.4
+  pourReach: 0.6
   bandWeight: 0.6
   minFillToFinish: 0.1
   waterSeconds: 8

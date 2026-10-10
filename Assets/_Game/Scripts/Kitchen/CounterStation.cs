@@ -107,8 +107,10 @@ namespace Courtyard.Kitchen
         public Vector3 MugTop => new(mugBody.bounds.center.x - mugBody.bounds.extents.x * 0.29f, mugBody.bounds.max.y, 0f);
 
         /// <summary>Is the point above the mug's opening (for carrying the kettle or a spice jar to it)?</summary>
+        /// <summary>True when <paramref name="world"/> (e.g. the kettle's spout) is over the cup: within
+        /// <paramref name="reach"/> of its centre sideways and above its rim (not below it, not far overhead).</summary>
         public bool IsAboveMug(Vector2 world, float reach) =>
-            Mathf.Abs(world.x - MugTop.x) <= reach && world.y >= MugTop.y - 0.25f && world.y <= MugTop.y + 2.2f;
+            Mathf.Abs(world.x - MugTop.x) <= reach && world.y >= MugTop.y + 0.15f && world.y <= MugTop.y + 2f;
 
         public bool IsOverMug(Vector2 world) =>
             mugBody.bounds.Contains(new Vector3(world.x, world.y, mugBody.bounds.center.z));
@@ -183,6 +185,7 @@ namespace Courtyard.Kitchen
             SetDripperAlpha(1f);
             if (restingSpoon != null) restingSpoon.gameObject.SetActive(HasStep<Minigames.InstantCoffeeStep>(level));
             SetCoffeeBagOpen(false);
+            if (_hisCup != null) Destroy(_hisCup);
             milkStation.SetActive(props.milk);
             toppingShelf.SetActive(props.toppings);
             var style = (int)props.brewMug;
@@ -215,6 +218,44 @@ namespace Courtyard.Kitchen
 
         public ParticleSystem MugSteam => mugSteam;
         public Transform RestingSpoon => restingSpoon;
+
+        [Header("Day 10: her cup joins his on the counter")]
+        [Tooltip("Where his finished cup moves when hers takes the brewing spot (offset from the mug, world units).")]
+        [SerializeField] private Vector2 hisCupOffset = new(-1.95f, 0f);
+
+        private GameObject _hisCup;
+
+        /// <summary>
+        /// Mira's cup comes to the counter: his finished cup stays as a still copy beside it, and the brewing mug becomes
+        /// her cup — empty, ready for the next steps to fill. Two cups on the table.
+        /// </summary>
+        public void BringHerCup()
+        {
+            if (_hisCup != null) Destroy(_hisCup);
+            _hisCup = StillCopy(mugBody.gameObject, mugBody.transform.position + (Vector3)hisCupOffset);
+            var shadow = mugBody.transform.parent.Find(mugBody.name + "Shadow");
+            if (shadow != null)
+                StillCopy(shadow.gameObject, shadow.position + (Vector3)hisCupOffset).transform.SetParent(_hisCup.transform, true);
+
+            var hers = (int)MugStyle.Hers;
+            if (mugSprites != null && hers < mugSprites.Length && mugSprites[hers] != null) mugBody.sprite = mugSprites[hers];
+            if (mugContents != null) mugContents.SetChipped(false);
+            mugFoam.SetActive(false);
+            SetMugLevel(0f);
+            SetMugDrink(MugDrink.Instant, Color.white);
+            if (mugContents != null) mugContents.ClearSpice();
+            SetSteam(0.7f);
+        }
+
+        /// <summary>A copy that only draws (no clicks, no scripts) — the drink, its mask and steam keep showing.</summary>
+        private static GameObject StillCopy(GameObject source, Vector3 position)
+        {
+            var copy = Instantiate(source, position, source.transform.rotation, source.transform.parent);
+            copy.name = source.name + " (his)";
+            foreach (var behaviour in copy.GetComponentsInChildren<MonoBehaviour>(true)) Destroy(behaviour);
+            foreach (var collider in copy.GetComponentsInChildren<Collider2D>(true)) Destroy(collider);
+            return copy;
+        }
 
         /// <summary>The bag of beans is open while grinding (no-op without the drawn bag).</summary>
         public void SetCoffeeBagOpen(bool open)

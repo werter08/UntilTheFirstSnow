@@ -14,7 +14,7 @@ namespace Courtyard.Editor
     /// </summary>
     internal static class MinigamePrefabBuilder
     {
-        private const string Folder = "Assets/_Game/Prefabs/Minigames/";
+        public const string Folder = "Assets/_Game/Prefabs/Minigames/";
 
         public const string KettleBoil = "KettleBoil";
         public const string InstantCoffee = "InstantCoffee";
@@ -26,6 +26,7 @@ namespace Courtyard.Editor
         public const string HerDrinkFromMemory = "HerDrinkFromMemory";
         public const string WaveBack = "WaveBack";
         public const string MiraVisit = "MiraVisit";
+        public const string TakeHerCup = "TakeHerCup";
 
         private static readonly Color Coffee = new(0.35f, 0.2f, 0.1f);
         private static readonly Color Water = new(0.75f, 0.85f, 0.95f);
@@ -51,8 +52,13 @@ namespace Courtyard.Editor
             {
                 var thermometer = root.transform.Find("Thermometer");
                 if (thermometer != null) Object.DestroyImmediate(thermometer.gameObject);
-                Wire(root.GetComponent<KettleBoilStep>(), "hintText", KettleBoilHint);
+                var step = root.GetComponent<KettleBoilStep>();
+                Wire(step, "hintText", KettleBoilHint);
+                // The lid rattles from 90 °C: give the player ~1.5 s after that to switch off (90–108 is "good").
+                Wire(step, "bandMax", 108f);
+                Wire(step, "qualityFalloff", 30f);
             });
+            LoadOrCreatePrefab(Folder + TakeHerCup + ".prefab", BuildTakeHerCup); // Day 10 at the door
         }
 
         /// <summary>Day 20 ChooseMug with the drawn mugs: two decoys and hers (the maple leaf, seen on Day 10).</summary>
@@ -207,6 +213,7 @@ namespace Courtyard.Editor
                 (HerDrinkFromMemory, () => BuildPickToppings(HerDrinkFromMemory, "Make her usual. Pick two toppings, then click the mug.")),
                 (WaveBack, BuildWaveBack),
                 (MiraVisit, BuildMiraVisit),
+                (TakeHerCup, BuildTakeHerCup),
             };
 
             return builders.ToDictionary(
@@ -326,6 +333,15 @@ namespace Courtyard.Editor
             var root = new GameObject(WaveBack);
             var step = root.AddComponent<WaveBackStep>();
             Wire(step, "hintText", "She's waving! Click your mug to wave back.");
+            Wire(step, "scored", false);
+            return root;
+        }
+
+        private static GameObject BuildTakeHerCup()
+        {
+            var root = new GameObject(TakeHerCup);
+            var step = root.AddComponent<TakeHerCupStep>();
+            Wire(step, "hintText", "Take her cup.");
             Wire(step, "scored", false);
             return root;
         }

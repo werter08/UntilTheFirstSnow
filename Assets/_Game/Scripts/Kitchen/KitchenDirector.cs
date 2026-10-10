@@ -203,6 +203,33 @@ namespace Courtyard.Kitchen
 
         public void SetMiraAtDoor(bool visible) => miraAtDoor.SetActive(visible);
 
+        [Header("Day 10: at the front door")]
+        [Tooltip("The door scene (Mira with her cup), placed away from the kitchen; the camera visits it.")]
+        [SerializeField] private Transform doorView;
+        [SerializeField] private PointerTarget herCupAtDoor;
+
+        private Vector3? _kitchenCamera;
+
+        public PointerTarget HerCupAtDoor => doorView != null ? herCupAtDoor : null;
+
+        /// <summary>Moves the camera to the front door (Mira with her cup) and back (call while the screen is black).</summary>
+        public void ShowDoor(Camera cam, bool atDoor)
+        {
+            if (doorView == null || cam == null) return;
+            var t = cam.transform;
+            if (atDoor)
+            {
+                _kitchenCamera ??= t.position;
+                doorView.gameObject.SetActive(true);
+                t.position = new Vector3(doorView.position.x, doorView.position.y, t.position.z);
+                return;
+            }
+
+            if (_kitchenCamera.HasValue) t.position = _kitchenCamera.Value;
+            _kitchenCamera = null;
+            doorView.gameObject.SetActive(false);
+        }
+
         public void SetSillMugs(bool visible)
         {
             if (sillMugs != null) sillMugs.SetActive(visible);

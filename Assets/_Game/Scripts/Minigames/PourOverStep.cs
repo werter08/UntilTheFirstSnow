@@ -29,7 +29,7 @@ namespace Courtyard.Minigames
         [SerializeField, Range(0f, 1f)] private float bandMin = 0.12f;
         [SerializeField, Range(0f, 1f)] private float bandMax = 0.55f;
         [Tooltip("Pours only while the kettle is above the cup, at most this far to either side of it.")]
-        [SerializeField, Min(0.1f)] private float pourReach = 0.8f;
+        [SerializeField, Min(0.1f)] private float pourReach = 0.6f;
         [SerializeField, Range(0f, 1f)] private float bandWeight = 0.6f;
         [SerializeField, Range(0f, 1f)] private float minFillToFinish = 0.1f;
         [Tooltip("Seconds of pouring the kettle holds (matches the ~8 s pour sound); then the stream fades and the pour ends.")]
@@ -125,14 +125,16 @@ namespace Courtyard.Minigames
             var pointer = PointerWorld();
             var speed = (pointer - _lastPointer).magnitude / Mathf.Max(Time.deltaTime, 0.0001f);
             _lastPointer = pointer;
-            _flow = Mathf.Lerp(_flow, Mathf.Clamp01(speed / speedForFullFlow), 1f - Mathf.Exp(-flowSmoothing * Time.deltaTime));
-            flowMeter.SetValue(_flow);
-
             var kettle = _counter.Kettle;
             var follow = 1f - Mathf.Exp(-kettleFollow * Time.deltaTime);
             kettle.position = Vector3.Lerp(kettle.position, new Vector3(pointer.x, pointer.y, kettle.position.z), follow);
             var overCup = _counter.IsAboveMug(kettle.position, pourReach);
             SetStream(overCup);
+
+            // Nothing changes until the kettle is over the cup: the flow meter rests at zero, the cup doesn't fill.
+            var target = overCup ? Mathf.Clamp01(speed / speedForFullFlow) : 0f;
+            _flow = Mathf.Lerp(_flow, target, 1f - Mathf.Exp(-flowSmoothing * Time.deltaTime));
+            flowMeter.SetValue(_flow);
             if (!overCup) return;
 
             _pourTime += Time.deltaTime;

@@ -34,8 +34,8 @@ MonoBehaviour:
     cinnamon: 1
     herMug: 0
     toppings: 1
-    brewMug: 2
-    rackMugs: 0000000001000000
+    brewMug: 1
+    rackMugs: 00000000
     mugsOnSill: 0
     scarf: 0
     blanket: 0
@@ -48,6 +48,7 @@ MonoBehaviour:
   - {fileID: 104158219434757867, guid: dccb5e1aee3234a4484f894ced79da0d, type: 3}
   - {fileID: 6738547792549017874, guid: 61b9f335f46924425b3f7ffe28e6e34a, type: 3}
   - {fileID: 5262487450328234932, guid: 8b01d6c73ddfa4e92b1fd201f6a01f3c, type: 3}
+  - {fileID: 3176449780106624447, guid: 231fa81c2de6d49dab19bab6cb8db21e, type: 3}
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
   - {fileID: 7175227584742457043, guid: cbeeab98e4bdc40cdbee94abbb2e6547, type: 3}
   storyBeats:

@@ -51,6 +51,6 @@ MonoBehaviour:
   startTemperature: 20
   trembleFrom: 75
   bandMin: 90
-  bandMax: 96
+  bandMax: 108
   heatPerSecond: 12
-  qualityFalloff: 15
+  qualityFalloff: 30

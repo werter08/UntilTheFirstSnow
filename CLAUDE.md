@@ -113,7 +113,7 @@ export PROJ="$(pwd)"
 |---|---|---|---|---|---|
 | 1 | Grey morning, light rain | KettleBoil → InstantCoffee | slow drain (tutorial) | Her window `LitWarmSilhouette`. No hint; it's for the attentive player. | Desaturated blue-grey, fluorescent light |
 | 5 | Rainy evening, heavy rain | KettleBoil → GrindBeans → PourOver | medium drain | She **waves**; the player clicks a "raise mug" prompt to wave back | Grey with first orange leaves |
-| 10 | Sunny morning, falling leaves | KettleBoil → GrindBeans → PourOver → SteamMilk → GuessHerDrink | medium | **Knock at the door**: her hand and scarf at the edge of the frame. She borrows coffee; you make *her* drink from a hint | Golden, warm sunlight |
+| 10 | Sunny morning, falling leaves | KettleBoil → GrindBeans → PourOver → MiraVisit → TakeHerCup → SteamMilk → GuessHerDrink | medium | **Knock at the door** ("took-took"): fade to black, footsteps, eyes open at the front door (Art/Scenes/door_mira.png) — take her cup. Back in the kitchen two cups stand on the counter: his finished coffee and her cup, which milk and spices then fill (from a hint) | Golden, warm sunlight |
 | 20 | Late night, cold, windy | KettleBoil → GrindBeans → PourOver → SteamMilk → ChooseMug (hers) | **fast drain, 2 meters** (him + her) | **Note on her window**: "Heating broke 🥶". He replies "Hold on." The level ends with him carrying two mugs across the courtyard (fade to black, footsteps on leaves) | Dark blue night, warm lamp pocket |
 | 30 | Last evening of autumn, first snow | KettleBoil → SteamMilk → HerDrinkFromMemory | **no drain** (meter full and glowing) | She's **in his kitchen**: scarf on the chair, second mug, blanket. Her window across is `Empty`/dark | Warmest palette, snow outside |
 

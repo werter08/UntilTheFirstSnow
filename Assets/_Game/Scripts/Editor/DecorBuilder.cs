@@ -152,6 +152,8 @@ namespace Courtyard.Editor
 
             ApplyCoffeeBagAndSpoon(kitchen);
             OutsideBuilder.ApplyToKitchen(kitchen); // after the manifest: the outside art owns its layers
+            ApplyPourStream(kitchen);
+            ApplyDoorScene(kitchen);
             ApplyShadows(kitchen); // last: props are in their final places
 
             // Bag of real beans from Day 5 ("Bought real beans today") stands at the left end of the counter.
@@ -1002,6 +1004,111 @@ namespace Courtyard.Editor
             var fade = new Gradient();
             fade.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) }, alpha);
             colour.color = fade;
+        }
+
+        /// <summary>The kettle pours drops of water (the team's raindrop) instead of a solid rectangle.</summary>
+        private static void ApplyPourStream(Transform kitchen)
+        {
+            var stream = Find(kitchen, "Stream", false);
+            if (stream == null || stream.GetComponentInParent<KettleView>(true) == null)
+            {
+                Debug.LogWarning("DecorBuilder: no kettle 'Stream' for the pour drops.");
+                return;
+            }
+
+            var existing = stream.Find("Drops");
+            if (existing != null) Object.DestroyImmediate(existing.gameObject);
+            var water = new Color(0.78f, 0.9f, 1f, 0.95f);
+            // The kettle's origin is the spout tip: the drops start there and fall into the cup.
+            var drops = Particles(stream, "Drops", -(Vector2)stream.localPosition, 0.06f, new Vector2(0f, -3.2f), water, 0.12f, 0.32f, 0f, "Props", 0);
+            var main = drops.main;
+            main.playOnAwake = true;
+            main.gravityModifier = 0.8f;
+            main.startRotation = 0f;
+            var drop = AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "weather_rain.png");
+            if (drop != null)
+            {
+                var sheet = drops.textureSheetAnimation;
+                sheet.enabled = true;
+                sheet.mode = ParticleSystemAnimationMode.Sprites;
+                sheet.AddSprite(drop);
+                main.startSize3D = true;
+                main.startSizeX = new ParticleSystem.MinMaxCurve(0.05f, 0.07f);
+                main.startSizeY = new ParticleSystem.MinMaxCurve(0.16f, 0.22f);
+                main.startSizeZ = 1f;
+            }
+
+            var pour = GetOrAdd<PourStream>(stream);
+            Wire(pour, "drops", drops);
+        }
+
+        private const string DoorArt = "Assets/_Game/Art/Scenes/door_mira.png";
+        private static readonly Vector2 DoorViewCentre = new(40f, 0f); // far from the kitchen; the camera visits it
+
+        /// <summary>
+        /// Day 10's front door: the team's full-screen drawing (Art/Scenes/door_mira.png, 1920×1080) or a placeholder
+        /// hallway + door + Mira, and her cup to click (HerCup — move it onto the cup in the drawing; HandPlaced keeps it).
+        /// </summary>
+        private static void ApplyDoorScene(Transform kitchen)
+        {
+            var view = Find(kitchen, "DoorView", false) ?? Empty(kitchen, "DoorView", DoorViewCentre);
+            view.position = new Vector3(DoorViewCentre.x, DoorViewCentre.y, 0f);
+            var art = AssetDatabase.LoadAssetAtPath<Sprite>(DoorArt);
+            var square = AssetDatabase.LoadAssetAtPath<Sprite>(SquarePath);
+
+            var backdrop = SpriteChild(view, "Backdrop");
+            if (art != null) PlaceAtScreenScale(backdrop, art, Vector2.zero, "Wall", 0);
+            else
+            {
+                Debug.LogWarning($"DecorBuilder: {DoorArt} missing — the door scene uses a placeholder.");
+                Box(backdrop, square, new Vector2(19.2f, 10.8f), new Color(0.86f, 0.74f, 0.58f), "Wall", 0);
+            }
+
+            var placeholder = art == null;
+            var door = SpriteChild(view, "Door");
+            door.gameObject.SetActive(placeholder);
+            if (placeholder) { Box(door, square, new Vector2(4.4f, 8.6f), new Color(0.42f, 0.28f, 0.2f), "Wall", 1); door.localPosition = new Vector3(0f, -0.9f, 0f); }
+            var mira = SpriteChild(view, "Mira");
+            mira.gameObject.SetActive(placeholder);
+            if (placeholder) { Box(mira, square, new Vector2(2.2f, 6.2f), new Color(0.93f, 0.6f, 0.42f), "Props", 1); mira.localPosition = new Vector3(0.1f, -1.9f, 0f); }
+
+            var cup = SpriteChild(view, "HerCup");
+            var cupRenderer = cup.GetComponent<SpriteRenderer>();
+            cupRenderer.sprite = Load(PropsFolder, "mug_hers");
+            cupRenderer.drawMode = SpriteDrawMode.Simple;
+            cupRenderer.color = Color.white;
+            cupRenderer.enabled = placeholder; // in the drawing the cup is painted in her hands: only the click area remains
+            SetLayer(cup, "Props", 3);
+            if (!IsHandPlaced(cup))
+            {
+                cup.localPosition = new Vector3(1.0f, -1.2f, 0f);
+                cup.localScale = Vector3.one;
+            }
+
+            var collider = GetOrAdd<BoxCollider2D>(cup);
+            if (cupRenderer.sprite != null)
+            {
+                collider.size = cupRenderer.sprite.bounds.size + new Vector3(0.3f, 0.3f, 0f);
+                collider.offset = cupRenderer.sprite.bounds.center;
+            }
+
+            var target = GetOrAdd<PointerTarget>(cup);
+            Edit(target, so => so.FindProperty("interactable").boolValue = false);
+            var director = kitchen.GetComponent<KitchenDirector>();
+            Wire(director, "doorView", view);
+            Wire(director, "herCupAtDoor", target);
+            view.gameObject.SetActive(false);
+        }
+
+        private static void Box(Transform target, Sprite square, Vector2 size, Color colour, string layer, int order)
+        {
+            var renderer = target.GetComponent<SpriteRenderer>();
+            renderer.sprite = square;
+            renderer.drawMode = SpriteDrawMode.Sliced;
+            renderer.size = size;
+            renderer.color = colour;
+            SetLayer(target, layer, order);
+            target.localScale = Vector3.one;
         }
 
         /// <summary>Figma pixel (1920×1080, y down) → world units.</summary>
