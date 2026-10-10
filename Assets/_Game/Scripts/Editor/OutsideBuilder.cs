@@ -153,6 +153,56 @@ namespace Courtyard.Editor
                 so.FindProperty("waveFrameSeconds").floatValue = 0.4f;
             });
             Wire(kitchen.GetComponent<KitchenDirector>(), "miraWindowArt", art);
+            ApplyMiraArm(window, art);
+        }
+
+        /// <summary>
+        /// Her waving arm (mira_arm.png): pivot at the shoulder, placed where the arm is in the waving drawing
+        /// (window pixels x 92–123, y 46–106; shoulder just under it, behind her silhouette's shoulder).
+        /// </summary>
+        private static void ApplyMiraArm(Transform window, MiraWindow art)
+        {
+            const string armPath = Folder + "mira_arm.png";
+            if (!System.IO.File.Exists(armPath))
+            {
+                Debug.LogWarning($"OutsideBuilder: {armPath} missing — Mira waves by swapping drawings.");
+                return;
+            }
+
+            var importer = (TextureImporter)AssetImporter.GetAtPath(armPath);
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            var pivot = new Vector2(0.5f, 0.03f);
+            if (settings.spriteAlignment != (int)SpriteAlignment.Custom || settings.spritePivot != pivot)
+            {
+                settings.spriteAlignment = (int)SpriteAlignment.Custom;
+                settings.spritePivot = pivot;
+                importer.SetTextureSettings(settings);
+                importer.SaveAndReimport();
+            }
+
+            var armSprite = AssetDatabase.LoadAssetAtPath<Sprite>(armPath);
+            var windowSprite = window.GetComponent<SpriteRenderer>().sprite;
+            var armT = window.Find("Arm");
+            if (armT == null)
+            {
+                armT = new GameObject("Arm").transform;
+                armT.SetParent(window, false);
+            }
+
+            var renderer = armT.GetComponent<SpriteRenderer>();
+            if (renderer == null) renderer = armT.gameObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = armSprite;
+            renderer.color = Color.white;
+            Layer(renderer, "Outside", 2);
+            // Window pixel (107, 110) — the shoulder — relative to the window sprite's centre, in units (1 px = 0.01).
+            var w = windowSprite.rect.width;
+            var h = windowSprite.rect.height;
+            armT.localPosition = new Vector3((107f - w * 0.5f) / 100f, (h * 0.5f - 110f) / 100f, 0f);
+            armT.localScale = Vector3.one * 0.9f;
+            armT.localRotation = Quaternion.identity;
+            armT.gameObject.SetActive(false);
+            Wire(art, "arm", armT);
         }
 
         /// <summary>
