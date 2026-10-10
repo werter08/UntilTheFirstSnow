@@ -21,6 +21,9 @@ namespace Courtyard.Story
         [SerializeField] private TMP_Text speakerLabel;
         [SerializeField] private GameObject continueHint;
         [SerializeField, Min(1f)] private float charactersPerSecond = 40f;
+        [Tooltip("A soft typing tick every this many letters while text types out.")]
+        [SerializeField, Min(1)] private int typingEveryCharacters = 2;
+        [SerializeField, Min(0f)] private float typingMinGapSeconds = 0.06f;
         [SerializeField, Min(0f)] private float fadeDuration = 0.25f;
 
         [Header("Style colours (background / text)")]
@@ -74,6 +77,8 @@ namespace Courtyard.Story
 
             var total = body.textInfo.characterCount;
             var shown = 0f;
+            var lastTyped = 0;
+            var nextTypeSound = 0f;
             yield return null; // don't let the click that opened this beat skip it
 
             while (shown < total)
@@ -88,6 +93,20 @@ namespace Courtyard.Story
                 }
 
                 body.maxVisibleCharacters = Mathf.Min(total, Mathf.FloorToInt(shown));
+                // Soft typing: a tick every couple of letters (not on spaces), never faster than the throttle.
+                var typed = body.maxVisibleCharacters;
+                if (typed >= lastTyped + typingEveryCharacters && Time.unscaledTime >= nextTypeSound && typed < total)
+                {
+                    var c = body.textInfo.characterInfo[Mathf.Clamp(typed - 1, 0, total - 1)].character;
+                    if (!char.IsWhiteSpace(c))
+                    {
+                        AudioManager.Play(SfxId.Type);
+                        nextTypeSound = Time.unscaledTime + typingMinGapSeconds;
+                    }
+
+                    lastTyped = typed;
+                }
+
                 yield return null;
             }
 

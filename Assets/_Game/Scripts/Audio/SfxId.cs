@@ -22,5 +22,6 @@ namespace Courtyard.Audio
         KettleDone,
         SpoonTink,
         ClockTick,
+        Type, // story text typing out
     }
 }

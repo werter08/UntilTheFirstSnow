@@ -43,6 +43,7 @@ namespace Courtyard.Editor
             (SfxId.Footsteps, "sfx_footsteps_leaves", 0.8f, 0.95f, 1.05f),
             (SfxId.Perfect, "sfx_perfect", 0.35f, 0.95f, 1.05f),
             (SfxId.ClockTick, "sfx_clock_tick", 0.25f, 0.95f, 1.05f),
+            (SfxId.Type, "sfx_clock_tick", 0.12f, 1.35f, 1.75f), // soft, pitched-up ticks while story text types out
         };
 
         /// <summary>Day → music (Audio/Music), ambience (Audio/Ambience), ambience volume. Null = none.</summary>

@@ -123,15 +123,19 @@ namespace Courtyard.Core
                 hint.Show(_activeStep.HintText);
                 counter.SetAllInteractable(false);
                 _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader));
+                StartCoroutine(FadeStepParts(_activeStep.transform, 0f, 1f)); // its own tools fade in
 
                 _draining = true;
                 yield return new WaitUntil(() => quality >= 0f);
                 _draining = false;
 
+                // Let the result land (the last pour, the meter, the punch) before the step's tools fade away.
                 hint.Hide();
                 counter.SetAllInteractable(false);
                 var step = _activeStep;
                 _activeStep = null;
+                yield return new WaitForSeconds(stepHoldSeconds);
+                yield return FadeStepParts(step.transform, 1f, 0f);
                 Destroy(step.gameObject);
                 AudioManager.StopAllLoops();
 
@@ -149,6 +153,7 @@ namespace Courtyard.Core
                     counter.SetSteam(quality);
                 }
 
+                yield return new WaitForSeconds(stepGapSeconds); // a breath before the next line or step
                 yield return story.Play(_level.GetBeats(BeatTrigger.AfterStep, i, IsGood(quality)));
             }
 
@@ -240,6 +245,38 @@ namespace Courtyard.Core
         {
             AudioManager.ColdSwell(1.2f, 0.5f); // a gust of cold
             yield return fx.Chill(counter.Mug.transform.position, worldCamera.transform);
+        }
+
+        [Header("Between steps")]
+        [Tooltip("Pause after a step finishes, before its tools fade away.")]
+        [SerializeField, Min(0f)] private float stepHoldSeconds = 0.5f;
+        [Tooltip("Fade of a step's own tools (spoon, gauges…) in and out.")]
+        [SerializeField, Min(0f)] private float stepFadeSeconds = 0.35f;
+        [Tooltip("Pause after the result feedback, before the next story line or step.")]
+        [SerializeField, Min(0f)] private float stepGapSeconds = 0.6f;
+
+        /// <summary>
+        /// Fades a step's own sprites and texts (alpha scaled from <paramref name="from"/> to <paramref name="to"/>),
+        /// keeping whatever colour the step gives them. Counter tools aren't children of the step, so they stay put.
+        /// </summary>
+        private IEnumerator FadeStepParts(Transform stepRoot, float from, float to)
+        {
+            if (stepRoot == null || stepFadeSeconds <= 0f) yield break;
+            var sprites = stepRoot.GetComponentsInChildren<SpriteRenderer>(true);
+            var texts = stepRoot.GetComponentsInChildren<TMPro.TMP_Text>(true);
+            var spriteAlpha = sprites.Select(r => r.color.a).ToArray();
+            var textAlpha = texts.Select(t => t.color.a).ToArray();
+            void Set(float k)
+            {
+                for (var i = 0; i < sprites.Length; i++)
+                    if (sprites[i] != null) { var c = sprites[i].color; c.a = spriteAlpha[i] * k; sprites[i].color = c; }
+                for (var i = 0; i < texts.Length; i++)
+                    if (texts[i] != null) { var c = texts[i].color; c.a = textAlpha[i] * k; texts[i].color = c; }
+            }
+
+            Set(from);
+            yield return Tweens.Run(stepFadeSeconds, t => Set(Mathf.Lerp(from, to, t)));
+            if (stepRoot != null) Set(to);
         }
 
         [Header("End-of-day note")]

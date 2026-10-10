@@ -34394,6 +34394,9 @@ MonoBehaviour:
   finaleZoom: 2.6
   finaleSeconds: 4
   hudGroup: {fileID: 1040335575}
+  stepHoldSeconds: 0.5
+  stepFadeSeconds: 0.35
+  stepGapSeconds: 0.6
   newNoteHint: A new note on the fridge. Click it to read.
   newNoteWaitSeconds: 5
 --- !u!4 &1414371747

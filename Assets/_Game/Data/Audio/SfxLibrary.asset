@@ -106,3 +106,8 @@ MonoBehaviour:
     - {fileID: 8300000, guid: cafbb7d998ae64190bc702b4cca19069, type: 3}
     volume: 0.25
     pitch: {x: 0.95, y: 1.05}
+  - id: 19
+    clips:
+    - {fileID: 8300000, guid: cafbb7d998ae64190bc702b4cca19069, type: 3}
+    volume: 0.12
+    pitch: {x: 1.35, y: 1.75}
