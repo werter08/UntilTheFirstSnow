@@ -188,8 +188,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8f3f668884a244b49e72f4a4771ca68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.PourOverStep
-  hintText: Hold over the dripper and pour in slow circles. Keep the flow in the
-    green. Fill to the line.
+  hintText: Grab the kettle and pour over the cup in slow circles. Keep the flow
+    in the green. Fill to the line.
   scored: 1
   warmthTarget: 0
   zone: 3

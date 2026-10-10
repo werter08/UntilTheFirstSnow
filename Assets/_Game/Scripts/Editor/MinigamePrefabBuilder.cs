@@ -95,12 +95,14 @@ namespace Courtyard.Editor
         public const string InstantCoffeeHint = "Spoon two scoops of coffee into the cup. Then pick up the kettle and pour to the line.";
         public const string GuessHerDrinkHint = "Carry two spices into her cup, one at a time. Then click the cup.";
         public const string HerUsualHint = "Make her usual: two spices, one at a time. Then click the cup.";
+        public const string PourOverHint = "Grab the kettle and pour over the cup in slow circles. Keep the flow in the green. Fill to the line.";
 
         private static void PatchHints()
         {
             Patch(Folder + InstantCoffee + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "hintText", InstantCoffeeHint));
             Patch(Folder + GuessHerDrink + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "hintText", GuessHerDrinkHint));
             Patch(Folder + HerDrinkFromMemory + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "hintText", HerUsualHint));
+            Patch(Folder + PourOver + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "hintText", PourOverHint));
         }
 
         /// <summary>Each step's own parts belong to a counter zone and move with it (see KitchenArtLayout).</summary>
@@ -241,7 +243,7 @@ namespace Courtyard.Editor
             var spoon = spoonRenderer.gameObject.AddComponent<DragTarget>();
             var spoonLoad = Box(spoonRenderer.transform, "Load", new Vector2(0.4f, 0.1f), new Vector2(0.3f, 0.22f), Coffee, 6);
 
-            Wire(step, "hintText", "Drag two spoons of coffee into the mug. Then hold the kettle to pour to the line.");
+            Wire(step, "hintText", InstantCoffeeHint);
             Wire(step, "spoon", spoon);
             Wire(step, "spoonLoad", spoonLoad);
             Wire(step, "jar", jar.GetComponent<Collider2D>());
@@ -277,7 +279,7 @@ namespace Courtyard.Editor
                 CounterLayout.GaugeHeight, Water, Gray(0.2f), 0);
             var band = Box(flow.transform, "FlowBand", Vector2.zero, new Vector2(0.55f, 0.2f), Green, 3);
 
-            Wire(step, "hintText", "Hold over the dripper and pour in slow circles. Keep the flow in the green. Fill to the line.");
+            Wire(step, "hintText", PourOverHint);
             Wire(step, "pourZone", pourZone);
             Wire(step, "flowMeter", flow);
             Wire(step, "flowBand", band);

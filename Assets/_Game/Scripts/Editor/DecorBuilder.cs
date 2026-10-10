@@ -158,7 +158,8 @@ namespace Courtyard.Editor
             ApplyShadows(kitchen); // last: props are in their final places
 
             // Bag of real beans from Day 5 ("Bought real beans today") stands at the left end of the counter.
-            Fit(kitchen, "BeansJar", "Oddblot_deco", new Vector2(-8.85f, -2.2f + CounterLift), 1.15f, "Props", 1);
+            if (Load(PropsFolder, "coffee_bag") == null) // the team's bag (ApplyCoffeeBagAndSpoon) wins; pack bag only as fallback
+                Fit(kitchen, "BeansJar", "Oddblot_deco", new Vector2(-8.85f, -2.2f + CounterLift), 1.15f, "Props", 1);
             Find(kitchen, "CinnamonJar").localPosition = new Vector3(-8.1f, -2.4f + CounterLift, 0f);
             SetLayer(Find(kitchen, "CinnamonJar"), "Props", 1);
             // Day 30: her scarf lies on the front of the counter, between the kettle and the grinder.
@@ -661,20 +662,27 @@ namespace Courtyard.Editor
         private static void ApplyJars(Transform kitchen)
         {
             Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
-            var art = new System.Collections.Generic.Dictionary<string, Sprite>
+            // Honey and salt have no drawing yet: until jar_honey / jar_salt exist they borrow the team's cocoa and
+            // instant-coffee jars, tinted (their labels say which is which).
+            var honey = Load("jar_honey");
+            var salt = Load("jar_salt");
+            var art = new System.Collections.Generic.Dictionary<string, (Sprite sprite, Color tint)>
             {
-                ["Cinnamon"] = Load("jar_cinnamon"),
-                ["Cocoa"] = Load("jar_cocoa"),
+                ["Cinnamon"] = (Load("jar_cinnamon"), Color.white),
+                ["Cocoa"] = (Load("jar_cocoa"), Color.white),
+                ["Honey"] = honey != null ? (honey, Color.white) : (Load("jar_cocoa"), new Color(1f, 0.8f, 0.4f)),
+                ["Salt"] = salt != null ? (salt, Color.white) : (Load("jar_instant"), new Color(0.93f, 0.94f, 0.97f)),
             };
 
             var toppings = Find(Find(kitchen, "Counter Tools"), "Toppings");
-            foreach (var (jarName, sprite) in art)
+            foreach (var (jarName, (sprite, tint)) in art)
             {
                 if (sprite == null) continue;
                 var jar = Find(toppings, jarName);
                 var x = jar.localPosition.x;
                 var height = sprite.bounds.size.y * ToppingJarScale;
                 PlaceAtScreenScale(jar, sprite, new Vector2(x, CounterLayout.Top + height * 0.5f), "Props", 1);
+                jar.GetComponent<SpriteRenderer>().color = tint;
                 jar.localScale = new Vector3(ToppingJarScale, ToppingJarScale, 1f);
                 var collider = jar.GetComponent<BoxCollider2D>();
                 collider.size = sprite.bounds.size;
@@ -692,6 +700,28 @@ namespace Courtyard.Editor
                 var prop = Find(kitchen, "CinnamonJar");
                 PlaceAtScreenScale(prop, cinnamon, prop.localPosition, "Props", 1);
                 prop.localScale = new Vector3(0.7f, 0.7f, 1f);
+            }
+
+            // Day 30's scarf and blanket: drawn art when it exists, otherwise nothing (no coloured placeholder boxes).
+            foreach (var (objectName, file) in new[] { ("Scarf", "scarf"), ("Blanket", "blanket") })
+            {
+                var target = kitchen.Find(objectName); // direct child (Mira's old door placeholder has its own "Scarf")
+                if (target == null) continue;
+                var renderer = target.GetComponent<SpriteRenderer>();
+                var drawn = Load(file);
+                if (drawn != null)
+                {
+                    renderer.sprite = drawn;
+                    renderer.drawMode = SpriteDrawMode.Simple;
+                    renderer.color = Color.white;
+                    target.localScale = Vector3.one;
+                    renderer.enabled = true;
+                }
+                else
+                {
+                    renderer.enabled = false;
+                    Debug.LogWarning($"DecorBuilder: {PropsFolder}{file}.png missing — the Day 30 {objectName.ToLower()} is hidden until drawn.");
+                }
             }
         }
 
