@@ -28,7 +28,15 @@ namespace Courtyard.Editor
             (30, "#c8ccd4", MiraWindowState.Dark, "tree_5_snow"),       // snowy evening; she's in his kitchen
         };
 
-        private static Vector2 Px(float x, float y) => new((x - 960f) / 100f, (540f - y) / 100f);
+        /// <summary>
+        /// Outside plan coordinates → world. The outside art is planned for a window opening of x 660–1260, y 110–560;
+        /// the kitchen's real opening (the window mask, from the art manifest) sits a little lower, so the whole
+        /// courtyard moves with it (no scaling): what you see through the window matches the plan.
+        /// </summary>
+        private static Vector2 Px(float x, float y) => new Vector2((x - 960f) / 100f, (540f - y) / 100f) + _planOffset;
+
+        private static readonly Vector2 PlannedOpeningCentre = new(0f, (540f - 335f) / 100f); // (960, 335)
+        private static Vector2 _planOffset;
 
         private static Sprite Load(string name) => AssetDatabase.LoadAssetAtPath<Sprite>(Folder + name + ".png");
 
@@ -37,7 +45,8 @@ namespace Courtyard.Editor
             foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { Folder.TrimEnd('/') }))
             {
                 var importer = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid));
-                if (importer.textureType == TextureImporterType.Sprite && importer.spritePixelsPerUnit == 100f && !importer.mipmapEnabled) continue;
+                if (importer.textureType == TextureImporterType.Sprite && importer.spriteImportMode == SpriteImportMode.Single
+                    && importer.spritePixelsPerUnit == 100f && !importer.mipmapEnabled) continue;
                 importer.textureType = TextureImporterType.Sprite;
                 importer.spriteImportMode = SpriteImportMode.Single;
                 importer.spritePixelsPerUnit = 100f; // 1 px = 1 px on the reference screen
@@ -60,6 +69,10 @@ namespace Courtyard.Editor
                 Debug.LogWarning($"OutsideBuilder: {Folder}outside_wall.png missing — the placeholder courtyard stays.");
                 return;
             }
+
+            var mask = Find(kitchen, "WindowMask");
+            _planOffset = (Vector2)mask.position - PlannedOpeningCentre;
+            Debug.Log($"OutsideBuilder: courtyard offset to the real window opening = {_planOffset * 100f} px (x right, y up).");
 
             // Sky: a solid colour behind everything outside (the old courtyard quad), coloured per level.
             var sky = Find(kitchen, "Courtyard").GetComponent<SpriteRenderer>();
@@ -150,27 +163,64 @@ namespace Courtyard.Editor
             if (mira != null) mira.targetSortingLayers = outside;
         }
 
-        /// <summary>Tree slots (not drawn yet): placeholders now, the art drops in by file name.</summary>
+        private static readonly string[] TreeArt = { "tree_1_green", "tree_2_orange", "tree_3_golden", "tree_4_half", "tree_5_snow" };
+
+        /// <summary>
+        /// The chestnut tree. The drawings are whole trees (trunk included, one per day), so each stands on its own trunk
+        /// base at (720, 635) and the separate trunk slot is hidden; without the drawings the placeholders stay.
+        /// </summary>
         private static void ApplyTree(Transform kitchen)
         {
             var trunk = Find(kitchen, "TreeTrunk");
             var trunkRenderer = trunk.GetComponent<SpriteRenderer>();
-            var trunkArt = Load("tree_trunk");
-            if (trunkArt != null)
+            var crown = Find(kitchen, "TreeCrown");
+            var crownRenderer = crown.GetComponent<SpriteRenderer>();
+            var trees = TreeArt.Where(n => System.IO.File.Exists(Folder + n + ".png")).ToArray();
+            var basePoint = Px(720f, 635f);
+
+            if (trees.Length > 0)
             {
-                trunkRenderer.sprite = trunkArt;
-                trunkRenderer.drawMode = SpriteDrawMode.Simple;
-                trunkRenderer.color = Color.white;
-                trunk.localScale = Vector3.one;
+                foreach (var name in trees) SetTrunkBasePivot(Folder + name + ".png");
+                trunk.gameObject.SetActive(false); // each drawing has its own trunk
+                Sprite(crown, Load(trees[0]), "Outside", 3); // preview; KitchenDirector picks the day's tree
+                crown.position = new Vector3(basePoint.x, basePoint.y, 0f);
+                return;
             }
 
+            trunk.gameObject.SetActive(true);
             Layer(trunkRenderer, "Outside", 2);
-            var bottom = Px(720f, 635f);
-            trunk.position = new Vector3(bottom.x, bottom.y - trunkRenderer.bounds.min.y + trunk.position.y, 0f);
-
-            var crown = Find(kitchen, "TreeCrown");
-            Layer(crown.GetComponent<SpriteRenderer>(), "Outside", 3);
+            trunk.position = new Vector3(basePoint.x, basePoint.y - trunkRenderer.bounds.min.y + trunk.position.y, 0f);
+            Layer(crownRenderer, "Outside", 3);
             crown.position = (Vector3)Px(700f, 400f);
+        }
+
+        /// <summary>Pivot at the bottom centre of the trunk (measured on the drawing's lowest rows).</summary>
+        private static void SetTrunkBasePivot(string path)
+        {
+            var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            texture.LoadImage(System.IO.File.ReadAllBytes(path));
+            var pixels = texture.GetPixels32();
+            int w = texture.width, h = texture.height;
+            Object.DestroyImmediate(texture);
+
+            int bottom = -1, min = w, max = -1;
+            for (var y = 0; y < h && bottom < 0; y++) // texture rows go bottom-up
+                for (var x = 0; x < w; x++)
+                    if (pixels[y * w + x].a > 128) { bottom = y; break; }
+            for (var y = bottom; y < Mathf.Min(h, bottom + 6); y++)
+                for (var x = 0; x < w; x++)
+                    if (pixels[y * w + x].a > 128) { min = Mathf.Min(min, x); max = Mathf.Max(max, x); }
+            if (bottom < 0 || max < min) return;
+
+            var pivot = new Vector2((min + max + 1) * 0.5f / w, bottom / (float)h);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            if (settings.spriteAlignment == (int)SpriteAlignment.Custom && (settings.spritePivot - pivot).sqrMagnitude < 1e-6f) return;
+            settings.spriteAlignment = (int)SpriteAlignment.Custom;
+            settings.spritePivot = pivot;
+            importer.SetTextureSettings(settings);
+            importer.SaveAndReimport();
         }
 
         private static SpriteRenderer Sprite(Transform target, Sprite sprite, string layer, int order)

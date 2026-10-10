@@ -24,7 +24,7 @@ MonoBehaviour:
     miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
     vignetteTint: {r: 0, g: 0, b: 0, a: 0}
   treeStage: 1
-  treeCrownSprite: {fileID: 0}
+  treeCrownSprite: {fileID: 21300000, guid: 425f33ea0d459450898a66c811485b62, type: 3}
   skyColor: {r: 0.36078432, g: 0.40784314, b: 0.47058824, a: 1}
   miraWindow: 1
   props:

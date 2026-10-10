@@ -1598,7 +1598,8 @@ namespace Courtyard.Editor
                 var importer = (TextureImporter)AssetImporter.GetAtPath(path);
                 var settings = new TextureImporterSettings();
                 importer.ReadTextureSettings(settings);
-                var changed = importer.textureType != TextureImporterType.Sprite || settings.spriteMeshType != SpriteMeshType.Tight
+                var changed = importer.textureType != TextureImporterType.Sprite || importer.spriteImportMode != SpriteImportMode.Single
+                              || settings.spriteMeshType != SpriteMeshType.Tight
                               || importer.maxTextureSize != 2048 || importer.mipmapEnabled || importer.filterMode != FilterMode.Bilinear
                               || importer.textureCompression != TextureImporterCompression.CompressedHQ;
                 if (!changed) continue;

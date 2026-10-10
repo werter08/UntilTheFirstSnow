@@ -14596,7 +14596,7 @@ Transform:
   m_GameObject: {fileID: 1055401160}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.6, y: 1.4, z: 0}
+  m_LocalPosition: {x: -2.4, y: -1.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14651,12 +14651,12 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 3
   m_MaskInteraction: 1
-  m_Sprite: {fileID: 21300000, guid: 4c75ccea1ad234a8c93f3f613d3d5f2e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a1f01ad31f6da42bd8a4f127510b9909, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 1
-  m_Size: {x: 2.2, y: 1.8}
+  m_DrawMode: 0
+  m_Size: {x: 2.63, y: 3.69}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -26499,7 +26499,7 @@ Transform:
   m_GameObject: {fileID: 1306198000}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.15, z: 0}
+  m_LocalPosition: {x: 0, y: 2.8500001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -27282,7 +27282,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1348847485
 Transform:
   m_ObjectHideFlags: 0
@@ -53697,7 +53697,7 @@ Transform:
   m_GameObject: {fileID: 1964089283}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.8749998, z: 0}
+  m_LocalPosition: {x: 0, y: 1.5749996, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -53752,7 +53752,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 0
   m_MaskInteraction: 1
-  m_Sprite: {fileID: 5772943902156874981, guid: 6bb2b6d79e916442d831e50098a062d6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6bb2b6d79e916442d831e50098a062d6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -54510,7 +54510,7 @@ Transform:
   m_GameObject: {fileID: 2043284256}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.15, z: 0}
+  m_LocalPosition: {x: 0, y: 2.8500001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -54567,12 +54567,12 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 1
   m_MaskInteraction: 1
-  m_Sprite: {fileID: 866566718549466232, guid: cb166a387516a4c2ba29ffbc7693cca3, type: 3}
+  m_Sprite: {fileID: 21300000, guid: cb166a387516a4c2ba29ffbc7693cca3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1.1, y: 1.3}
+  m_Size: {x: 1.7, y: 1.9}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -54649,13 +54649,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.7, y: 1.81}
-    newSize: {x: 1.1, y: 1.3}
+    oldSize: {x: 1.7, y: 1.9}
+    newSize: {x: 1.7, y: 1.9}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.7, y: 1.81}
+  m_Size: {x: 1.7, y: 1.9}
   m_EdgeRadius: 0
 --- !u!114 &2043284262
 MonoBehaviour:
@@ -54670,11 +54670,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Kitchen.MiraWindow
   window: {fileID: 2043284258}
-  lit: {fileID: 866566718549466232, guid: cb166a387516a4c2ba29ffbc7693cca3, type: 3}
-  dark: {fileID: 2198187578660575104, guid: 95e2d33f3520643db8bb6b3bc942e743, type: 3}
-  silhouette: {fileID: 6043390947425700158, guid: 9cd11ecf000984faca85404deea871af, type: 3}
-  wave: {fileID: -3415747309439446804, guid: bd88ce031868442c48f9fdfee93205c1, type: 3}
-  note: {fileID: 2828253176464108939, guid: 55502ea82b2df4259b6400a805b6783e, type: 3}
+  lit: {fileID: 21300000, guid: cb166a387516a4c2ba29ffbc7693cca3, type: 3}
+  dark: {fileID: 21300000, guid: 95e2d33f3520643db8bb6b3bc942e743, type: 3}
+  silhouette: {fileID: 21300000, guid: 9cd11ecf000984faca85404deea871af, type: 3}
+  wave: {fileID: 21300000, guid: bd88ce031868442c48f9fdfee93205c1, type: 3}
+  note: {fileID: 21300000, guid: 55502ea82b2df4259b6400a805b6783e, type: 3}
   glow: {fileID: 1306198002}
   waveFrameSeconds: 0.4
 --- !u!1 &2048537174
