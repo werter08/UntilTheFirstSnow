@@ -128,6 +128,8 @@ namespace Courtyard.Editor
             if (Fit(kitchen, "Shelf", "Oddblot_shelf", new Vector2(-7.3f, 1.6f), 1.9f, "Wall", 1))
                 Find(kitchen, "InstantCoffeeJar").gameObject.SetActive(false);
 
+            ApplyShadows(kitchen); // last: props are in their final places
+
             // Bag of real beans from Day 5 ("Bought real beans today") stands at the left end of the counter.
             Fit(kitchen, "BeansJar", "Oddblot_deco", new Vector2(-8.85f, -2.2f + CounterLift), 1.15f, "Props", 1);
             Find(kitchen, "CinnamonJar").localPosition = new Vector3(-8.1f, -2.4f + CounterLift, 0f);
@@ -980,6 +982,140 @@ namespace Courtyard.Editor
             var fade = new Gradient();
             fade.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) }, alpha);
             colour.color = fade;
+        }
+
+        /// <summary>
+        /// Shadows for every prop, in the team's style: the drawn contact shadows (mug_shadow for round things,
+        /// grinder_shadow for wide ones) under everything standing on the counter, sill or rack, and a 45% black
+        /// silhouette drop shadow (like the window frame's) behind everything hanging on the wall or fridge. Idempotent.
+        /// </summary>
+        private static void ApplyShadows(Transform kitchen)
+        {
+            var round = Load(PropsFolder, "mug_shadow");
+            var wide = Load(PropsFolder, "grinder_shadow");
+            if (round == null || wide == null) return;
+
+            // Things standing on a surface: shadow one order below, on the same layer.
+            Contact(kitchen, "Mug", round, 1.35f, 0.05f);
+            Contact(kitchen, "KettleBase", wide, 2.6f);
+            Contact(kitchen, "Body", wide, 1.3f, parentName: "Grinder");
+            Contact(kitchen, "Jug", round, 1.3f, parentName: "MilkStation");
+            foreach (var jar in new[] { "Cinnamon", "Honey", "Cocoa", "Salt" }) Contact(kitchen, jar, round, 0.9f, parentName: "Toppings");
+            Contact(kitchen, "BeansJar", round, 1.3f);
+            Contact(kitchen, "CinnamonJar", round, 0.65f);
+
+            // Window sill (plant, Day 30 mugs) and the rack plank: casters move up one order so the shadow fits
+            // between them and the surface.
+            SetOrder(kitchen, "Plant", 13);
+            SetOrder(kitchen, "SillMugHis", 13);
+            SetOrder(kitchen, "SillMugHers", 13);
+            Contact(kitchen, "Plant", round, 1f);
+            Contact(kitchen, "SillMugHis", round, 0.9f, 0.05f);
+            Contact(kitchen, "SillMugHers", round, 0.9f, 0.05f);
+            for (var i = 0; i < 4; i++)
+            {
+                SetOrder(kitchen, $"RackMug{i}", 3);
+                Contact(kitchen, $"RackMug{i}", round, 0.45f, 0.02f);
+            }
+
+            // Hanging on the wall / fridge: silhouette drop shadows (wall items move up one order so the shadow
+            // sits above the wall itself).
+            SetOrder(kitchen, "Shelf", 2);
+            SetOrder(kitchen, "WallPicture", 2);
+            foreach (var name in new[] { "Clock", "Calendar", "CeilingLamp", "MugRack", "Shelf", "WallPicture" }) Drop(kitchen, name);
+            for (var i = 0; i < 3; i++)
+            {
+                SetOrder(kitchen, $"FridgeNote{i}", 22);
+                var magnet = Find(kitchen, $"FridgeNote{i}", false)?.Find("Magnet");
+                if (magnet != null) SetOrder(magnet, 23);
+                Drop(kitchen, $"FridgeNote{i}");
+            }
+        }
+
+        private static Sprite Load(string folder, string name) => AssetDatabase.LoadAssetAtPath<Sprite>(folder + name + ".png");
+
+        private static Transform FindUnder(Transform kitchen, string name, string parentName)
+        {
+            if (parentName == null) return Find(kitchen, name, false);
+            return kitchen.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == name && t.parent != null && t.parent.name == parentName);
+        }
+
+        private static void SetOrder(Transform kitchen, string name, int order)
+        {
+            var target = Find(kitchen, name, false);
+            if (target != null) SetOrder(target, order);
+        }
+
+        private static void SetOrder(Transform target, int order)
+        {
+            var renderer = target.GetComponent<SpriteRenderer>();
+            if (renderer != null) renderer.sortingOrder = order;
+        }
+
+        /// <summary>
+        /// The drawn contact shadow under <paramref name="casterName"/>, sized to <paramref name="width"/> (world units),
+        /// centred under it (+ <paramref name="xNudge"/>, e.g. to sit under a mug's body rather than its handle).
+        /// A sibling of the caster, so it can stay on the surface while the caster is lifted.
+        /// </summary>
+        private static void Contact(Transform kitchen, string casterName, Sprite shadow, float width, float xNudge = 0f, string parentName = null)
+        {
+            var caster = FindUnder(kitchen, casterName, parentName);
+            var renderer = caster != null ? caster.GetComponent<SpriteRenderer>() : null;
+            if (renderer == null || renderer.sprite == null)
+            {
+                Debug.LogWarning($"DecorBuilder: no prop '{casterName}' for a contact shadow.");
+                return;
+            }
+
+            var shadowName = casterName + "Shadow";
+            var transform = caster.parent.Find(shadowName) ?? new GameObject(shadowName).transform;
+            transform.SetParent(caster.parent, false);
+            var shadowRenderer = GetOrAdd<SpriteRenderer>(transform);
+            shadowRenderer.sprite = shadow;
+            // The drawn shadow (≈ 128,112,112 at 50%) barely shows on the warm counter: tint it darker.
+            shadowRenderer.color = new Color(0.42f, 0.34f, 0.34f, 1f);
+            shadowRenderer.sortingLayerID = renderer.sortingLayerID;
+            shadowRenderer.sortingOrder = renderer.sortingOrder - 1;
+
+            var bounds = renderer.bounds;
+            var parentScale = caster.parent.lossyScale;
+            var scaleX = width / shadow.bounds.size.x;
+            var scaleY = Mathf.Clamp(scaleX, 0.6f, 1.1f); // small props get a thinner shadow
+            transform.localScale = new Vector3(scaleX / parentScale.x, scaleY / parentScale.y, 1f);
+            transform.position = new Vector3(bounds.center.x + xNudge, bounds.min.y - 0.02f, caster.position.z); // peeks out below
+            transform.localRotation = Quaternion.identity;
+            Edit(GetOrAdd<ContactShadow>(transform), so =>
+            {
+                so.FindProperty("caster").objectReferenceValue = caster;
+                so.FindProperty("casterRenderer").objectReferenceValue = renderer;
+            });
+        }
+
+        /// <summary>A silhouette drop shadow behind <paramref name="casterName"/> (child: it swings and swaps with it).</summary>
+        private static void Drop(Transform kitchen, string casterName)
+        {
+            var caster = Find(kitchen, casterName, false);
+            var renderer = caster != null ? caster.GetComponent<SpriteRenderer>() : null;
+            if (renderer == null)
+            {
+                Debug.LogWarning($"DecorBuilder: no prop '{casterName}' for a drop shadow.");
+                return;
+            }
+
+            var transform = caster.Find("DropShadow") ?? new GameObject("DropShadow").transform;
+            transform.SetParent(caster, false);
+            var shadowRenderer = GetOrAdd<SpriteRenderer>(transform);
+            shadowRenderer.sprite = renderer.sprite;
+            shadowRenderer.drawMode = renderer.drawMode;
+            if (renderer.drawMode != SpriteDrawMode.Simple) shadowRenderer.size = renderer.size;
+            shadowRenderer.color = new Color(0f, 0f, 0f, 0.45f);
+            shadowRenderer.sortingLayerID = renderer.sortingLayerID;
+            shadowRenderer.sortingOrder = renderer.sortingOrder - 1;
+            var scale = caster.lossyScale;
+            transform.localPosition = new Vector3(ShadowOffset.x / scale.x, ShadowOffset.y / scale.y, 0f);
+            transform.localRotation = Quaternion.identity;
+            transform.localScale = Vector3.one;
+            Wire(GetOrAdd<DropShadow>(transform), "caster", renderer);
         }
 
         /// <summary>A few windows across the courtyard whose lights go on and off.</summary>
