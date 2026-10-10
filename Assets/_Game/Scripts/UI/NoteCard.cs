@@ -31,8 +31,14 @@ namespace Courtyard.UI
         public void Open(FridgeNote note)
         {
             if (note == null) return;
-            body.text = note.Text;
-            signature.text = string.IsNullOrEmpty(note.From) ? string.Empty : "— " + note.From;
+            Open(note.Text, note.From);
+        }
+
+        /// <summary>Opens a page with any text (fridge note, calendar page); <paramref name="from"/> signs it.</summary>
+        public void Open(string text, string from)
+        {
+            body.text = text;
+            signature.text = string.IsNullOrEmpty(from) ? string.Empty : "— " + from;
             IsOpen = true;
             _openedFrame = Time.frameCount;
             AudioManager.Play(SfxId.PaperNote);

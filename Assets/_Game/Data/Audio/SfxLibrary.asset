@@ -111,3 +111,18 @@ MonoBehaviour:
     - {fileID: 8300000, guid: cafbb7d998ae64190bc702b4cca19069, type: 3}
     volume: 0.12
     pitch: {x: 1.35, y: 1.75}
+  - id: 20
+    clips:
+    - {fileID: 8300000, guid: 8d56cc6d22d6043b8bf268c094865dd4, type: 3}
+    volume: 0.45
+    pitch: {x: 0.6, y: 0.75}
+  - id: 21
+    clips:
+    - {fileID: 8300000, guid: a69702e78c6fb457fa24b928ca685397, type: 3}
+    volume: 0.6
+    pitch: {x: 1.1, y: 1.25}
+  - id: 22
+    clips:
+    - {fileID: 8300000, guid: b5ba21898d05f4a72955d853858b607e, type: 3}
+    volume: 0.9
+    pitch: {x: 0.55, y: 0.7}

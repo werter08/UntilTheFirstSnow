@@ -124,6 +124,7 @@ namespace Courtyard.Editor
         private static void ApplyToKitchen(Scene scene)
         {
             var kitchen = scene.GetRootGameObjects().First(g => g.name == "Kitchen").transform;
+            var handPlaced = SnapshotHandPlaced(kitchen); // whatever the passes below do, the team's placements win
             ApplyWindow(kitchen);
             ApplyWallBackground(kitchen);
             ApplyTable(kitchen);
@@ -193,6 +194,9 @@ namespace Courtyard.Editor
             NotesBuilder.ApplyToKitchen(scene, kitchen);
             ApplyHoverHighlight(kitchen);
             ApplyScarf(kitchen);
+            RestoreHandPlaced(handPlaced);
+            ApplyRackShelf(kitchen);
+            ApplyClickables(kitchen);
             ApplyShadows(kitchen); // last: props are in their final places
         }
 
@@ -878,7 +882,7 @@ namespace Courtyard.Editor
                 }
             }
             Motion(lampPivot, sway: 1.2f, speed: 0.45f, wind: 0.6f);
-            Poke(lamp, lampPivot, swing: 9f, punch: 0f, sound: Audio.SfxId.UiClick);
+            Poke(lamp, lampPivot, swing: 9f, punch: 0f, sound: Audio.SfxId.LampSwitch);
 
             // Calendar: sheet, number and ring move together.
             var calendarGroup = Find(kitchen, "CalendarGroup", false);
@@ -893,7 +897,7 @@ namespace Courtyard.Editor
                     if (t != null) t.SetParent(calendarGroup, true);
                 }
             }
-            Poke(calendar, calendarGroup, swing: 5f, punch: 0f, sound: Audio.SfxId.PaperNote);
+            Poke(calendar, calendarGroup, swing: 5f, punch: 0f, sound: Audio.SfxId.UiClick); // the page opening rustles
 
             // Window: curtains breathe (more on windy days), plant sways, Mira's silhouette moves a little.
             foreach (var curtain in new[] { "CurtainLeft", "CurtainRight" })
@@ -901,7 +905,7 @@ namespace Courtyard.Editor
                 var t = Find(kitchen, curtain, false);
                 if (t == null) continue;
                 Motion(t, sway: 0.35f, stretch: 0.012f, speed: 0.5f, wind: 1f);
-                Poke(t, t, swing: 2.5f, punch: 0f, sound: Audio.SfxId.UiClick);
+                Poke(t, t, swing: 2.5f, punch: 0f, sound: Audio.SfxId.Curtain);
             }
 
             var plant = Find(kitchen, "Plant");
@@ -910,7 +914,7 @@ namespace Courtyard.Editor
             Motion(Find(kitchen, "Silhouette"), bob: 0.02f, speed: 0.35f, wind: 0f);
 
             // Wall and fridge details.
-            Poke(Find(kitchen, "Clock"), Find(kitchen, "Clock"), swing: 4f, punch: 0.15f, sound: Audio.SfxId.UiClick);
+            Poke(Find(kitchen, "Clock"), Find(kitchen, "Clock"), swing: 4f, punch: 0.15f, sound: Audio.SfxId.ClockTick);
             Poke(Find(kitchen, "WallPicture"), Find(kitchen, "WallPicture"), swing: 7f, punch: 0f, sound: Audio.SfxId.UiClick);
             Poke(Find(kitchen, "Shelf"), Find(kitchen, "Shelf"), swing: 0f, punch: 0.12f, sound: Audio.SfxId.MugClink);
             for (var i = 0; i < 4; i++)
@@ -1025,6 +1029,104 @@ namespace Courtyard.Editor
         /// (1680, 520), in front of the fridge and behind the notes, swaying gently from the top of the loop (±1.5°, 3 s).
         /// The KitchenDirector shows it on scarf days only. The old blanket slot is removed.
         /// </summary>
+        /// <summary>
+        /// The team's rack shelf (rack_shelf.png, 1:1) under the rack mugs: as wide as the row of mugs plus a margin,
+        /// its board top where the mugs stand. Replaces the placeholder plank (and its drop shadow — the art has one).
+        /// </summary>
+        private static void ApplyRackShelf(Transform kitchen)
+        {
+            var art = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "rack_shelf.png");
+            var plank = Find(kitchen, "MugRack", false);
+            if (art == null || plank == null)
+            {
+                Debug.LogWarning("DecorBuilder: rack_shelf.png (or MugRack) missing — the rack keeps its placeholder plank.");
+                return;
+            }
+
+            var mugs = Enumerable.Range(0, 4).Select(i => Find(kitchen, $"RackMug{i}", false))
+                .Where(m => m != null).Select(m => m.GetComponent<SpriteRenderer>()).Where(m => m != null && m.sprite != null).ToArray();
+            if (mugs.Length == 0) return;
+            var left = mugs.Min(m => m.bounds.min.x);
+            var right = mugs.Max(m => m.bounds.max.x);
+            var bottom = mugs.Min(m => m.bounds.min.y);
+
+            var shadow = plank.Find("DropShadow");
+            if (shadow != null) Object.DestroyImmediate(shadow.gameObject);
+            var renderer = plank.GetComponent<SpriteRenderer>();
+            renderer.sprite = art;
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.color = Color.white;
+            var scale = (right - left + 0.5f) / art.bounds.size.x;
+            plank.localScale = new Vector3(scale, scale, 1f);
+            plank.position = new Vector3((left + right) * 0.5f, bottom + 0.03f - art.bounds.max.y * scale, plank.position.z);
+        }
+
+        /// <summary>
+        /// Things you can play with: the clock turns time (light follows), the lamp switches on/off, the calendar opens
+        /// today's page, curtains open and close; clicked too much, lamp, curtains and rack mugs break.
+        /// </summary>
+        private static void ApplyClickables(Transform kitchen)
+        {
+            var director = kitchen.GetComponent<KitchenDirector>();
+
+            var clock = Find(kitchen, "Clock", false);
+            if (clock != null) Wire(GetOrAdd<ClockControl>(clock), "director", director);
+
+            var calendar = Find(kitchen, "Calendar", false);
+            if (calendar != null) Wire(GetOrAdd<CalendarPage>(calendar), "director", director);
+
+            var lamp = Find(kitchen, "CeilingLamp", false);
+            if (lamp != null)
+            {
+                Edit(GetOrAdd<Breakable>(lamp), so => so.FindProperty("shardColour").colorValue = new Color(1f, 0.95f, 0.8f));
+                Wire(GetOrAdd<LampSwitch>(lamp), "director", director);
+            }
+
+            for (var i = 0; i < 4; i++)
+            {
+                var mug = Find(kitchen, $"RackMug{i}", false);
+                if (mug == null || mug.GetComponent<PointerTarget>() == null) continue;
+                Edit(GetOrAdd<Breakable>(mug), so => so.FindProperty("shardColour").colorValue = new Color(0.95f, 0.93f, 0.88f));
+                GetOrAdd<BreakableMug>(mug);
+            }
+
+            // Curtains: tied back (as placed) ↔ hanging loose over the window (Window_CurtainDrawn), top on the rod.
+            var drawn = Load(WindowFolder, "Window_CurtainDrawn");
+            foreach (var name in new[] { "CurtainLeft", "CurtainRight" })
+            {
+                var curtain = Find(kitchen, name, false);
+                var renderer = curtain != null ? curtain.GetComponent<SpriteRenderer>() : null;
+                if (renderer == null || renderer.sprite == null || curtain.GetComponent<PointerTarget>() == null) continue;
+                GetOrAdd<Breakable>(curtain);
+                var toggle = GetOrAdd<CurtainToggle>(curtain);
+                if (drawn == null)
+                {
+                    Debug.LogWarning("DecorBuilder: Window_CurtainDrawn.png missing — curtains can't be drawn.");
+                    continue;
+                }
+
+                // Same height as the tied curtain; wide enough to reach the window's middle (the two meet there).
+                var tied = renderer.sprite;
+                var height = renderer.bounds.size.y;
+                var top = renderer.bounds.max.y;
+                var outer = name == "CurtainLeft" ? renderer.bounds.min.x : renderer.bounds.max.x;
+                var sy = height / drawn.bounds.size.y;
+                var sx = Mathf.Clamp((Mathf.Abs(outer) + 0.05f) / drawn.bounds.size.x, sy * 0.8f, sy * 1.8f);
+                var centreX = outer - Mathf.Sign(outer) * drawn.bounds.size.x * sx * 0.5f;
+                var parent = curtain.parent;
+                var world = new Vector3(centreX, top - drawn.bounds.max.y * sy, curtain.position.z);
+                Edit(toggle, so =>
+                {
+                    so.FindProperty("tiedBack").objectReferenceValue = tied;
+                    so.FindProperty("drawn").objectReferenceValue = drawn;
+                    so.FindProperty("tiedPosition").vector3Value = curtain.localPosition;
+                    so.FindProperty("tiedScale").vector3Value = curtain.localScale;
+                    so.FindProperty("drawnPosition").vector3Value = parent != null ? parent.InverseTransformPoint(world) : world;
+                    so.FindProperty("drawnScale").vector3Value = new Vector3(sx, sy, 1f);
+                });
+            }
+        }
+
         private static void ApplyScarf(Transform kitchen)
         {
             var blanket = kitchen.Find("Blanket");
@@ -1047,13 +1149,29 @@ namespace Courtyard.Editor
             renderer.drawMode = SpriteDrawMode.Simple;
             renderer.color = Color.white;
             renderer.enabled = true;
-            SetLayer(scarf, "Fridge", 21); // fridge 20 < scarf 21 < note shadows 22 < notes 23
+            SetLayer(scarf, "Fridge", 24); // fridge 20 < note shadows 21 < notes 22 < magnets 23 < scarf 24 < handle 25
             scarf.localScale = Vector3.one;
             scarf.localRotation = Quaternion.identity;
             if (!IsHandPlaced(scarf))
             {
                 var top = Px(1680f, 520f);
                 scarf.position = new Vector3(top.x, top.y, scarf.position.z);
+            }
+
+            // The fridge's main handle drawn over the scarf (the team's handle drawing, exactly where Fridge.png has it:
+            // pixel 77, 308), so the scarf hangs behind the handle.
+            var fridge = Find(kitchen, "Fridge");
+            var fridgeSprite = fridge.GetComponent<SpriteRenderer>().sprite;
+            var handleArt = LoadKitchen("Fridge_HandleLong");
+            if (handleArt != null && fridgeSprite != null && fridgeSprite.name == "Fridge")
+            {
+                var handle = SpriteChild(fridge, "HandleOverFront");
+                PlaceAtScreenScale(handle, handleArt, Vector2.zero, "Fridge", 25);
+                var w = fridgeSprite.rect.width;
+                var h = fridgeSprite.rect.height;
+                handle.localPosition = new Vector3((77f + handleArt.rect.width * 0.5f - w * 0.5f) / 100f,
+                    (h * 0.5f - 308f - handleArt.rect.height * 0.5f) / 100f, 0f);
+                handle.gameObject.SetActive(true);
             }
 
             var collider = scarf.GetComponent<BoxCollider2D>();
@@ -1067,6 +1185,22 @@ namespace Courtyard.Editor
                 so.FindProperty("speed").floatValue = 2f * Mathf.PI / 3f; // one slow sway every 3 s
                 so.FindProperty("windResponse").floatValue = 0f;          // indoors: no wind
             });
+        }
+
+        /// <summary>Position, rotation and scale of every hand-placed object (HandPlaced) in the kitchen.</summary>
+        private static System.Collections.Generic.List<(Transform t, Vector3 p, Quaternion r, Vector3 s)> SnapshotHandPlaced(Transform kitchen) =>
+            kitchen.GetComponentsInChildren<HandPlaced>(true)
+                .Select(h => (h.transform, h.transform.localPosition, h.transform.localRotation, h.transform.localScale)).ToList();
+
+        private static void RestoreHandPlaced(System.Collections.Generic.List<(Transform t, Vector3 p, Quaternion r, Vector3 s)> snapshot)
+        {
+            foreach (var (t, p, r, s) in snapshot)
+            {
+                if (t == null) continue;
+                t.localPosition = p;
+                t.localRotation = r;
+                t.localScale = s;
+            }
         }
 
         /// <summary>One soft warm light that lights up whatever clickable / draggable thing the cursor is over.</summary>
@@ -1338,13 +1472,13 @@ namespace Courtyard.Editor
             // sits above the wall itself).
             SetOrder(kitchen, "Shelf", 2);
             SetOrder(kitchen, "WallPicture", 2);
-            foreach (var name in new[] { "Clock", "Calendar", "CeilingLamp", "MugRack", "Shelf", "WallPicture" }) Drop(kitchen, name);
+            foreach (var name in new[] { "Clock", "Calendar", "CeilingLamp", "Shelf", "WallPicture" }) Drop(kitchen, name);
             for (var i = 0; i < 5; i++)
             {
                 if (Find(kitchen, $"FridgeNote{i}", false) == null) continue;
-                SetOrder(kitchen, $"FridgeNote{i}", 23); // above the hanging scarf (21) and their shadows (22)
+                SetOrder(kitchen, $"FridgeNote{i}", 22); // shadows 21, magnets 23; the scarf (24) hangs over them
                 var magnet = Find(kitchen, $"FridgeNote{i}", false)?.Find("Magnet");
-                if (magnet != null) SetOrder(magnet, 24);
+                if (magnet != null) SetOrder(magnet, 23);
                 Drop(kitchen, $"FridgeNote{i}");
             }
         }

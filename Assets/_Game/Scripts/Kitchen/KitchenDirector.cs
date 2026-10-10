@@ -145,12 +145,15 @@ namespace Courtyard.Kitchen
             calendarDay.text = level.DayNumber.ToString();
             clockTime.text = level.ClockTime;
             SetClockHands(level.ClockTime);
+            _lampBroken = false;
+            BeginClock(level);
 
             var props = level.Props;
             beans.SetActive(props.beans);
             cinnamon.SetActive(props.cinnamon);
             if (herMug != null) herMug.SetActive(props.herMug);
             FillRack(props.rackMugs);
+            ProtectHerMug();
             scarf.SetActive(props.scarf);
             var stage = (int)props.plantStage;
             var drawn = plantStageSprites != null && stage < plantStageSprites.Length ? plantStageSprites[stage] : null;
@@ -433,6 +436,100 @@ namespace Courtyard.Kitchen
 
             clockHourHand.localRotation = Quaternion.Euler(0f, 0f, -((hours % 12) + minutes / 60f) * 30f);
             clockMinuteHand.localRotation = Quaternion.Euler(0f, 0f, -minutes * 6f);
+        }
+
+        // ---------------------------------------------------------------- clock: turn time, and the light follows
+
+        [Header("Clock you can turn (each click moves it on; the light slowly follows the hour)")]
+        [SerializeField, Min(1)] private int minutesPerClick = 15;
+        [Tooltip("Minutes of turning before the light fully follows the clock instead of the day's own look.")]
+        [SerializeField, Min(1f)] private float minutesToFollow = 180f;
+        [SerializeField] private Color dayLight = new(1f, 0.97f, 0.92f);
+        [SerializeField] private float dayLightIntensity = 1f;
+        [SerializeField] private Color nightLight = new(0.42f, 0.48f, 0.75f);
+        [SerializeField] private float nightLightIntensity = 0.55f;
+        [SerializeField] private Color daySky = new(0.66f, 0.8f, 0.92f);
+        [SerializeField] private Color nightSky = new(0.12f, 0.14f, 0.24f);
+
+        private int _startMinutes;
+        private int _minutes;
+        private Color _baseLight;
+        private float _baseIntensity;
+        private Color _baseSky;
+        private Color[] _baseShade;
+
+        private void BeginClock(LevelDefinition level)
+        {
+            _startMinutes = _minutes = ParseMinutes(level.ClockTime);
+            _baseLight = globalLight.color;
+            _baseIntensity = globalLight.intensity;
+            _baseSky = courtyard.color;
+            _baseShade = outsideShaded != null ? System.Array.ConvertAll(outsideShaded, p => p != null ? p.color : Color.white) : null;
+        }
+
+        /// <summary>Turns the clock on by <see cref="minutesPerClick"/>: hands move, and day and night slowly follow.</summary>
+        public void AdvanceClock()
+        {
+            _minutes = (_minutes + minutesPerClick) % (24 * 60);
+            var time = $"{_minutes / 60:00}:{_minutes % 60:00}";
+            clockTime.text = time;
+            SetClockHands(time);
+
+            // Night factor of the clock's hour (0 at 13:00, 1 at 01:00), blended in as more time is turned.
+            var hours = _minutes / 60f;
+            var night = Mathf.SmoothStep(0f, 1f, 0.5f - 0.5f * Mathf.Cos((hours - 13f) / 24f * Mathf.PI * 2f + Mathf.PI));
+            var turned = (_minutes - _startMinutes + 24 * 60) % (24 * 60);
+            var follow = Mathf.Clamp01(turned / minutesToFollow);
+            globalLight.color = Color.Lerp(_baseLight, Color.Lerp(dayLight, nightLight, night), follow);
+            globalLight.intensity = Mathf.Lerp(_baseIntensity, Mathf.Lerp(dayLightIntensity, nightLightIntensity, night), follow);
+            courtyard.color = Color.Lerp(_baseSky, Color.Lerp(daySky, nightSky, night), follow);
+            if (outsideShaded == null || _baseShade == null) return;
+            var shade = Color.Lerp(morningOutside, nightOutside, night);
+            for (var i = 0; i < outsideShaded.Length; i++)
+                if (outsideShaded[i] != null)
+                    outsideShaded[i].color = Color.Lerp(_baseShade[i], _outsideBase != null && i < _outsideBase.Length ? _outsideBase[i] * shade : shade, follow);
+        }
+
+        private static int ParseMinutes(string time)
+        {
+            var parts = time.Split(':');
+            return parts.Length == 2 && int.TryParse(parts[0], out var h) && int.TryParse(parts[1], out var m) ? h * 60 + m : 12 * 60;
+        }
+
+        // ---------------------------------------------------------------- lamp switch
+
+        private bool _lampBroken;
+
+        public bool LampOn => lampLight.enabled;
+
+        /// <summary>Click the lamp: on / off (unless it's broken).</summary>
+        public void ToggleLamp()
+        {
+            if (_lampBroken || _level == null) return;
+            ApplyLamp(LampOn, _level.Palette.lampColor);
+        }
+
+        /// <summary>Clicked once too often: the bulb pops and the lamp stays dark for the rest of the day.</summary>
+        public void BreakLamp()
+        {
+            _lampBroken = true;
+            if (_level != null) ApplyLamp(true, _level.Palette.lampColor);
+        }
+
+        // ---------------------------------------------------------------- calendar
+
+        /// <summary>Click the calendar: today's page with a hopeful line (one per day).</summary>
+        public void OpenCalendar()
+        {
+            if (noteCard == null || _level == null) return;
+            noteCard.Open($"<size=160%>{_level.DayNumber}</size>\n{_level.CalendarLine}", string.Empty);
+        }
+
+        /// <summary>Her mug on the rack never breaks (Day 20 needs it).</summary>
+        private void ProtectHerMug()
+        {
+            foreach (var (slot, style) in _rack)
+                if (slot.TryGetComponent<Breakable>(out var breakable)) breakable.enabled = style != MugStyle.Hers;
         }
 
         private static Color PickColor(Color[] colors, int index) =>

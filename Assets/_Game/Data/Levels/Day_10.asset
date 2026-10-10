@@ -38,7 +38,6 @@ MonoBehaviour:
     rackMugs: 00000000
     mugsOnSill: 0
     scarf: 0
-    blanket: 0
     plantStage: 1
     lampOff: 0
     sweater: 0
@@ -112,6 +111,7 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 8
   badDrinkChill: 20
+  calendarLine: Sunday. Make the coffee slowly.
   coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   drinkResults:

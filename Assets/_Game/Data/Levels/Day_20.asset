@@ -38,7 +38,6 @@ MonoBehaviour:
     rackMugs: 000000000100000002000000
     mugsOnSill: 0
     scarf: 0
-    blanket: 0
     plantStage: 2
     lampOff: 0
     sweater: 1
@@ -94,6 +93,9 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
+  calendarLine: 'Someone is cold tonight.
+
+    You know how to help.'
   coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   drinkResults:

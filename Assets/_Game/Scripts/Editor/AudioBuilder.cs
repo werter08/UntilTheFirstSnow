@@ -44,6 +44,10 @@ namespace Courtyard.Editor
             (SfxId.Perfect, "sfx_perfect", 0.35f, 0.95f, 1.05f),
             (SfxId.ClockTick, "sfx_clock_tick", 0.25f, 0.95f, 1.05f),
             (SfxId.Type, "sfx_clock_tick", 0.12f, 1.35f, 1.75f), // soft, pitched-up ticks while story text types out
+            // Stand-ins until real sounds arrive (see Docs/Texts.md → SFX status).
+            (SfxId.Curtain, "sfx_paper", 0.45f, 0.6f, 0.75f), // curtain swish: a low, slow paper rustle
+            (SfxId.LampSwitch, "sfx_kettle_switch", 0.6f, 1.1f, 1.25f),
+            (SfxId.Break, "sfx_mug_down", 0.9f, 0.55f, 0.7f), // breaking: a heavy, low clunk
         };
 
         /// <summary>Day → music (Audio/Music), ambience (Audio/Ambience), ambience volume. Null = none.</summary>

@@ -38,7 +38,6 @@ MonoBehaviour:
     rackMugs: 00000000
     mugsOnSill: 0
     scarf: 0
-    blanket: 0
     plantStage: 0
     lampOff: 0
     sweater: 0
@@ -85,6 +84,7 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 12
   badDrinkChill: 20
+  calendarLine: Rain again. Maybe someone waves back today.
   coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   drinkResults:

@@ -23,5 +23,8 @@ namespace Courtyard.Audio
         SpoonTink,
         ClockTick,
         Type, // story text typing out
+        Curtain,
+        LampSwitch,
+        Break,
     }
 }

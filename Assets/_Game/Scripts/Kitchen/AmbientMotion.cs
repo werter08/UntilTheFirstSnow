@@ -30,6 +30,15 @@ namespace Courtyard.Kitchen
             _phase = Random.value * Mathf.PI * 2f;
         }
 
+        /// <summary>Moves the rest pose (used when something else re-places the object, e.g. a curtain drawn shut).</summary>
+        public void SetBase(Vector3 position, Vector3 scale)
+        {
+            _basePosition = position;
+            _baseScale = scale;
+            transform.localPosition = position;
+            transform.localScale = scale;
+        }
+
         private void OnDisable()
         {
             transform.localPosition = _basePosition;

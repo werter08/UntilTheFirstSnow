@@ -38,7 +38,6 @@ MonoBehaviour:
     rackMugs: 
     mugsOnSill: 0
     scarf: 0
-    blanket: 0
     plantStage: 0
     lampOff: 1
     sweater: 0
@@ -83,6 +82,9 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
+  calendarLine: 'Small things count too.
+
+    One warm cup is a start.'
   coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   drinkResults:

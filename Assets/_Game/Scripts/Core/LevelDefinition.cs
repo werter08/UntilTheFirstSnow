@@ -54,6 +54,8 @@ namespace Courtyard.Core
         [SerializeField, Min(0f)] private float badStepChill = 20f;
         [Tooltip("Warmth lost when the served drink (average quality) is below the bad threshold.")]
         [SerializeField, Min(0f)] private float badDrinkChill = 35f;
+        [Tooltip("The calendar page's hopeful line for this day (click the calendar).")]
+        [SerializeField, TextArea] private string calendarLine;
         [SerializeField, TextArea] private string coldDrinkText = "Cold, bitter coffee… the cold got in. Let's try again.";
         [SerializeField, TextArea] private string failText = "Too cold… let's try again.";
 
@@ -101,6 +103,7 @@ namespace Courtyard.Core
         public float GoodResultThreshold => goodResultThreshold;
         public float BadResultThreshold => badResultThreshold;
         public string ColdDrinkText => coldDrinkText;
+        public string CalendarLine => calendarLine;
 
         /// <summary>Warmth change after a scored step: a good step warms, a bad one (below the threshold) chills.</summary>
         public float StepWarmthDelta(float quality)

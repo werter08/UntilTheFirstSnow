@@ -38,7 +38,6 @@ MonoBehaviour:
     rackMugs: 00000000010000000200000003000000
     mugsOnSill: 1
     scarf: 1
-    blanket: 1
     plantStage: 3
     lampOff: 0
     sweater: 1
@@ -92,6 +91,7 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
+  calendarLine: First snow. Nobody is cold anymore.
   coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   drinkResults:
