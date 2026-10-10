@@ -32,6 +32,7 @@ namespace Courtyard.Minigames
         private FeedbackFx _fx;
         private Vector2 _grabOffset;
         private bool _busy;
+        private bool _spoiled;
 
         private int TotalPortions => _portions.Values.Sum();
 
@@ -117,11 +118,8 @@ namespace Courtyard.Minigames
             yield return ReturnJar(jar);
             _busy = false;
 
-            if (_portions[jar.Topping] > maxPortionsPerSpice || TotalPortions > picksRequired)
-            {
-                Ruin(); // too much
-                yield break;
-            }
+            // Too much (two portions of one spice, or more than two spices) spoils it — judged when served.
+            if (_portions[jar.Topping] > maxPortionsPerSpice || TotalPortions > picksRequired) _spoiled = true;
 
             _counter.Mug.Interactable = TotalPortions > 0;
             NudgeTarget = TotalPortions == picksRequired ? _counter.Mug.transform : null; // never hint the answer
@@ -147,9 +145,9 @@ namespace Courtyard.Minigames
                 if (jar.Drag != null) jar.Drag.Interactable = false;
             _counter.Mug.Interactable = false;
 
-            if (TotalPortions < picksRequired)
+            if (_spoiled || TotalPortions < picksRequired)
             {
-                Ruin(); // too little
+                Ruin(); // too much or too little: a cold drink, the day goes on
                 return;
             }
 

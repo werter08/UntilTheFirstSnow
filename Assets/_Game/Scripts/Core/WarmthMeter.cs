@@ -4,22 +4,27 @@ using UnityEngine;
 namespace Courtyard.Core
 {
     /// <summary>
-    /// One warmth value in [0, Max]. Pure C# so it can be unit-tested; the level runner ticks it.
+    /// One warmth value in [floor, Max]. Pure C# so it can be unit-tested; the level runner ticks it.
+    /// Warmth now moves with how well the drinks are made (drain is 0 in every level); a locked meter (Day 30)
+    /// stays full, and a floor above 0 (Day 1) means the meter can never empty.
     /// </summary>
     public sealed class WarmthMeter
     {
         public const float Max = 100f;
 
         private readonly float _drainPerSecond;
+        private readonly float _floor;
 
-        public WarmthMeter(float startValue, float drainPerSecond)
+        public WarmthMeter(float startValue, float drainPerSecond, bool locked = false, float floor = 0f)
         {
             if (drainPerSecond < 0f) throw new ArgumentOutOfRangeException(nameof(drainPerSecond));
+            if (floor < 0f || floor > Max) throw new ArgumentOutOfRangeException(nameof(floor));
 
             _drainPerSecond = drainPerSecond;
-            IsLocked = drainPerSecond <= 0f;
-            // A meter that never drains is shown full (Day 30: warm together).
-            Value = IsLocked ? Max : Mathf.Clamp(startValue, 0f, Max);
+            _floor = floor;
+            IsLocked = locked;
+            // A locked meter is shown full (Day 30: warm together).
+            Value = IsLocked ? Max : Mathf.Clamp(startValue, floor, Max);
         }
 
         /// <summary>Raised with the new value whenever it changes.</summary>
@@ -54,7 +59,7 @@ namespace Courtyard.Core
 
         private void Set(float value)
         {
-            var clamped = Mathf.Clamp(value, 0f, Max);
+            var clamped = Mathf.Clamp(value, _floor, Max);
             if (Mathf.Approximately(clamped, Value)) return;
 
             Value = clamped;

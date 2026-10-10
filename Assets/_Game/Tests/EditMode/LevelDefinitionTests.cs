@@ -41,8 +41,9 @@ namespace Courtyard.Tests
         public void Day30_DoesNotDrain_AndDay20_HasTwoMeters()
         {
             var levels = AllLevels().ToDictionary(l => l.DayNumber);
-            Assert.That(levels[30].EffectiveDrainPerSecond, Is.EqualTo(0f));
-            Assert.That(new WarmthMeter(levels[30].StartWarmth, levels[30].EffectiveDrainPerSecond).IsLocked, Is.True);
+            Assert.That(levels[30].WarmthLocked, Is.True, "Day 30: warm together.");
+            Assert.That(levels.Values.All(l => l.EffectiveDrainPerSecond == 0f), Is.True, "Warmth must not drain with time.");
+            Assert.That(levels[1].MinWarmth, Is.GreaterThanOrEqualTo(15f), "Day 1 (tutorial) can't be lost.");
             Assert.That(levels[20].TwoMeters, Is.True);
         }
 

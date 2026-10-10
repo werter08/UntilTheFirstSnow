@@ -73,17 +73,18 @@ MonoBehaviour:
     miraWindowAfter: 0
   twoMeters: 0
   startWarmth: 70
-  drainPerSecond: 0.8
+  drainPerSecond: 0
   coldMultiplier: 1
   warmthPerStep: 15
   drinkWarmthBonus: 25
+  warmthLocked: 0
+  minWarmth: 15
   goodResultThreshold: 0.7
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
   coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
-  ruinedText: "That's not how it goes\u2026 let's start over."
   drinkResults:
   - icon: {fileID: 21300000, guid: 91d627434fcdd4e6abf3907d0bb14040, type: 3}
     condition: 0

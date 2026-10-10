@@ -52,13 +52,35 @@ namespace Courtyard.Tests
         }
 
         [Test]
-        public void ZeroDrain_IsLockedAtFull()
+        public void Locked_IsFull_AndNeverChanges()
         {
-            var meter = new WarmthMeter(40f, 0f);
+            var meter = new WarmthMeter(40f, 0f, locked: true);
             meter.Tick(100f);
+            meter.Chill(50f);
 
             Assert.That(meter.IsLocked, Is.True);
             Assert.That(meter.Value, Is.EqualTo(WarmthMeter.Max));
+        }
+
+        [Test]
+        public void ZeroDrain_TimeDoesNotChangeWarmth()
+        {
+            var meter = new WarmthMeter(40f, 0f);
+            meter.Tick(1000f);
+            Assert.That(meter.IsLocked, Is.False);
+            Assert.That(meter.Value, Is.EqualTo(40f));
+        }
+
+        [Test]
+        public void Floor_KeepsTheMeterFromEmptying()
+        {
+            var meter = new WarmthMeter(30f, 0f, floor: 15f);
+            var depleted = false;
+            meter.Depleted += () => depleted = true;
+            meter.Chill(100f);
+            Assert.That(meter.Value, Is.EqualTo(15f));
+            Assert.That(meter.IsEmpty, Is.False);
+            Assert.That(depleted, Is.False);
         }
 
         [Test]
@@ -89,7 +111,7 @@ namespace Courtyard.Tests
         [Test]
         public void Chill_DoesNothing_OnALockedMeter()
         {
-            var meter = new WarmthMeter(50f, 0f);
+            var meter = new WarmthMeter(50f, 0f, locked: true);
             meter.Chill(80f);
             Assert.That(meter.Value, Is.EqualTo(WarmthMeter.Max));
         }

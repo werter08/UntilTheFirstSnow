@@ -21,7 +21,7 @@ Result: **22/22 PlayMode and 32/32 EditMode pass.**
 camera shiver, weak steam); a bad served drink chills 35. A careless player now freezes on Days 1–20 at a normal pace
 (`Day01_TerribleCoffee_TheColdWins`, `TerribleBarista_FreezesOnEveryDayButTheLast`). Day 30 never fails.
 
-**Rule (from the team):** wrong amounts ruin the drink and **restart the day** — too many/few coffee spoonfuls on Day 1,
+**Rule (from the team, updated):** warmth never drains with time; wrong amounts **spoil the drink (quality 0, "Brr… cold.", warmth loss) and the day goes on**. Only warmth reaching 0 ends a day (in practice Day 20 for a careless player); Day 1 can't be lost. Previously: wrong amounts ruined the drink and restarted the day — too many/few coffee spoonfuls on Day 1,
 two portions of one spice, more than two spices, or serving with fewer than two. Run them from the Test Runner, or `unity command run_tests
 --mode PlayMode --filter Courtyard.Tests.PlayMode --filter_type assembly --async_tests true` (Editor open, ~12 min).
 

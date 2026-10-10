@@ -692,6 +692,70 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 89575989}
   m_CullTransparentMesh: 1
+--- !u!1 &98319152
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 98319154}
+  - component: {fileID: 98319153}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &98319153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 98319152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b577199bee474e01ae979a8ccd381d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Audio.AudioManager
+  library: {fileID: 11400000, guid: 8a05ada51a7904e56b40d6c14e2895b2, type: 2}
+  mixer: {fileID: 24100000, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  musicGroup: {fileID: -5021596973808864783, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  ambienceGroup: {fileID: 8214023234049042654, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  sfxGroup: {fileID: 3710202660124574611, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  uiGroup: {fileID: 1150290139741891243, guid: e81721d48421741a2a570da7ad425b5e, type: 2}
+  musicVolume: 0.25
+  musicCrossfadeSeconds: 2
+  ambienceVolume: 0.6
+  roomTone: {fileID: 8300000, guid: 94b0c8018e9974e47b39a1de5f1d6120, type: 3}
+  roomToneVolume: 0.12
+  ambienceCrossfadeSeconds: 2
+  warmCutoff: 22000
+  coldCutoff: 1500
+  coldThreshold: 0.3
+  cutoffSmoothing: 3
+  coldMusicDuck: 0.45
+  coldWind: {fileID: 8300000, guid: 1c9bc662a06514aa2af78e866fc6abb7, type: 3}
+  swellCutoff: 800
+  voices: 8
+--- !u!4 &98319154
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 98319152}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &105781404
 GameObject:
   m_ObjectHideFlags: 0
@@ -33128,7 +33192,6 @@ MonoBehaviour:
   fadeDuration: 0.8
   endColor: {r: 0, g: 0, b: 0, a: 1}
   failColor: {r: 0.55, g: 0.7, b: 0.9, a: 1}
-  ruinedColor: {r: 0.35, g: 0.27, b: 0.22, a: 1}
   failHoldSeconds: 2.5
   nudgeAfterSeconds: 7
   nudgeRepeatSeconds: 4
@@ -60871,3 +60934,4 @@ SceneRoots:
   - {fileID: 402295876}
   - {fileID: 392219578}
   - {fileID: 1414371747}
+  - {fileID: 98319154}

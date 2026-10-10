@@ -41,6 +41,10 @@ namespace Courtyard.Core
         [SerializeField, Min(0f)] private float coldMultiplier = 1f;
         [SerializeField, Min(0f)] private float warmthPerStep = 12f;
         [SerializeField, Min(0f)] private float drinkWarmthBonus = 25f;
+        [Tooltip("Warm together (Day 30): the meter is full and never changes.")]
+        [SerializeField] private bool warmthLocked;
+        [Tooltip("Warmth never drops below this (Day 1, the tutorial, can't be lost: 15).")]
+        [SerializeField, Range(0f, WarmthMeter.Max)] private float minWarmth;
         [Tooltip("Step quality at or above this counts as a good result for conditional beats.")]
         [SerializeField, Range(0f, 1f)] private float goodResultThreshold = 0.7f;
         [Header("Bad drinks: the cold wins")]
@@ -52,8 +56,6 @@ namespace Courtyard.Core
         [SerializeField, Min(0f)] private float badDrinkChill = 35f;
         [SerializeField, TextArea] private string coldDrinkText = "Cold, bitter coffee… the cold got in. Let's try again.";
         [SerializeField, TextArea] private string failText = "Too cold… let's try again.";
-        [Tooltip("Shown when a drink is ruined (too much / too little of something) and the day restarts.")]
-        [SerializeField, TextArea] private string ruinedText = "That's not how it goes… let's start over.";
 
         [Header("Served drink")]
         [Tooltip("Icons that pop up above the mug when the drink is served.")]
@@ -94,6 +96,8 @@ namespace Courtyard.Core
         public float EffectiveDrainPerSecond => drainPerSecond * coldMultiplier;
         public float WarmthPerStep => warmthPerStep;
         public float DrinkWarmthBonus => drinkWarmthBonus;
+        public bool WarmthLocked => warmthLocked;
+        public float MinWarmth => minWarmth;
         public float GoodResultThreshold => goodResultThreshold;
         public float BadResultThreshold => badResultThreshold;
         public string ColdDrinkText => coldDrinkText;
@@ -110,7 +114,6 @@ namespace Courtyard.Core
         public float DrinkWarmthDelta(float quality) =>
             quality >= badResultThreshold ? quality * drinkWarmthBonus : -badDrinkChill;
         public string FailText => failText;
-        public string RuinedText => ruinedText;
         public AudioClip Ambience => ambience;
         public AudioClip Music => music;
         public float AmbienceVolume => ambienceVolume;

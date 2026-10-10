@@ -98,6 +98,7 @@ namespace Courtyard.Editor
             ApplyMiraWindow(kitchen);
             ApplyTree(kitchen);
             ScopeLights(kitchen);
+            ApplyWeatherSprites(kitchen);
             WireArray(kitchen.GetComponent<KitchenDirector>(), "outsideShaded", new Object[]
             {
                 opposite.GetComponent<SpriteRenderer>(), Find(kitchen, "TreeTrunk").GetComponent<SpriteRenderer>(),
@@ -152,6 +153,35 @@ namespace Courtyard.Editor
                 so.FindProperty("waveFrameSeconds").floatValue = 0.4f;
             });
             Wire(kitchen.GetComponent<KitchenDirector>(), "miraWindowArt", art);
+        }
+
+        /// <summary>
+        /// Weather particles drawn by the team (Art/FX/weather_leaf, weather_snow, weather_rain). Each waits, with a
+        /// warning, until its PNG is there; the particle keeps its current look until then.
+        /// </summary>
+        private static void ApplyWeatherSprites(Transform kitchen)
+        {
+            foreach (var (system, file) in new[] { ("Leaves", "weather_leaf"), ("Snow", "weather_snow"), ("Rain", "weather_rain") })
+            {
+                var path = $"Assets/_Game/Art/FX/{file}.png";
+                var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                var particles = Find(kitchen, system, false)?.GetComponent<ParticleSystem>();
+                if (particles == null) continue;
+                if (sprite == null)
+                {
+                    Debug.LogWarning($"OutsideBuilder: {path} missing — {system} keeps its current particle look.");
+                    continue;
+                }
+
+                var sheet = particles.textureSheetAnimation;
+                sheet.enabled = true;
+                sheet.mode = ParticleSystemAnimationMode.Sprites;
+                while (sheet.spriteCount > 0) sheet.RemoveSprite(0);
+                sheet.AddSprite(sprite);
+                var main = particles.main;
+                main.startColor = Color.white; // the drawing carries its own colour
+                EditorUtility.SetDirty(particles);
+            }
         }
 
         private static readonly string[] OutsideLayers = { "Sky", "Outside", "Weather" };

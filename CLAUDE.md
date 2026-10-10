@@ -170,12 +170,12 @@ public abstract class MinigameStep : MonoBehaviour {
 | Step | Interaction | Quality is based on |
 |---|---|---|
 | **KettleBoil** | Click the kettle switch; a temperature needle rises; click again to stop inside the green band (90–96 °C) | distance from the band centre |
-| **InstantCoffee** | Carry spoonfuls from the jar into the cup one by one (the cup visibly fills), then pick up the kettle, carry it over the cup and pour to the line | pour accuracy; **wrong number of spoons ruins the coffee → the day restarts** |
+| **InstantCoffee** | Carry spoonfuls from the jar into the cup one by one (the cup visibly fills), then pick up the kettle, carry it over the cup and pour to the line | pour accuracy; **wrong number of spoons spoils the cup (quality 0: "Brr… cold." + warmth loss); the day goes on** |
 | **GrindBeans** | Drag the grinder handle in circles; the grind meter fills; stop in the "medium" zone | final grind level vs. target |
 | **PourOver** | Hold the mouse to pour from the kettle and move it in a circle over the V60; the flow-rate bar must stay in a band; fill to the line | % of time in band + final fill accuracy |
 | **SteamMilk** | Hold to steam; foam level and temperature rise; release in the zone (too long gives a squeal SFX) | release timing |
 | **ChooseMug** | Click a mug on the wall rack (one new mug per day; earlier days' mugs hang there, never duplicated); hers (maple leaf) was used on Day 10 | correct = 1, wrong = 0.6 (no hard fail) |
-| **GuessHerDrink** | Carry spices (cinnamon, honey, cocoa, salt) to the cup one portion at a time, then click the cup | matches recipe `Mira_Usual`; **too much (2× one spice, >2 total) or too little ruins it → the day restarts** |
+| **GuessHerDrink** | Carry spices (cinnamon, honey, cocoa, salt) to the cup one portion at a time, then click the cup | matches recipe `Mira_Usual`; **too much (2× one spice, >2 total) or too little spoils it (quality 0, cold drink); the day goes on** |
 | **HerDrinkFromMemory** | Same as GuessHerDrink but with no hint; uses `Mira_Usual` | matches recipe |
 
 **Juice requirements for every step:** an SFX on each action, steam particles, a small squash/scale tween on the drink, and a "perfect!" popup at quality ≥ 0.9. Everything is readable without instructions after 3 seconds; show `HintText` at the top.
@@ -183,15 +183,15 @@ public abstract class MinigameStep : MonoBehaviour {
 ## 7. Warmth system (`Scripts/Core/WarmthMeter.cs`)
 
 - `value` 0..100, starts at the level's `startWarmth`.
-- Drains every frame by `drainPerSecond * level.coldMultiplier`.
+- **No time drain** (`drainPerSecond` = 0 on every day): warmth moves only with how well the drinks are made — a good step warms, a bad or spoiled one chills.
 - After each step: `value += step.quality * level.warmthPerStep`. **A badly made step (quality < `badResultThreshold`, 0.4) is a cold drink: it takes warmth away instead** (`badStepChill` 20 at quality 0, half that just under the threshold) with frost, "Brr… cold." and a shiver.
 - Final drink served: `value += finalQuality * level.drinkWarmthBonus`; a bad final drink (average < 0.4) chills by `badDrinkChill` (35). If that empties a meter the day restarts with `coldDrinkText`. So careless play loses to the cold even at a normal pace (`BalanceTests.TerribleBarista_FreezesOnEveryDayButTheLast`). Day 30 never fails.
-- `value <= 0` → gentle fail: fade to blue, show "Too cold… let's try again.", restart the level.
+- `value <= 0` → gentle fail: fade to blue, show "Too cold… let's try again.", restart the level. This is the **only** way to lose a day; in practice only Day 20 (a careless player). Day 1 (tutorial) has a floor of 15% (`minWarmth`) and can't be lost.
 - Day 20: two meters (`Him`, `Mira`). The serve step for her mug restores only her meter. Both must stay > 0.
-- Day 30: `drainPerSecond = 0`, meter locked at full with a glow animation.
+- Day 30: `warmthLocked`, meter full with a glow animation.
 - Visuals: below 30 %, a frost vignette on the screen edges and the music low-pass filter closes slightly. Above 70 %, a warm vignette.
 
-**Tuning:** all numbers live in `LevelDefinition`. No magic numbers in code. Current values (after playtest; the first guesses of 1.5–4/s made Day 20 impossible): Day 1 drain 0.8/s, Day 5 1.0/s, Day 10 1.2/s, Day 20 1.4/s per meter, Day 30 0, startWarmth 70, warmthPerStep 15, drinkWarmthBonus 25. Warmth drains only while a minigame step is active. `BalanceTests` checks that an average player (~15 s per step, quality 0.6) finishes every day and that a very slow player can still fail Day 20.
+**Tuning:** all numbers live in `LevelDefinition`. No magic numbers in code. startWarmth 70, warmthPerStep 15, drinkWarmthBonus 25, drain 0. Cold per bad step / bad served drink: Day 1 20/35 (floor 15%), Day 5 12/20, Day 10 8/20, Day 20 20/35, Day 30 locked. `BalanceTests` checks: an average player never fails at any pace, a careless player (quality 0.1) loses only Day 20, Day 1 can't be lost, Day 30 never fails.
 
 **Counter layout:** all of the day's tools stand on the counter at once (kettle → grinder → mug + V60 → milk jug → topping jars). They live in `CounterStation` in the Kitchen scene; each minigame step activates its tool and shows only its own gauge next to it. The mug is shared, so the drink visibly builds up across steps.
 

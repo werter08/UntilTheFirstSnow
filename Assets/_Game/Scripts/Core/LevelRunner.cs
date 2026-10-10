@@ -41,7 +41,6 @@ namespace Courtyard.Core
         [SerializeField, Min(0f)] private float fadeDuration = 0.8f;
         [SerializeField] private Color endColor = Color.black;
         [SerializeField] private Color failColor = new(0.55f, 0.7f, 0.9f);
-        [SerializeField] private Color ruinedColor = new(0.35f, 0.27f, 0.22f);
         [SerializeField, Min(0f)] private float failHoldSeconds = 2.5f;
         [Header("Idle nudge (no text): the right tool bounces if the player does nothing for a while")]
         [SerializeField, Min(1f)] private float nudgeAfterSeconds = 7f;
@@ -92,7 +91,8 @@ namespace Courtyard.Core
 
         private void CreateMeters()
         {
-            _warmth = new WarmthGroup(_level.TwoMeters ? 2 : 1, _level.StartWarmth, _level.EffectiveDrainPerSecond);
+            _warmth = new WarmthGroup(_level.TwoMeters ? 2 : 1, _level.StartWarmth, _level.EffectiveDrainPerSecond,
+                _level.WarmthLocked, _level.MinWarmth);
             _warmth.Depleted += OnMeterDepleted;
             for (var i = 0; i < meterViews.Length; i++)
                 meterViews[i].Bind(i < _warmth.Meters.Count ? _warmth.Meters[i] : null);
@@ -115,7 +115,6 @@ namespace Courtyard.Core
                 _activeStep = Instantiate(_level.Steps[i], stepRoot);
                 _activeStep.transform.position += (Vector3)counter.ZoneShift(_activeStep.Zone);
                 _activeStep.Completed += q => quality = q;
-                _activeStep.Ruined += OnStepRuined;
                 hint.Show(_activeStep.HintText);
                 counter.SetAllInteractable(false);
                 _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands));
@@ -249,13 +248,6 @@ namespace Courtyard.Core
             if (_failed) return;
             _failed = true;
             StartCoroutine(Fail(_chilledByDrink ? _level.ColdDrinkText : _level.FailText, failColor));
-        }
-
-        private void OnStepRuined()
-        {
-            if (_failed) return;
-            _failed = true;
-            StartCoroutine(Fail(_level.RuinedText, ruinedColor));
         }
 
         private IEnumerator Fail(string message, Color colour)

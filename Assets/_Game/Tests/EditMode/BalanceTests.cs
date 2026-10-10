@@ -23,7 +23,8 @@ namespace Courtyard.Tests
         /// <summary>Returns the lowest warmth reached across all meters, or a negative value if the level fails.</summary>
         private static float Simulate(LevelDefinition level, float secondsPerStep, float quality)
         {
-            var group = new WarmthGroup(level.TwoMeters ? 2 : 1, level.StartWarmth, level.EffectiveDrainPerSecond);
+            var group = new WarmthGroup(level.TwoMeters ? 2 : 1, level.StartWarmth, level.EffectiveDrainPerSecond,
+                level.WarmthLocked, level.MinWarmth);
             var lowest = float.MaxValue;
 
             foreach (var step in level.Steps)
@@ -41,10 +42,13 @@ namespace Courtyard.Tests
         }
 
         [Test]
-        public void AveragePlayer_FinishesEveryDay()
+        public void AveragePlayer_NeverFails_AtAnyPace()
         {
             foreach (var level in AllLevels())
+            {
                 Assert.That(Simulate(level, 15f, 0.6f), Is.GreaterThan(0f), $"{level.name} fails for an average player");
+                Assert.That(Simulate(level, 120f, 0.6f), Is.GreaterThan(0f), $"{level.name}: time alone must not freeze anyone");
+            }
         }
 
         [Test]
@@ -55,11 +59,22 @@ namespace Courtyard.Tests
         }
 
         [Test]
-        public void TerribleBarista_FreezesOnEveryDayButTheLast()
+        public void CarelessPlayer_CanOnlyLoseDay20()
         {
-            // A badly made drink is cold: it takes warmth away, so careless play loses even at a normal pace.
-            foreach (var level in AllLevels().Where(l => l.DayNumber != 30))
-                Assert.That(Simulate(level, 15f, 0.1f), Is.LessThan(0f), $"{level.name}: bad drinks should let the cold win");
+            // Spoiled or careless drinks chill; a careless player gets through every day except the coldest night.
+            foreach (var level in AllLevels())
+            {
+                var result = Simulate(level, 15f, 0.1f);
+                if (level.DayNumber == 20) Assert.That(result, Is.LessThan(0f), "Day 20: careless drinks should let the cold win");
+                else Assert.That(result, Is.GreaterThan(0f), $"{level.name}: a careless player should still make it");
+            }
+        }
+
+        [Test]
+        public void Day1_CannotBeLost()
+        {
+            var day1 = AllLevels().Single(l => l.DayNumber == 1);
+            Assert.That(Simulate(day1, 60f, 0f), Is.GreaterThanOrEqualTo(day1.MinWarmth));
         }
 
         [Test]
@@ -67,14 +82,6 @@ namespace Courtyard.Tests
         {
             var day30 = AllLevels().Single(l => l.DayNumber == 30);
             Assert.That(Simulate(day30, 30f, 0f), Is.GreaterThan(0f));
-        }
-
-        [Test]
-        public void VerySlowPlayer_CanStillFail_OnTheColdestDay()
-        {
-            // Warmth must still matter (the limitation is rated): a very slow, sloppy player feels the cold on Day 20.
-            var day20 = AllLevels().Single(l => l.DayNumber == 20);
-            Assert.That(Simulate(day20, 30f, 0.3f), Is.LessThan(0f));
         }
     }
 }

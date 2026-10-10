@@ -14,13 +14,13 @@ namespace Courtyard.Core
         private readonly List<WarmthMeter> _meters = new();
         private bool _depleted;
 
-        public WarmthGroup(int count, float startValue, float drainPerSecond)
+        public WarmthGroup(int count, float startValue, float drainPerSecond, bool locked = false, float floor = 0f)
         {
             if (count < 1 || count > 2) throw new ArgumentOutOfRangeException(nameof(count), "Supports one or two meters.");
 
             for (var i = 0; i < count; i++)
             {
-                var meter = new WarmthMeter(startValue, drainPerSecond);
+                var meter = new WarmthMeter(startValue, drainPerSecond, locked, floor);
                 meter.Depleted += OnMeterDepleted;
                 _meters.Add(meter);
             }

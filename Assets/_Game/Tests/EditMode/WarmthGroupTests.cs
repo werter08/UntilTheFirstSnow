@@ -69,7 +69,7 @@ namespace Courtyard.Tests
             group.Tick(1000f);
 
             Assert.That(group.IsDepleted, Is.False);
-            Assert.That(group.Meters[0].Value, Is.EqualTo(WarmthMeter.Max));
+            Assert.That(group.Meters[0].Value, Is.EqualTo(70f), "Time alone doesn't change warmth.");
         }
     }
 }

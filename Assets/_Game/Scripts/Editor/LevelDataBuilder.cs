@@ -42,7 +42,11 @@ namespace Courtyard.Editor
             public string[] Steps;
             public Beat[] Beats;
             public bool TwoMeters;
-            public float Drain;
+            public float Drain; // 0 everywhere: warmth moves with how well the drinks are made, not with time
+            public float BadStepChill = 20f;
+            public float BadDrinkChill = 35f;
+            public float MinWarmth;
+            public bool Locked;
             public float OutroSeconds;
             public (string icon, BeatCondition condition)[] Drinks = System.Array.Empty<(string, BeatCondition)>();
             public MugStyle[] Rack = System.Array.Empty<MugStyle>();
@@ -124,6 +128,11 @@ namespace Courtyard.Editor
                     props.FindPropertyRelative("mugsOnSill").boolValue = spec.Props.mugsOnSill;
                     props.FindPropertyRelative("sweater").enumValueIndex = (int)spec.Props.sweater;
                     props.FindPropertyRelative("lampOff").boolValue = spec.Props.lampOff;
+                    so.FindProperty("drainPerSecond").floatValue = spec.Drain;
+                    so.FindProperty("badStepChill").floatValue = spec.BadStepChill;
+                    so.FindProperty("badDrinkChill").floatValue = spec.BadDrinkChill;
+                    so.FindProperty("minWarmth").floatValue = spec.MinWarmth;
+                    so.FindProperty("warmthLocked").boolValue = spec.Locked;
                     var rack = props.FindPropertyRelative("rackMugs");
                     rack.arraySize = spec.Rack.Length;
                     for (var i = 0; i < spec.Rack.Length; i++) rack.GetArrayElementAtIndex(i).enumValueIndex = (int)spec.Rack[i];
@@ -224,7 +233,9 @@ namespace Courtyard.Editor
             vignetteTint = new Color(0f, 0f, 0f, 0f),
         };
 
-        // Drain values are tuned so an average player (~15 s per step, quality ~0.6) finishes every day;
+        // Warmth doesn't drain with time (Drain 0): good drinks warm, spoiled or careless ones chill. Tuned so an average
+        // player never fails and a careless one can lose only Day 20; Day 1 can't be lost, Day 30 is warm together.
+        // (Old note:) Drain values were tuned so an average player (~15 s per step, quality ~0.6) finishes every day;
         // BalanceTests guards this. CLAUDE.md's first-guess numbers (1.5 … 4 /s) emptied the meter mid-level.
         private static IEnumerable<Spec> Specs()
         {
@@ -246,7 +257,8 @@ namespace Courtyard.Editor
                     After(0, thought, "Instant coffee. It tastes like Monday."),
                     End(thought, "…Someone across the courtyard is already awake."),
                 },
-                Drain = 0.8f,
+                Drain = 0f,
+                MinWarmth = 15f, // tutorial: can't be lost
                 Drinks = new[] { ("drink_black", BeatCondition.Always) }, // drink_instant is the empty-mug cap
             };
 
@@ -264,7 +276,8 @@ namespace Courtyard.Editor
                     After(1, thought, "Grind. Pour slowly. Breathe."),
                     End(thought, "She waved. I waved back with my mug. Smooth."),
                 },
-                Drain = 1f,
+                Drain = 0f,
+                BadStepChill = 12f, BadDrinkChill = 20f, // a careless player still makes it
                 Drinks = new[] { ("drink_pourover", BeatCondition.Always) },
             };
 
@@ -286,7 +299,8 @@ namespace Courtyard.Editor
                     End(dialogue, "It's… nice. Thank you.", mira, BeatCondition.PoorResult),
                     End(thought, "I think I'm smiling. Weird feeling."),
                 },
-                Drain = 1.2f,
+                Drain = 0f,
+                BadStepChill = 8f, BadDrinkChill = 20f, // a careless player still makes it
                 Drinks = new[] { ("drink_latte", BeatCondition.Always), ("drink_cinnamon", BeatCondition.GoodResult) },
             };
 
@@ -307,7 +321,7 @@ namespace Courtyard.Editor
                     End(thought, "Funny. A month ago I couldn't keep myself warm."),
                 },
                 TwoMeters = true,
-                Drain = 1.4f,
+                Drain = 0f, // the coldest night: careless drinks can let the cold win
                 Drinks = new[] { ("drink_latte", BeatCondition.Always), ("drink_latte", BeatCondition.Always) },
                 OutroSeconds = 3f, // fade to black, footsteps across the courtyard with two mugs
             };
@@ -328,6 +342,7 @@ namespace Courtyard.Editor
                     End(thought, "For the first time in a long while — I'm warm."),
                 },
                 Drain = 0f,
+                Locked = true, // warm together
                 Drinks = new[] { ("drink_latte_heart", BeatCondition.Always) },
             };
         }

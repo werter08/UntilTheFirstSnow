@@ -21,9 +21,6 @@ namespace Courtyard.Minigames
         /// <summary>Raised once with the result quality in [0, 1].</summary>
         public event Action<float> Completed;
 
-        /// <summary>Raised once when the drink is ruined (too much / too little): the day restarts.</summary>
-        public event Action Ruined;
-
         public string HintText => hintText;
         public bool Scored => scored;
         public WarmthTarget WarmthTarget => warmthTarget;
@@ -35,13 +32,11 @@ namespace Courtyard.Minigames
 
         public abstract void Begin(MinigameContext ctx);
 
-        /// <summary>The drink can't be saved (wrong amount): the level runner restarts the day.</summary>
-        protected void Ruin()
-        {
-            if (IsComplete) return;
-            IsComplete = true;
-            Ruined?.Invoke();
-        }
+        /// <summary>
+        /// The drink is spoiled (wrong amount): it finishes with quality 0, so it's a cold drink — "Brr… cold." and the
+        /// meters drop — but the day goes on. Only warmth running out ends a day.
+        /// </summary>
+        protected void Ruin() => Complete(0f);
 
         protected void Complete(float quality)
         {

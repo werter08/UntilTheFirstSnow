@@ -136,13 +136,8 @@ namespace Courtyard.Minigames
                 _fx.Punch(_counter.Mug.transform);
                 _fx.Burst(_counter.MugTop, coffeeColor, 8, 0.9f, 0.06f);
 
-                if (_spoons > targetSpoons)
-                {
-                    Ruin(); // far too strong
-                    return;
-                }
-
-                if (_spoons == targetSpoons) NudgeTarget = _counter.KettleTarget.transform;
+                // Too many spoons spoil it (judged when the water is poured); the player carries on either way.
+                if (_spoons >= targetSpoons) NudgeTarget = _counter.KettleTarget.transform;
             }
 
             var from = spoon.transform.position;
@@ -238,7 +233,7 @@ namespace Courtyard.Minigames
 
             if (_spoons != targetSpoons)
             {
-                Ruin(); // too weak (or no coffee at all)
+                Ruin(); // too strong or too weak: a cold, bitter cup
                 return;
             }
 

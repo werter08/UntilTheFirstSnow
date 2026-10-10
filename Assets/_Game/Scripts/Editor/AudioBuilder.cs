@@ -231,29 +231,34 @@ namespace Courtyard.Editor
             }
         }
 
+        private static void EnsureAudioManager(UnityEngine.SceneManagement.Scene scene, SfxLibrary library, AudioMixer mixer)
+        {
+            var manager = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<AudioManager>(true)).FirstOrDefault(m => m != null);
+            if (manager == null)
+            {
+                var go = new GameObject("AudioManager");
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene);
+                manager = go.AddComponent<AudioManager>();
+            }
+
+            Wire(manager, "library", library);
+            Wire(manager, "mixer", mixer);
+            Wire(manager, "musicGroup", Group(mixer, "Music"));
+            Wire(manager, "ambienceGroup", Group(mixer, "Ambience"));
+            Wire(manager, "sfxGroup", Group(mixer, "SFX"));
+            Wire(manager, "uiGroup", Group(mixer, "UI"));
+            Wire(manager, "roomTone", Clip("Ambience", RoomTone));
+            Wire(manager, "coldWind", Clip("Ambience", ColdWind));
+            Wire(manager, "musicVolume", 0.25f); // ≈ -12 dB
+        }
+
         private static void WireScenes(AudioMixer mixer)
         {
             var library = AssetDatabase.LoadAssetAtPath<SfxLibrary>(LibraryPath);
-            EditScene(BuildScript.Scenes[0], scene =>
-            {
-                var manager = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<AudioManager>(true)).FirstOrDefault(m => m != null);
-                if (manager == null)
-                {
-                    var go = new GameObject("AudioManager");
-                    UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene);
-                    manager = go.AddComponent<AudioManager>();
-                }
-
-                Wire(manager, "library", library);
-                Wire(manager, "mixer", mixer);
-                Wire(manager, "musicGroup", Group(mixer, "Music"));
-                Wire(manager, "ambienceGroup", Group(mixer, "Ambience"));
-                Wire(manager, "sfxGroup", Group(mixer, "SFX"));
-                Wire(manager, "uiGroup", Group(mixer, "UI"));
-                Wire(manager, "roomTone", Clip("Ambience", RoomTone));
-                Wire(manager, "coldWind", Clip("Ambience", ColdWind));
-                Wire(manager, "musicVolume", 0.25f); // ≈ -12 dB
-            });
+            // Every scene carries a wired AudioManager, so Kitchen or Ending played directly in the Editor has sound too.
+            // The first one survives scene loads; later copies remove themselves (AudioManager.Awake).
+            foreach (var path in BuildScript.Scenes)
+                EditScene(path, scene => EnsureAudioManager(scene, library, mixer));
 
             // The Ending keeps Day 30's music playing.
             EditScene(BuildScript.Scenes[2], scene =>
