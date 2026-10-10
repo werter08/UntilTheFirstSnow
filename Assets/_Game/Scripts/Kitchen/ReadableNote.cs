@@ -33,7 +33,11 @@ namespace Courtyard.Kitchen
 
         private void Read()
         {
-            if (_card != null && _note != null && !_card.IsOpen) _card.Open(_note);
+            if (_card == null || _note == null || _card.IsOpen) return;
+            // The note opens on paper of its own colour.
+            var sprite = TryGetComponent<SpriteRenderer>(out var renderer) ? renderer.sprite : null;
+            var pink = sprite != null && sprite.name.Contains("pink", System.StringComparison.OrdinalIgnoreCase);
+            _card.Open(_note, pink ? NotePaper.Pink : NotePaper.Yellow);
         }
     }
 }

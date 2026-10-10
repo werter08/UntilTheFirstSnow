@@ -94,8 +94,8 @@ namespace Courtyard.Editor
             Wire(director, "noteCard", card);
         }
 
-        private const string NoteArt = "Assets/_Game/Art/Props/note.png";
-        private const string OpenNoteArt = "Assets/_Game/Art/Props/note_open.png";
+        private const string PropsFolder = "Assets/_Game/Art/Props/";
+        private const string NoteArt = PropsFolder + "note.png";
 
         /// <summary>
         /// The team's sticky notes on the fridge (1:1): yellow and pink alternate, each tilted by a fixed random angle
@@ -151,22 +151,63 @@ namespace Courtyard.Editor
             }
         }
 
-        /// <summary>The open note on screen: the team's paper drawing (note_open.png) behind the handwritten text.</summary>
+        /// <summary>
+        /// The open note on screen: the team's paper drawings (1:1, sliced from their sheet) — a yellow or pink sticky
+        /// note matching the note on the fridge, and the torn calendar page for the calendar. Sizes are the drawings
+        /// scaled up to read at 1080p; padding keeps the writing off the curl, the red header and the torn edge.
+        /// </summary>
         private static void ApplyOpenNoteArt(NoteCard card)
         {
-            var art = AssetDatabase.LoadAssetAtPath<Sprite>(OpenNoteArt);
-            var paper = card.transform.Find("Paper")?.GetComponent<Image>();
-            if (paper == null) return;
-            if (art == null)
+            PaperLook Look(NotePaper kind, string file, float scale, Vector4 padding)
             {
-                Debug.LogWarning($"NotesBuilder: {OpenNoteArt} missing — the open note is plain paper.");
-                return;
+                var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + file + ".png");
+                if (sprite == null)
+                {
+                    Debug.LogWarning($"NotesBuilder: {file}.png missing in Art/Props — that page keeps plain paper.");
+                    return null;
+                }
+
+                return new PaperLook { paper = kind, sprite = sprite, size = sprite.rect.size * scale, padding = padding };
             }
 
-            paper.sprite = art;
-            paper.color = Color.white;
-            paper.preserveAspect = true;
-            ((RectTransform)paper.transform).sizeDelta = new Vector2(art.rect.width, art.rect.height);
+            var looks = new[]
+            {
+                Look(NotePaper.Yellow, "note_open_yellow", 2.2f, new Vector4(70f, 80f, 90f, 60f)),
+                Look(NotePaper.Pink, "note_open_pink", 2.2f, new Vector4(70f, 80f, 90f, 60f)),
+                Look(NotePaper.Calendar, "calendar_page", 1.6f, new Vector4(50f, 150f, 50f, 120f)),
+            }.Where(l => l != null).ToArray();
+
+            Edit(card, so =>
+            {
+                var list = so.FindProperty("papers");
+                list.arraySize = looks.Length;
+                for (var i = 0; i < looks.Length; i++)
+                {
+                    var item = list.GetArrayElementAtIndex(i);
+                    item.FindPropertyRelative("paper").enumValueIndex = (int)looks[i].paper;
+                    item.FindPropertyRelative("sprite").objectReferenceValue = looks[i].sprite;
+                    item.FindPropertyRelative("size").vector2Value = looks[i].size;
+                    item.FindPropertyRelative("padding").vector4Value = looks[i].padding;
+                    item.FindPropertyRelative("ink").colorValue = looks[i].ink;
+                }
+            });
+
+            // Signature sits left of the curled corner.
+            var signature = card.transform.Find("Paper/Signature") as RectTransform;
+            if (signature != null)
+            {
+                signature.offsetMin = new Vector2(60f, 50f);
+                signature.offsetMax = new Vector2(-150f, -330f);
+            }
+
+            var paper = card.transform.Find("Paper")?.GetComponent<Image>();
+            if (paper != null && looks.Length > 0)
+            {
+                paper.sprite = looks[0].sprite;
+                paper.color = Color.white;
+                paper.preserveAspect = true;
+                ((RectTransform)paper.transform).sizeDelta = looks[0].size;
+            }
         }
 
         /// <summary>The reading card: a dimmed screen with the paper note in the middle (above the story box).</summary>

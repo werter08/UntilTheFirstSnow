@@ -6,6 +6,7 @@ using Courtyard.Story;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Courtyard.UI
 {
@@ -17,6 +18,8 @@ namespace Courtyard.UI
         [SerializeField] private TMP_Text body;
         [SerializeField] private TMP_Text signature;
         [SerializeField, Min(0f)] private float popSeconds = 0.25f;
+        [Tooltip("The paper drawings (yellow / pink sticky note, calendar page). Missing ones keep the current paper.")]
+        [SerializeField] private PaperLook[] papers = Array.Empty<PaperLook>();
 
         private Coroutine _anim;
         private int _openedFrame;
@@ -28,15 +31,16 @@ namespace Courtyard.UI
 
         private void Awake() => SetVisible(0f, false);
 
-        public void Open(FridgeNote note)
+        public void Open(FridgeNote note, NotePaper paper = NotePaper.Yellow)
         {
             if (note == null) return;
-            Open(note.Text, note.From);
+            Open(note.Text, note.From, paper);
         }
 
         /// <summary>Opens a page with any text (fridge note, calendar page); <paramref name="from"/> signs it.</summary>
-        public void Open(string text, string from)
+        public void Open(string text, string from, NotePaper paper = NotePaper.Yellow)
         {
+            UsePaper(paper);
             body.text = text;
             signature.text = string.IsNullOrEmpty(from) ? string.Empty : "— " + from;
             IsOpen = true;
@@ -81,6 +85,23 @@ namespace Courtyard.UI
             });
             SetVisible(to, open);
             paper.localScale = Vector3.one;
+        }
+
+        private void UsePaper(NotePaper kind)
+        {
+            var look = Array.Find(papers, p => p != null && p.paper == kind && p.sprite != null);
+            if (look == null) return;
+            if (paper.TryGetComponent<Image>(out var image))
+            {
+                image.sprite = look.sprite;
+                image.color = Color.white;
+                image.preserveAspect = true;
+            }
+
+            paper.sizeDelta = look.size;
+            body.rectTransform.offsetMin = new Vector2(look.padding.x, look.padding.y);
+            body.rectTransform.offsetMax = new Vector2(-look.padding.z, -look.padding.w);
+            body.color = look.ink;
         }
 
         private void SetVisible(float alpha, bool blocks)

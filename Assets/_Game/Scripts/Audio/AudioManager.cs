@@ -84,8 +84,12 @@ namespace Courtyard.Audio
 
         // ---------------------------------------------------------------- one-shots
 
+        /// <summary>Frame of the last sound effect asked for (one-shot or loop) — lets fallbacks stay quiet when an action has its own sound.</summary>
+        public static int LastSfxFrame { get; private set; } = -1;
+
         public static void Play(SfxId id)
         {
+            LastSfxFrame = Time.frameCount;
             if (Instance != null) Instance.PlayInternal(id);
         }
 
@@ -93,6 +97,7 @@ namespace Courtyard.Audio
 
         public static void StartLoop(SfxId id, float fadeInSeconds = 0f)
         {
+            LastSfxFrame = Time.frameCount;
             if (Instance != null) Instance.StartLoopInternal(id, fadeInSeconds);
         }
 

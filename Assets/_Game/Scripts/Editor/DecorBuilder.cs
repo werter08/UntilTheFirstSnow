@@ -197,6 +197,7 @@ namespace Courtyard.Editor
             RestoreHandPlaced(handPlaced);
             ApplyRackShelf(kitchen);
             ApplyClickables(kitchen);
+            ApplyInteractionFeedback(scene);
             ApplyShadows(kitchen); // last: props are in their final places
         }
 
@@ -1125,6 +1126,19 @@ namespace Courtyard.Editor
                     so.FindProperty("drawnScale").vector3Value = new Vector3(sx, sy, 1f);
                 });
             }
+        }
+
+        /// <summary>The fallback feedback for every action (hover tick, click sound, lift on pick-up), next to FeedbackFx.</summary>
+        private static void ApplyInteractionFeedback(Scene scene)
+        {
+            var fx = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<FeedbackFx>(true)).FirstOrDefault(f => f != null);
+            if (fx == null)
+            {
+                Debug.LogWarning("DecorBuilder: no FeedbackFx in the scene — no interaction fallback.");
+                return;
+            }
+
+            Wire(GetOrAdd<InteractionFeedback>(fx.transform), "fx", fx);
         }
 
         private static void ApplyScarf(Transform kitchen)

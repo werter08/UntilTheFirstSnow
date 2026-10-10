@@ -30,6 +30,8 @@ namespace Courtyard.Minigames
         private readonly Dictionary<ToppingJar, Vector3> _rest = new();
         private CounterStation _counter;
         private FeedbackFx _fx;
+        [Tooltip("Tilt (degrees) of a jar while it is carried.")]
+        [SerializeField] private float carryTilt = -12f;
         private Vector2 _grabOffset;
         private bool _busy;
         private bool _spoiled;
@@ -81,6 +83,14 @@ namespace Courtyard.Minigames
         {
             if (_busy || IsComplete) return;
             _grabOffset = (Vector2)jar.transform.position - world;
+            // Picked up: tipped toward the cup, ready to shake (the lift and sound come from InteractionFeedback).
+            StartCoroutine(Tilt(jar.transform, Quaternion.Euler(0f, 0f, carryTilt)));
+        }
+
+        private static IEnumerator Tilt(Transform jar, Quaternion to)
+        {
+            var from = jar.localRotation;
+            yield return Tweens.Run(0.12f, k => jar.localRotation = Quaternion.Slerp(from, to, k));
         }
 
         private void OnJarDragged(ToppingJar jar, Vector2 world)
@@ -109,7 +119,7 @@ namespace Courtyard.Minigames
             yield return Tweens.Run(shakeSeconds, k => t.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(k * Mathf.PI) * shakeTilt));
 
             _portions[jar.Topping] = _portions.TryGetValue(jar.Topping, out var n) ? n + 1 : 1;
-            jar.SetPicked(true);
+            jar.SetPortions(_portions[jar.Topping]);
             _counter.AddSpice(jar.SprinkleColour);
             AudioManager.Play(SfxId.Topping);
             _fx.Burst(_counter.MugTop, jar.SprinkleColour, 10, 0.8f, 0.05f, 1f);

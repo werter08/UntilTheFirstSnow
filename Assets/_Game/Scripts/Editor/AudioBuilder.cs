@@ -48,6 +48,9 @@ namespace Courtyard.Editor
             (SfxId.Curtain, "sfx_paper", 0.45f, 0.6f, 0.75f), // curtain swish: a low, slow paper rustle
             (SfxId.LampSwitch, "sfx_kettle_switch", 0.6f, 1.1f, 1.25f),
             (SfxId.Break, "sfx_mug_down", 0.9f, 0.55f, 0.7f), // breaking: a heavy, low clunk
+            (SfxId.Hover, "sfx_ui_click", 0.07f, 1.6f, 1.8f), // barely there
+            (SfxId.Pickup, "sfx_ui_click", 0.3f, 0.85f, 0.95f),
+            (SfxId.PutDown, "sfx_mug_down", 0.3f, 1.15f, 1.3f),
         };
 
         /// <summary>Day → music (Audio/Music), ambience (Audio/Ambience), ambience volume. Null = none.</summary>

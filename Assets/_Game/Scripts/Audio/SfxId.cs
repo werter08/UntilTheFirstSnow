@@ -26,5 +26,8 @@ namespace Courtyard.Audio
         Curtain,
         LampSwitch,
         Break,
+        Hover, // soft tick when the hand moves onto something you can use
+        Pickup, // fallback: something lifted
+        PutDown, // fallback: something set down
     }
 }

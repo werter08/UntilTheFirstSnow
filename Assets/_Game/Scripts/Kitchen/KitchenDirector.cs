@@ -522,7 +522,8 @@ namespace Courtyard.Kitchen
         public void OpenCalendar()
         {
             if (noteCard == null || _level == null) return;
-            noteCard.Open($"<size=160%>{_level.DayNumber}</size>\n{_level.CalendarLine}", string.Empty);
+            noteCard.Open($"<size=200%><color=#C0392B>{_level.DayNumber}</color></size>\n{_level.CalendarLine}", string.Empty,
+                UI.NotePaper.Calendar);
         }
 
         /// <summary>Her mug on the rack never breaks (Day 20 needs it).</summary>
