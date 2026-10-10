@@ -46,20 +46,12 @@ namespace Courtyard.Editor
             DecorBuilder.ConfigureArtImports(); // sprites must have their final IDs before prefabs reference them
             PatchChooseMug();
             PatchZones();
+            PatchHints();
             Patch(Folder + KettleBoil + ".prefab", root =>
             {
                 var thermometer = root.transform.Find("Thermometer");
                 if (thermometer != null) Object.DestroyImmediate(thermometer.gameObject);
                 Wire(root.GetComponent<KettleBoilStep>(), "hintText", KettleBoilHint);
-            });
-            Patch(Folder + InstantCoffee + ".prefab", root =>
-            {
-                var step = root.GetComponent<InstantCoffeeStep>();
-                Edit(step, so =>
-                {
-                    so.FindProperty("kettleIdleColor").colorValue = Color.white;
-                    so.FindProperty("kettleReadyColor").colorValue = Color.white;
-                });
             });
         }
 
@@ -91,6 +83,17 @@ namespace Courtyard.Editor
 
                 Wire(root.GetComponent<ChooseMugStep>(), "herMugIndex", 2);
             });
+        }
+
+        public const string InstantCoffeeHint = "Spoon two scoops of coffee into the cup. Then pick up the kettle and pour to the line.";
+        public const string GuessHerDrinkHint = "Carry two spices into her cup, one at a time. Then click the cup.";
+        public const string HerUsualHint = "Make her usual: two spices, one at a time. Then click the cup.";
+
+        private static void PatchHints()
+        {
+            Patch(Folder + InstantCoffee + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "hintText", InstantCoffeeHint));
+            Patch(Folder + GuessHerDrink + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "hintText", GuessHerDrinkHint));
+            Patch(Folder + HerDrinkFromMemory + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "hintText", HerUsualHint));
         }
 
         /// <summary>Each step's own parts belong to a counter zone and move with it (see KitchenArtLayout).</summary>

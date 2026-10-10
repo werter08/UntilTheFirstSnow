@@ -41,6 +41,7 @@ namespace Courtyard.Core
         [SerializeField, Min(0f)] private float fadeDuration = 0.8f;
         [SerializeField] private Color endColor = Color.black;
         [SerializeField] private Color failColor = new(0.55f, 0.7f, 0.9f);
+        [SerializeField] private Color ruinedColor = new(0.35f, 0.27f, 0.22f);
         [SerializeField, Min(0f)] private float failHoldSeconds = 2.5f;
         [Header("Idle nudge (no text): the right tool bounces if the player does nothing for a while")]
         [SerializeField, Min(1f)] private float nudgeAfterSeconds = 7f;
@@ -112,6 +113,7 @@ namespace Courtyard.Core
                 _activeStep = Instantiate(_level.Steps[i], stepRoot);
                 _activeStep.transform.position += (Vector3)counter.ZoneShift(_activeStep.Zone);
                 _activeStep.Completed += q => quality = q;
+                _activeStep.Ruined += OnStepRuined;
                 hint.Show(_activeStep.HintText);
                 counter.SetAllInteractable(false);
                 _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands));
@@ -214,10 +216,17 @@ namespace Courtyard.Core
         {
             if (_failed) return;
             _failed = true;
-            StartCoroutine(Fail());
+            StartCoroutine(Fail(_level.FailText, failColor));
         }
 
-        private IEnumerator Fail()
+        private void OnStepRuined()
+        {
+            if (_failed) return;
+            _failed = true;
+            StartCoroutine(Fail(_level.RuinedText, ruinedColor));
+        }
+
+        private IEnumerator Fail(string message, Color colour)
         {
             _draining = false;
             if (_run != null) StopCoroutine(_run);
@@ -227,7 +236,7 @@ namespace Courtyard.Core
             AudioManager.StopAllLoops();
             AudioManager.Play(SfxId.Fail);
 
-            yield return fader.FadeOut(failColor, fadeDuration, _level.FailText);
+            yield return fader.FadeOut(colour, fadeDuration, message);
             yield return new WaitForSeconds(failHoldSeconds);
 
             if (GameManager.Instance != null)

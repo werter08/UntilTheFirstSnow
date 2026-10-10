@@ -70,9 +70,12 @@ MonoBehaviour:
   drinkWarmthBonus: 25
   goodResultThreshold: 0.7
   failText: "Too cold\u2026 let's try again."
+  ruinedText: "That's not how it goes\u2026 let's start over."
   drinkResults:
-  - icon: {fileID: 21300000, guid: 3b9bb6d5ab51344f0bd121511651a0c2, type: 3}
+  - icon: {fileID: 21300000, guid: aa6fe5bccbf8c4a9f87bbebfdd118db9, type: 3}
     condition: 0
   ambience: {fileID: 0}
   outroClip: {fileID: 0}
   outroHoldSeconds: 0
+  outroWalkers: []
+  finale: 0

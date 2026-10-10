@@ -25,7 +25,39 @@ namespace Courtyard.Tests
 
             yield return Click(Counter.KettleTarget.transform);
             yield return Wait(0.3f);
-            Assert.That(step.IsComplete, Is.False, "A tap on the kettle ended the step.");
+            Assert.That(step.IsComplete, Is.False, "Picking up and putting down the kettle ended the step.");
+        }
+
+        /// <summary>Three spoonfuls: far too strong — the coffee is ruined and the day starts over.</summary>
+        [UnityTest, Timeout(180000)]
+        public IEnumerator InstantCoffee_ThreeSpoons_RestartsTheDay()
+        {
+            yield return LoadDay(1);
+            yield return PlayKettleBoil();
+            yield return AdvanceTo<InstantCoffeeStep>();
+            var step = Object.FindAnyObjectByType<InstantCoffeeStep>();
+            for (var i = 0; i < 3; i++)
+            {
+                yield return Drag(step.transform.Find("Spoon").position, step.transform.Find("Jar").position, Counter.Mug.transform.position + Vector3.up * 0.2f);
+                yield return Wait(0.5f);
+            }
+
+            Assert.That(GetField<bool>(Runner, "_failed"), Is.True, "Too much coffee should ruin the day.");
+        }
+
+        /// <summary>One spoonful, then pouring: too weak — ruined, the day starts over.</summary>
+        [UnityTest, Timeout(180000)]
+        public IEnumerator InstantCoffee_OneSpoon_RestartsTheDay()
+        {
+            yield return LoadDay(1);
+            yield return PlayKettleBoil();
+            yield return AdvanceTo<InstantCoffeeStep>();
+            var step = Object.FindAnyObjectByType<InstantCoffeeStep>();
+            yield return Drag(step.transform.Find("Spoon").position, step.transform.Find("Jar").position, Counter.Mug.transform.position + Vector3.up * 0.2f);
+            yield return Wait(0.5f);
+            yield return CarryKettleAndPour(0.8f);
+            yield return Wait(0.3f);
+            Assert.That(GetField<bool>(Runner, "_failed"), Is.True, "Too little coffee should ruin the day.");
         }
 
         /// <summary>Letting go of the grinder handle before the green zone should let the player keep grinding.</summary>
@@ -94,21 +126,47 @@ namespace Courtyard.Tests
             yield return FinishDay();
         }
 
-        /// <summary>Clicking a topping twice un-picks it; the mug only serves with exactly two.</summary>
+        /// <summary>The same spice twice is too much: ruined, the day starts over.</summary>
         [UnityTest, Timeout(240000)]
-        public IEnumerator Toppings_TogglesAndNeedsExactlyTwo()
+        public IEnumerator Spices_SameSpiceTwice_RestartsTheDay()
         {
             yield return LoadDay(30);
             yield return PlayKettleBoil();
             yield return PlaySteamMilk();
             yield return AdvanceTo<PickToppingsStep>();
-            var cinnamon = Counter.ToppingJars.First(j => j.Topping == Topping.Cinnamon);
-            yield return Click(cinnamon.transform);
-            yield return Click(cinnamon.transform);
-            Assert.That(cinnamon.IsPicked, Is.False, "Second click should un-pick.");
+            yield return AddSpice(Topping.Cinnamon);
+            Assert.That(GetField<bool>(Runner, "_failed"), Is.False, "One portion is fine.");
+            yield return AddSpice(Topping.Cinnamon);
+            Assert.That(GetField<bool>(Runner, "_failed"), Is.True, "Two portions of cinnamon should ruin the drink.");
+        }
+
+        /// <summary>Serving with only one spice is too little: ruined, the day starts over.</summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Spices_ServeWithOne_RestartsTheDay()
+        {
+            yield return LoadDay(30);
+            yield return PlayKettleBoil();
+            yield return PlaySteamMilk();
+            yield return AdvanceTo<PickToppingsStep>();
+            yield return AddSpice(Topping.Honey);
             yield return Click(Counter.Mug.transform);
-            var step = Object.FindAnyObjectByType<PickToppingsStep>();
-            Assert.That(step.IsComplete, Is.False, "Mug must not serve with zero toppings.");
+            Assert.That(GetField<bool>(Runner, "_failed"), Is.True, "One spice is too little.");
+        }
+
+        /// <summary>A spice jar dropped away from the cup just goes back to its place.</summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Spices_DroppedAwayFromCup_GoesBack()
+        {
+            yield return LoadDay(30);
+            yield return PlayKettleBoil();
+            yield return PlaySteamMilk();
+            yield return AdvanceTo<PickToppingsStep>();
+            var jar = Counter.ToppingJars.First(j => j.Topping == Topping.Cocoa);
+            var rest = jar.transform.position;
+            yield return Drag(rest, rest + new Vector3(-3f, 1.5f, 0f));
+            yield return Wait(0.6f);
+            Assert.That(Vector3.Distance(jar.transform.position, rest), Is.LessThan(0.05f), "Jar should return to its place.");
+            Assert.That(jar.IsPicked, Is.False);
         }
 
         /// <summary>Day 20: picking a decoy mug is gentle (0.6), not a fail.</summary>

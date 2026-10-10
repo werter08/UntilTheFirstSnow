@@ -10,6 +10,8 @@ namespace Courtyard.Kitchen
     {
         [SerializeField] private Topping topping;
         [SerializeField] private PointerTarget target;
+        [Tooltip("Lets the player carry the jar to the cup.")]
+        [SerializeField] private DragTarget drag;
         [Tooltip("Shown while this topping is picked.")]
         [SerializeField] private GameObject pickedMarker;
         [Tooltip("Colour of the little sprinkle when this topping is picked.")]
@@ -17,6 +19,7 @@ namespace Courtyard.Kitchen
 
         public Topping Topping => topping;
         public PointerTarget Target => target;
+        public DragTarget Drag => drag;
         public bool IsPicked => pickedMarker.activeSelf;
         public Color SprinkleColour => sprinkleColour;
 

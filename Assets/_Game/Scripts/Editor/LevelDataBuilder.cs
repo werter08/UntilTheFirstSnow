@@ -242,7 +242,7 @@ namespace Courtyard.Editor
                     End(thought, "…Someone across the courtyard is already awake."),
                 },
                 Drain = 0.8f,
-                Drinks = new[] { ("drink_instant", BeatCondition.Always) },
+                Drinks = new[] { ("drink_black", BeatCondition.Always) }, // drink_instant is the empty-mug cap
             };
 
             yield return new Spec

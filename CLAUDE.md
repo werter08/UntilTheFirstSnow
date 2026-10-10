@@ -170,12 +170,12 @@ public abstract class MinigameStep : MonoBehaviour {
 | Step | Interaction | Quality is based on |
 |---|---|---|
 | **KettleBoil** | Click the kettle switch; a temperature needle rises; click again to stop inside the green band (90–96 °C) | distance from the band centre |
-| **InstantCoffee** | Drag the spoon from the jar to the mug (1–2 spoons), then click the kettle to pour | spoon count correct + pour amount |
+| **InstantCoffee** | Carry spoonfuls from the jar into the cup one by one (the cup visibly fills), then pick up the kettle, carry it over the cup and pour to the line | pour accuracy; **wrong number of spoons ruins the coffee → the day restarts** |
 | **GrindBeans** | Drag the grinder handle in circles; the grind meter fills; stop in the "medium" zone | final grind level vs. target |
 | **PourOver** | Hold the mouse to pour from the kettle and move it in a circle over the V60; the flow-rate bar must stay in a band; fill to the line | % of time in band + final fill accuracy |
 | **SteamMilk** | Hold to steam; foam level and temperature rise; release in the zone (too long gives a squeal SFX) | release timing |
 | **ChooseMug** | Click one of 3 mugs; hers (with a small leaf print) was shown on Day 10 | correct = 1, wrong = 0.6 (no hard fail) |
-| **GuessHerDrink** | Pick 2 of 4 toppings (cinnamon, honey, cocoa, salt) based on her hint | matches recipe `Mira_Usual` |
+| **GuessHerDrink** | Carry spices (cinnamon, honey, cocoa, salt) to the cup one portion at a time, then click the cup | matches recipe `Mira_Usual`; **too much (2× one spice, >2 total) or too little ruins it → the day restarts** |
 | **HerDrinkFromMemory** | Same as GuessHerDrink but with no hint; uses `Mira_Usual` | matches recipe |
 
 **Juice requirements for every step:** an SFX on each action, steam particles, a small squash/scale tween on the drink, and a "perfect!" popup at quality ≥ 0.9. Everything is readable without instructions after 3 seconds; show `HintText` at the top.

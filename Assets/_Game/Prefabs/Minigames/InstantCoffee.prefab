@@ -184,8 +184,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6362b486184643559b3c762aac300a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.InstantCoffeeStep
-  hintText: Drag two spoons of coffee into the mug. Then hold the kettle to pour
-    to the line.
+  hintText: Spoon two scoops of coffee into the cup. Then pick up the kettle and
+    pour to the line.
   scored: 1
   warmthTarget: 0
   zone: 2
@@ -193,18 +193,16 @@ MonoBehaviour:
   spoonLoad: {fileID: 5879990792989624871}
   jar: {fileID: 5691306432783900373}
   targetSpoons: 2
-  wrongSpoonScore: 0.5
   pourPerSecond: 0.35
   targetFill: 0.85
   fillTolerance: 0.3
-  spoonWeight: 0.5
+  minFillToFinish: 0.15
+  pourReach: 0.55
+  kettleFollow: 14
   spoonReturnSeconds: 0.2
-  pourOffsetFromMug: {x: 0.15, y: 1.05}
-  kettleMoveSeconds: 0.25
+  kettleReturnSeconds: 0.25
   waterColor: {r: 0.75, g: 0.85, b: 0.95, a: 1}
   coffeeColor: {r: 0.35, g: 0.2, b: 0.1, a: 1}
-  kettleIdleColor: {r: 1, g: 1, b: 1, a: 1}
-  kettleReadyColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &4721343172157622859
 GameObject:
   m_ObjectHideFlags: 0

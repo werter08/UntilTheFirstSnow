@@ -41,12 +41,34 @@ namespace Courtyard.Tests
             }
 
             Assert.That(GetField<int>(step, "_spoons"), Is.EqualTo(2), "Two spoons should have landed in the mug.");
-            yield return Press(Counter.KettleTarget.transform.position);
-            var deadline = Time.realtimeSinceStartup + 15f;
-            while (Counter.MugLevel < 0.85f && Time.realtimeSinceStartup < deadline) yield return null;
-            yield return ReleaseMouse();
+            yield return CarryKettleAndPour(0.85f);
             yield return WaitForCompletion();
             Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.85f), "InstantCoffee quality");
+        }
+
+        /// <summary>Picks up the kettle, carries it over the cup and pours until <paramref name="level"/>, then lets go.</summary>
+        protected IEnumerator CarryKettleAndPour(float level)
+        {
+            var from = Counter.KettleTarget.transform.position;
+            var over = Counter.MugTop + new Vector3(0.05f, 0.7f, 0f);
+            yield return Press(from);
+            for (var t = 1; t <= 20; t++)
+            {
+                Move(Mouse.position, ToScreen(Vector3.Lerp(from, over, t / 20f)));
+                yield return null;
+            }
+
+            var deadline = Time.realtimeSinceStartup + 15f;
+            while (Counter.MugLevel < level && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return ReleaseMouse();
+        }
+
+        /// <summary>Carries a spice jar over the cup and lets go: one portion shakes in.</summary>
+        protected IEnumerator AddSpice(Topping topping)
+        {
+            var jar = Counter.ToppingJars.First(j => j.Topping == topping);
+            yield return Drag(jar.transform.position, Counter.MugTop + new Vector3(0f, 0.6f, 0f));
+            yield return Wait(1.2f); // shake + jar goes back
         }
 
         protected IEnumerator PlayGrindBeans()
@@ -116,9 +138,8 @@ namespace Courtyard.Tests
             yield return AdvanceTo<PickToppingsStep>();
             foreach (var topping in toppings)
             {
-                var jar = Counter.ToppingJars.First(j => j.Topping == topping);
-                yield return Click(jar.transform);
-                Assert.That(jar.IsPicked, Is.True, $"{topping} should be picked after a click.");
+                yield return AddSpice(topping);
+                Assert.That(Counter.ToppingJars.First(j => j.Topping == topping).IsPicked, Is.True, $"{topping} should be in the cup.");
             }
 
             yield return Click(Counter.Mug.transform);

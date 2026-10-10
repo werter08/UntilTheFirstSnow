@@ -96,6 +96,8 @@ namespace Courtyard.Editor
                 WorldText(body.transform, "Label", new Vector2(0f, 0.75f), t.Item1.ToString(), 1.6f, Gray(0.15f), "Props", 2);
                 var picked = Box(body.transform, "Picked", new Vector2(0f, -0.58f), new Vector2(0.8f, 0.14f), Leaf, 2);
                 var target = Pose(body.gameObject.AddComponent<PointerTarget>(), HandPose.Pinch);
+                var carry = body.gameObject.AddComponent<DragTarget>(); // spices are carried to the cup
+                WireEnum(carry, "handPose", HandPose.Pinch);
                 var jar = body.gameObject.AddComponent<ToppingJar>();
                 WireEnum(jar, "topping", t.Item1);
                 Wire(jar, "target", target);

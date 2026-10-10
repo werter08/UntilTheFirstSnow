@@ -21,6 +21,9 @@ namespace Courtyard.Minigames
         /// <summary>Raised once with the result quality in [0, 1].</summary>
         public event Action<float> Completed;
 
+        /// <summary>Raised once when the drink is ruined (too much / too little): the day restarts.</summary>
+        public event Action Ruined;
+
         public string HintText => hintText;
         public bool Scored => scored;
         public WarmthTarget WarmthTarget => warmthTarget;
@@ -31,6 +34,14 @@ namespace Courtyard.Minigames
         public Transform NudgeTarget { get; protected set; }
 
         public abstract void Begin(MinigameContext ctx);
+
+        /// <summary>The drink can't be saved (wrong amount): the level runner restarts the day.</summary>
+        protected void Ruin()
+        {
+            if (IsComplete) return;
+            IsComplete = true;
+            Ruined?.Invoke();
+        }
 
         protected void Complete(float quality)
         {

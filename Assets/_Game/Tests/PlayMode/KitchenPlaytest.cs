@@ -144,9 +144,9 @@ namespace Courtyard.Tests
             {
                 var from = ToScreen(path[i - 1]);
                 var to = ToScreen(path[i]);
-                for (var t = 1; t <= 8; t++)
+                for (var t = 1; t <= 16; t++)
                 {
-                    Move(Mouse.position, Vector2.Lerp(from, to, t / 8f));
+                    Move(Mouse.position, Vector2.Lerp(from, to, t / 16f));
                     yield return null;
                 }
             }

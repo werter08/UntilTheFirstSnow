@@ -44,8 +44,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80d10500b181d49b99065ad8f90a23ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.PickToppingsStep
-  hintText: Pick two toppings she'd like. Then click the mug.
+  hintText: Carry two spices into her cup, one at a time. Then click the cup.
   scored: 1
   warmthTarget: 0
+  zone: 0
   recipe: {fileID: 11400000, guid: c290129b152c04236ac2620159bf7a1c, type: 2}
   picksRequired: 2
+  maxPortionsPerSpice: 1
+  shakeTilt: -55
+  shakeSeconds: 0.35
+  returnSeconds: 0.25

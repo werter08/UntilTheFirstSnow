@@ -410,10 +410,10 @@ namespace Courtyard.Editor
             // The drink is shown inside the mug: a drink tile over the top of the mug body (the tiles are exactly the
             // body's width), revealed from the bottom up by a mask as the mug fills. Measured on the mug art:
             // body top 3 px below the sprite top, body centre 23.5 px left of the sprite centre (handle on the right).
-            var bodyTop = chipped.bounds.max.y - 0.03f;
-            const float bodyCentreX = -0.235f;
+            // As in the team's mockup: the cap's top edge and outline sit exactly on the mug's rim and outline.
+            // Both PNGs carry 2 px of padding; caps are 110×66 px, the mug body is 110 px wide from its left edge.
             const float region = 0.66f;
-            var regionCentre = new Vector2(bodyCentreX, bodyTop - region * 0.5f);
+            var regionCentre = new Vector2(chipped.bounds.min.x + 0.02f + 0.55f, chipped.bounds.max.y - 0.02f - region * 0.5f);
 
             var oldGauge = mug.Find("Gauge");
             var fill = Find(mug, "Fill");
@@ -430,18 +430,28 @@ namespace Courtyard.Editor
             var line = Find(fill, "FillLine").GetComponent<SpriteRenderer>();
             line.size = new Vector2(1.12f, 0.045f);
             line.color = new Color(1f, 1f, 1f, 0.9f);
-            SetLayer(line.transform, "Props", 4);
+            SetLayer(line.transform, "Props", 6);
 
             var contents = Child(mug, "Contents");
             contents.localPosition = regionCentre;
+            // Empty mug: the plain dark cap (the inside of an empty mug), always under the drink.
+            var empty = SpriteChild(contents, "EmptyCap");
+            PlaceAtScreenScale(empty, AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_instant.png"), Vector2.zero, "Props", 2);
             var liquid = SpriteChild(contents, "Liquid");
             var liquidRenderer = liquid.GetComponent<SpriteRenderer>();
-            liquidRenderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_instant.png");
+            liquidRenderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_black.png");
             liquidRenderer.drawMode = SpriteDrawMode.Simple;
             liquidRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             liquid.localPosition = Vector3.zero;
             liquid.localScale = Vector3.one;
-            SetLayer(liquid, "Props", 2);
+            SetLayer(liquid, "Props", 3);
+            var spice = SpriteChild(contents, "Spice");
+            var spiceRenderer = spice.GetComponent<SpriteRenderer>();
+            spiceRenderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(SquarePath);
+            spiceRenderer.drawMode = SpriteDrawMode.Sliced;
+            spiceRenderer.size = new Vector2(0.96f, 0.06f);
+            spiceRenderer.enabled = false;
+            SetLayer(spice, "Props", 4);
             var maskTransform = Child(contents, "Mask");
             var mask = maskTransform.GetComponent<SpriteMask>();
             if (mask == null) mask = maskTransform.gameObject.AddComponent<SpriteMask>();
@@ -450,9 +460,11 @@ namespace Courtyard.Editor
             mask.frontSortingLayerID = SortingLayer.NameToID("Props");
             mask.frontSortingOrder = 3;
             mask.backSortingLayerID = SortingLayer.NameToID("Props");
-            mask.backSortingOrder = 1;
+            mask.backSortingOrder = 2;
             var mugContents = GetOrAdd<MugContents>(contents);
             Wire(mugContents, "liquid", liquidRenderer);
+            Wire(mugContents, "emptyCap", empty.GetComponent<SpriteRenderer>());
+            Wire(mugContents, "spice", spiceRenderer);
             Wire(mugContents, "mask", mask);
             Wire(mugContents, "regionHeight", region);
             Wire(mugContents, "regionWidth", 1.2f);
@@ -461,7 +473,8 @@ namespace Courtyard.Editor
             {
                 var drinks = Property(so, "mugDrinkSprites");
                 drinks.arraySize = 3;
-                drinks.GetArrayElementAtIndex((int)MugDrink.Instant).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_instant.png");
+                // The plain dark tile is the inside of an EMPTY mug; instant coffee is the speckled dark one.
+                drinks.GetArrayElementAtIndex((int)MugDrink.Instant).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_black.png");
                 drinks.GetArrayElementAtIndex((int)MugDrink.Black).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_pourover.png");
                 drinks.GetArrayElementAtIndex((int)MugDrink.Latte).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_latte.png");
             });
@@ -559,9 +572,9 @@ namespace Courtyard.Editor
                 var frother = Child(station, "Frother");
                 frother.localPosition = new Vector3(x + JugBodyOffset, bodyCentre, 0f);
                 PlaceAtScreenScale(SpriteChild(frother, "Whisk"), whisk, new Vector2(0f, whiskCentre - bodyCentre), "Props", 2);
-                PlaceAtScreenScale(SpriteChild(frother, "Body"), body, Vector2.zero, "Props", 4);
+                PlaceAtScreenScale(SpriteChild(frother, "Body"), body, Vector2.zero, "Props", 5);
                 var buttonY = body.bounds.extents.y + button.bounds.extents.y + 0.02f;
-                PlaceAtScreenScale(SpriteChild(frother, "Button"), button, new Vector2(0f, buttonY), "Props", 5);
+                PlaceAtScreenScale(SpriteChild(frother, "Button"), button, new Vector2(0f, buttonY), "Props", 6);
                 Wire(counter, "frother", frother);
                 Wire(counter, "frotherButton", Find(frother, "Button").GetComponent<SpriteRenderer>());
             }
@@ -571,8 +584,10 @@ namespace Courtyard.Editor
             {
                 var blob = SpriteChild(station, "MilkFoamBlob");
                 var rim = top + jugSprite.bounds.size.y - 0.05f;
-                PlaceAtScreenScale(blob, foam, new Vector2(x + JugBodyOffset, rim), "Props", 6);
+                PlaceAtScreenScale(blob, foam, new Vector2(x + JugBodyOffset, rim - 0.08f), "Props", 4); // behind the frother
                 Wire(counter, "milkFoamBlob", blob);
+                Wire(counter, "foamMinScale", 0.08f); // a modest cap at the rim, not a splat
+                Wire(counter, "foamMaxScale", 0.38f);
             }
         }
 
@@ -764,7 +779,13 @@ namespace Courtyard.Editor
                 ["Cocoa"] = new(0.35f, 0.22f, 0.15f), ["Salt"] = new(0.95f, 0.95f, 0.97f),
             };
             foreach (var jar in Find(kitchen, "Counter Tools").GetComponentsInChildren<ToppingJar>(true))
+            {
                 if (sprinkles.TryGetValue(jar.name, out var c)) Edit(jar, so => so.FindProperty("sprinkleColour").colorValue = c);
+                // Spices are carried to the cup by hand (PickToppingsStep).
+                var drag = GetOrAdd<DragTarget>(jar.transform);
+                WireEnum(drag, "handPose", HandPose.Pinch);
+                Wire(jar, "drag", drag);
+            }
 
             // Lamp hangs from its cord: everything that should swing goes under a pivot at the cord's top.
             var lamp = Find(kitchen, "CeilingLamp");

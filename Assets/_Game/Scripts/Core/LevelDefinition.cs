@@ -40,6 +40,8 @@ namespace Courtyard.Core
         [Tooltip("Step quality at or above this counts as a good result for conditional beats.")]
         [SerializeField, Range(0f, 1f)] private float goodResultThreshold = 0.7f;
         [SerializeField, TextArea] private string failText = "Too cold… let's try again.";
+        [Tooltip("Shown when a drink is ruined (too much / too little of something) and the day restarts.")]
+        [SerializeField, TextArea] private string ruinedText = "That's not how it goes… let's start over.";
 
         [Header("Served drink")]
         [Tooltip("Icons that pop up above the mug when the drink is served.")]
@@ -76,6 +78,7 @@ namespace Courtyard.Core
         public float DrinkWarmthBonus => drinkWarmthBonus;
         public float GoodResultThreshold => goodResultThreshold;
         public string FailText => failText;
+        public string RuinedText => ruinedText;
         public AudioClip Ambience => ambience;
         public IReadOnlyList<DrinkResult> DrinkResults => drinkResults;
         public AudioClip OutroClip => outroClip;

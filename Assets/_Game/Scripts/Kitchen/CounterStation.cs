@@ -64,8 +64,8 @@ namespace Courtyard.Kitchen
         [SerializeField] private SpriteRenderer frotherButton;
         [Tooltip("Foam that rises from the jug's rim; swells into a spill when overheated.")]
         [SerializeField] private Transform milkFoamBlob;
-        [SerializeField] private float foamMinScale = 0.15f;
-        [SerializeField] private float foamMaxScale = 0.95f;
+        [SerializeField] private float foamMinScale = 0.08f;
+        [SerializeField] private float foamMaxScale = 0.38f;
         [SerializeField, Min(0f)] private float frothJitter = 0.025f;
         [SerializeField] private Color buttonIdle = Color.white;
         [SerializeField] private Color buttonOn = new(1f, 0.8f, 0.55f);
@@ -91,6 +91,13 @@ namespace Courtyard.Kitchen
         public Transform GrinderArm => grinderArm;
         public DragTarget GrinderHandle => grinderHandle;
         public PointerTarget Mug => mug;
+        /// <summary>Centre of the mug's rim (world), where pouring and spices go.</summary>
+        public Vector3 MugTop => new(mugBody.bounds.center.x - mugBody.bounds.extents.x * 0.29f, mugBody.bounds.max.y, 0f);
+
+        /// <summary>Is the point above the mug's opening (for carrying the kettle or a spice jar to it)?</summary>
+        public bool IsAboveMug(Vector2 world, float reach) =>
+            Mathf.Abs(world.x - MugTop.x) <= reach && world.y >= MugTop.y - 0.25f && world.y <= MugTop.y + 2.2f;
+
         public bool IsOverMug(Vector2 world) =>
             mugBody.bounds.Contains(new Vector3(world.x, world.y, mugBody.bounds.center.z));
         public float MugLevel => mugFill.Value;
@@ -140,6 +147,7 @@ namespace Courtyard.Kitchen
             SetMugGauge(false);
             SetMugLevel(0f);
             SetMugDrink(MugDrink.Instant, Color.white);
+            if (mugContents != null) mugContents.ClearSpice();
             SetDripperGrounds(false);
 
             kettle.position = _kettleRest;
@@ -181,7 +189,7 @@ namespace Courtyard.Kitchen
                 return;
             }
 
-            _groundsLevel = Mathf.Min(0.24f, spoons * 0.08f);
+            _groundsLevel = Mathf.Min(0.6f, spoons * 0.2f); // each spoonful visibly fills the cup
             if (MugLevel <= 0f)
             {
                 SetMugDrink(MugDrink.Instant, mugFill.Fill.color);
@@ -196,6 +204,12 @@ namespace Courtyard.Kitchen
             if (mugContents != null && mugDrinkSprites != null && index < mugDrinkSprites.Length)
                 mugContents.SetSprite(mugDrinkSprites[index]);
             mugFill.Fill.color = placeholderColour;
+        }
+
+        /// <summary>A portion of spice settles on top of the drink.</summary>
+        public void AddSpice(Color colour)
+        {
+            if (mugContents != null) mugContents.AddSpice(colour);
         }
 
         /// <summary>The served drink (e.g. cinnamon latte) shown inside a full mug.</summary>

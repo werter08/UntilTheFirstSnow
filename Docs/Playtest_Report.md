@@ -15,7 +15,10 @@ Last update: 2026-10-10.
 - **EditMode tests (27)**: warmth rules, balance simulation (average / good / very slow player), level data, recipes.
 - **Code review** of every minigame and of the level flow; screenshots of every day.
 
-Result: **17/17 PlayMode and 27/27 EditMode pass.** Run them from the Test Runner, or `unity command run_tests
+Result: **21/21 PlayMode and 27/27 EditMode pass.**
+
+**Rule (from the team):** wrong amounts ruin the drink and **restart the day** — too many/few coffee spoonfuls on Day 1,
+two portions of one spice, more than two spices, or serving with fewer than two. Run them from the Test Runner, or `unity command run_tests
 --mode PlayMode --filter Courtyard.Tests.PlayMode --filter_type assembly --async_tests true` (Editor open, ~12 min).
 
 ## Minigame by minigame
@@ -46,6 +49,11 @@ Result: **17/17 PlayMode and 27/27 EditMode pass.** Run them from the Test Runne
 | B7 | Low | Kitchen | V60 visible on Day 30 (no pour-over that day). | ✅ Fixed — only on pour-over days |
 | B8 | Low | Decor | Pack bulb/flower overwrote the drawn lamp/plant on re-apply. | ✅ Fixed — pack art only as fallback |
 | B9 | Low | Story | Clicking a kitchen detail while text is shown also advances the text. | Open — harmless, by design for now |
+| B10 | High | Cup | Cups didn't match the art direction: the empty cup showed the bare body, the drink tile was misaligned. | ✅ Fixed — empty cap always on top; drink rises over it; caps aligned to rim and outline (team mockup) |
+| B11 | Medium | InstantCoffee | Water was poured by tapping/holding the kettle (it flew to the cup by itself). | ✅ Changed — pick up the kettle and carry it over the cup to pour |
+| B12 | Medium | Spices | Toppings were toggled by clicking jars; nothing went into the cup. | ✅ Changed — carry each spice to the cup; portions show on the drink |
+| B13 | Low | Milk | Foam splat was huge and covered the frother. | ✅ Fixed — small cap at the rim, behind the frother |
+| B14 | Low | Spices | A fast flick could drop a jar just outside the cup and lose the portion. | ✅ Fixed — jar or hand over the cup counts |
 
 ## What was added (life & juice)
 
