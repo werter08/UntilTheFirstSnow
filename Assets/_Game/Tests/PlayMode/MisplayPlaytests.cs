@@ -112,6 +112,36 @@ namespace Courtyard.Tests
             Assert.That(LastQuality, Is.LessThan(0.3f), "Boiling dry should score poorly.");
         }
 
+        /// <summary>
+        /// Terrible coffee on Day 1: the kettle boils dry and the cup gets a splash of water. Each bad step takes warmth
+        /// away, and the cold drink finishes it: the day restarts.
+        /// </summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Day01_TerribleCoffee_TheColdWins()
+        {
+            yield return LoadDay(1);
+            yield return AdvanceTo<KettleBoilStep>();
+            yield return Click(Counter.KettleSwitch.transform);
+            yield return WaitForCompletion(30f);
+            var meter = GetField<WarmthGroup>(Runner, "_warmth").Meters[0];
+            var before = meter.Value;
+            yield return Wait(2f); // frost + shiver, then the meter drops
+            Assert.That(meter.Value, Is.LessThan(before - 5f), "A badly made step should chill.");
+
+            yield return AdvanceTo<InstantCoffeeStep>();
+            var step = Object.FindAnyObjectByType<InstantCoffeeStep>();
+            for (var i = 0; i < 2; i++)
+            {
+                yield return Drag(step.transform.Find("Spoon").position, step.transform.Find("Jar").position, Counter.Mug.transform.position + Vector3.up * 0.2f);
+                yield return Wait(0.5f);
+            }
+
+            yield return CarryKettleAndPour(0.18f);
+            var deadline = Time.realtimeSinceStartup + 20f;
+            while (!GetField<bool>(Runner, "_failed") && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(GetField<bool>(Runner, "_failed"), Is.True, "Terrible coffee should let the cold win.");
+        }
+
         /// <summary>Day 10, wrong toppings: the gentle 'It's… nice' ending plays and the day still finishes.</summary>
         [UnityTest, Timeout(300000)]
         public IEnumerator Day10_WrongToppings_StillFinishes()

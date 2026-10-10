@@ -45,6 +45,13 @@ namespace Courtyard.Core
             Set(Value + amount);
         }
 
+        /// <summary>Takes warmth away at once (a cold, badly made drink). Can empty the meter.</summary>
+        public void Chill(float amount)
+        {
+            if (IsLocked || IsEmpty || amount <= 0f) return;
+            Set(Value - amount);
+        }
+
         private void Set(float value)
         {
             var clamped = Mathf.Clamp(value, 0f, Max);

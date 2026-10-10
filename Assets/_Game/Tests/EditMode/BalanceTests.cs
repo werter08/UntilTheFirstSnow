@@ -7,7 +7,8 @@ namespace Courtyard.Tests
 {
     /// <summary>
     /// Simulates a player through every level using the same warmth rules as LevelRunner
-    /// (drain only while a step runs; scored steps restore their target; final drink restores both).
+    /// (drain only while a step runs; scored steps warm or — when badly made — chill their target; the served drink
+    /// warms or chills both).
     /// </summary>
     public sealed class BalanceTests
     {
@@ -30,9 +31,12 @@ namespace Courtyard.Tests
                 group.Tick(step.Scored ? secondsPerStep : UnscoredStepSeconds);
                 lowest = group.Meters.Min(m => m.Value) is var v && v < lowest ? v : lowest;
                 if (group.IsDepleted) return -1f;
-                if (step.Scored) group.Restore(step.WarmthTarget, quality * level.WarmthPerStep);
+                if (step.Scored) group.Apply(step.WarmthTarget, level.StepWarmthDelta(quality));
+                if (group.IsDepleted) return -1f;
             }
 
+            group.Apply(WarmthTarget.Both, level.DrinkWarmthDelta(quality));
+            if (group.IsDepleted) return -1f;
             return lowest;
         }
 
@@ -48,6 +52,21 @@ namespace Courtyard.Tests
         {
             foreach (var level in AllLevels())
                 Assert.That(Simulate(level, 10f, 0.85f), Is.GreaterThan(30f), $"{level.name} is too harsh for a good player");
+        }
+
+        [Test]
+        public void TerribleBarista_FreezesOnEveryDayButTheLast()
+        {
+            // A badly made drink is cold: it takes warmth away, so careless play loses even at a normal pace.
+            foreach (var level in AllLevels().Where(l => l.DayNumber != 30))
+                Assert.That(Simulate(level, 15f, 0.1f), Is.LessThan(0f), $"{level.name}: bad drinks should let the cold win");
+        }
+
+        [Test]
+        public void Day30_NeverFails_EvenWithBadDrinks()
+        {
+            var day30 = AllLevels().Single(l => l.DayNumber == 30);
+            Assert.That(Simulate(day30, 30f, 0f), Is.GreaterThan(0f));
         }
 
         [Test]

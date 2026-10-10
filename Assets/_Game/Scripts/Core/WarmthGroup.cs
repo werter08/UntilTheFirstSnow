@@ -56,6 +56,30 @@ namespace Courtyard.Core
             }
         }
 
+        /// <summary>Takes warmth from the targeted meter (same mapping as <see cref="Restore"/>).</summary>
+        public void Chill(WarmthTarget target, float amount)
+        {
+            switch (target)
+            {
+                case WarmthTarget.Him:
+                    _meters[HimIndex].Chill(amount);
+                    break;
+                case WarmthTarget.Mira:
+                    _meters[_meters.Count > MiraIndex ? MiraIndex : HimIndex].Chill(amount);
+                    break;
+                default:
+                    foreach (var meter in _meters) meter.Chill(amount);
+                    break;
+            }
+        }
+
+        /// <summary>Applies a signed warmth change: positive restores, negative chills.</summary>
+        public void Apply(WarmthTarget target, float delta)
+        {
+            if (delta >= 0f) Restore(target, delta);
+            else Chill(target, -delta);
+        }
+
         private void OnMeterDepleted()
         {
             if (_depleted) return;

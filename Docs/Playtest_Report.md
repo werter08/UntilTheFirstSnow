@@ -15,7 +15,11 @@ Last update: 2026-10-10.
 - **EditMode tests (27)**: warmth rules, balance simulation (average / good / very slow player), level data, recipes.
 - **Code review** of every minigame and of the level flow; screenshots of every day.
 
-Result: **21/21 PlayMode and 27/27 EditMode pass.**
+Result: **22/22 PlayMode and 32/32 EditMode pass.**
+
+**Rule: the cold wins on bad coffee.** A step below quality 0.4 chills instead of warming (frost, "Brr… cold.",
+camera shiver, weak steam); a bad served drink chills 35. A careless player now freezes on Days 1–20 at a normal pace
+(`Day01_TerribleCoffee_TheColdWins`, `TerribleBarista_FreezesOnEveryDayButTheLast`). Day 30 never fails.
 
 **Rule (from the team):** wrong amounts ruin the drink and **restart the day** — too many/few coffee spoonfuls on Day 1,
 two portions of one spice, more than two spices, or serving with fewer than two. Run them from the Test Runner, or `unity command run_tests
@@ -62,6 +66,9 @@ two portions of one spice, more than two spices, or serving with fewer than two.
   shelf, rack mugs, coffee bag, fridge notes. **Mira waves back** from her lit window when clicked — only from Day 5.
 - **Ambient motion:** curtains breathe (stronger on rainy/windy days), lamp sways, plant sways, Mira's silhouette moves,
   neighbours' windows across the courtyard switch their lights on and off.
+- **Particles (new):** warm glow puffs on good steps (≥0.7), frost crystals + cold mist on bad ones, mug steam
+  strength follows drink quality, dust motes drifting in the lamp light, his breath puffs from the bottom of the view
+  when warmth drops below 35%.
 - **Juice:** sparkles on "Perfect!", grinder dust + shake, pour splashes, spoon puffs, topping sprinkles, foam puff,
   smooth warmth meter that bounces on gains, soft round snow and steam.
 - **No-text guidance:** after 7 s idle the right tool bounces (never reveals the ChooseMug / topping answers).

@@ -184,8 +184,8 @@ public abstract class MinigameStep : MonoBehaviour {
 
 - `value` 0..100, starts at the level's `startWarmth`.
 - Drains every frame by `drainPerSecond * level.coldMultiplier`.
-- After each step: `value += step.quality * level.warmthPerStep`.
-- Final drink served: `value += finalQuality * level.drinkWarmthBonus`.
+- After each step: `value += step.quality * level.warmthPerStep`. **A badly made step (quality < `badResultThreshold`, 0.4) is a cold drink: it takes warmth away instead** (`badStepChill` 20 at quality 0, half that just under the threshold) with frost, "Brr… cold." and a shiver.
+- Final drink served: `value += finalQuality * level.drinkWarmthBonus`; a bad final drink (average < 0.4) chills by `badDrinkChill` (35). If that empties a meter the day restarts with `coldDrinkText`. So careless play loses to the cold even at a normal pace (`BalanceTests.TerribleBarista_FreezesOnEveryDayButTheLast`). Day 30 never fails.
 - `value <= 0` → gentle fail: fade to blue, show "Too cold… let's try again.", restart the level.
 - Day 20: two meters (`Him`, `Mira`). The serve step for her mug restores only her meter. Both must stay > 0.
 - Day 30: `drainPerSecond = 0`, meter locked at full with a glow animation.
@@ -259,7 +259,7 @@ Before importing, re-check each page's licence. Add every used pack to `CREDITS.
 ## 11. Testing
 
 - **EditMode tests** (`Tests/EditMode`): WarmthMeter drain/restore/clamp; two-meter fail rule; Day 30 no-drain; every `LevelDefinition` has ≥1 step, non-empty story, valid day number; recipe matching for GuessHerDrink.
-- **PlayMode playtests** (`Tests/PlayMode`, 17): every day played end to end with a virtual mouse (`InputTestFixture`), the Day 20 fail/restart, clumsy-player cases and kitchen "life". Run all PlayMode tests after gameplay changes. Results and the bug/suggestion backlog live in `Docs/Playtest_Report.md`.
+- **PlayMode playtests** (`Tests/PlayMode`, 22): every day played end to end with a virtual mouse (`InputTestFixture`), the Day 20 fail/restart, clumsy-player cases and kitchen "life". Run all PlayMode tests after gameplay changes. Results and the bug/suggestion backlog live in `Docs/Playtest_Report.md`.
 - **Manual checklist before each upload:** full playthrough in the WebGL build (not only the Editor), audio starts after the first click, no console errors, 60 fps in Chrome and Firefox, every text box readable at 1280×720, fail-and-restart works on Day 20.
 
 ## 12. How to work with me (Claude Code)

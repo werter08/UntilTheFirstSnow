@@ -47,6 +47,8 @@ namespace Courtyard.Kitchen
 
         [Tooltip("Steam above the mug while there is a hot drink in it.")]
         [SerializeField] private ParticleSystem mugSteam;
+        [Tooltip("Steam rate for a badly made (cold) drink and a perfect (hot) one.")]
+        [SerializeField] private Vector2 steamRateColdHot = new(0.6f, 9f);
 
         [Header("Zones")]
         [Tooltip("Offset from where step prefabs were authored to the manifest zone, indexed by CounterZone. Written by the decor pass.")]
@@ -146,6 +148,7 @@ namespace Courtyard.Kitchen
             mugLeafPrint.SetActive(!hasArt && props.brewMug == MugStyle.Hers);
             SetMugGauge(false);
             SetMugLevel(0f);
+            SetSteam(0.7f);
             SetMugDrink(MugDrink.Instant, Color.white);
             if (mugContents != null) mugContents.ClearSpice();
             SetDripperGrounds(false);
@@ -165,6 +168,13 @@ namespace Courtyard.Kitchen
         }
 
         public ParticleSystem MugSteam => mugSteam;
+
+        /// <summary>The drink steams as well as it was made: a cold, sloppy drink barely steams.</summary>
+        public void SetSteam(float quality)
+        {
+            var emission = mugSteam.emission;
+            emission.rateOverTime = Mathf.Lerp(steamRateColdHot.x, steamRateColdHot.y, Mathf.Clamp01(quality));
+        }
 
         public Vector2 ZoneShift(CounterZone zone)
         {

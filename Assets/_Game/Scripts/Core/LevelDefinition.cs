@@ -39,6 +39,14 @@ namespace Courtyard.Core
         [SerializeField, Min(0f)] private float drinkWarmthBonus = 25f;
         [Tooltip("Step quality at or above this counts as a good result for conditional beats.")]
         [SerializeField, Range(0f, 1f)] private float goodResultThreshold = 0.7f;
+        [Header("Bad drinks: the cold wins")]
+        [Tooltip("A scored step below this quality takes warmth away instead of giving it.")]
+        [SerializeField, Range(0f, 1f)] private float badResultThreshold = 0.4f;
+        [Tooltip("Warmth lost by a step at quality 0 (half of it just below the threshold).")]
+        [SerializeField, Min(0f)] private float badStepChill = 20f;
+        [Tooltip("Warmth lost when the served drink (average quality) is below the bad threshold.")]
+        [SerializeField, Min(0f)] private float badDrinkChill = 35f;
+        [SerializeField, TextArea] private string coldDrinkText = "Cold, bitter coffee… the cold got in. Let's try again.";
         [SerializeField, TextArea] private string failText = "Too cold… let's try again.";
         [Tooltip("Shown when a drink is ruined (too much / too little of something) and the day restarts.")]
         [SerializeField, TextArea] private string ruinedText = "That's not how it goes… let's start over.";
@@ -77,6 +85,20 @@ namespace Courtyard.Core
         public float WarmthPerStep => warmthPerStep;
         public float DrinkWarmthBonus => drinkWarmthBonus;
         public float GoodResultThreshold => goodResultThreshold;
+        public float BadResultThreshold => badResultThreshold;
+        public string ColdDrinkText => coldDrinkText;
+
+        /// <summary>Warmth change after a scored step: a good step warms, a bad one (below the threshold) chills.</summary>
+        public float StepWarmthDelta(float quality)
+        {
+            if (quality >= badResultThreshold) return quality * warmthPerStep;
+            var badness = badResultThreshold > 0f ? 1f - quality / badResultThreshold : 1f;
+            return -badStepChill * Mathf.Lerp(0.5f, 1f, badness);
+        }
+
+        /// <summary>Warmth change when the drink is served (average quality of the scored steps).</summary>
+        public float DrinkWarmthDelta(float quality) =>
+            quality >= badResultThreshold ? quality * drinkWarmthBonus : -badDrinkChill;
         public string FailText => failText;
         public string RuinedText => ruinedText;
         public AudioClip Ambience => ambience;

@@ -28,6 +28,19 @@ namespace Courtyard.Kitchen
         [Tooltip("World-space emitter used for sparkles, dust, splashes and sprinkles (emission off; we Emit()).")]
         [SerializeField] private ParticleSystem burst;
         [SerializeField] private Color perfectSparkle = new(1f, 0.85f, 0.4f);
+        [Tooltip("Soft round puffs (radial sprite): warm glow, cold mist, breath.")]
+        [SerializeField] private ParticleSystem softBurst;
+        [SerializeField] private Color warmGlow = new(1f, 0.72f, 0.42f, 0.55f);
+        [SerializeField, Range(0f, 1f)] private float niceThreshold = 0.7f;
+
+        [Header("Cold (a badly made drink)")]
+        [SerializeField] private string chillText = "Brr… cold.";
+        [SerializeField] private Color chillTextColour = new(0.62f, 0.82f, 1f);
+        [SerializeField] private Color frostColour = new(0.8f, 0.92f, 1f);
+        [SerializeField] private Color mistColour = new(0.88f, 0.94f, 1f, 0.75f);
+        [SerializeField, Min(0f)] private float shakeSeconds = 0.5f;
+        [SerializeField, Min(0f)] private float shakeAmount = 0.07f;
+        [SerializeField, Min(0f)] private float chillHoldSeconds = 0.6f;
 
         [Header("Served drink")]
         [SerializeField] private string drinkSortingLayer = "Foreground";
@@ -59,10 +72,63 @@ namespace Courtyard.Kitchen
         /// <summary>Shows "Perfect!" over <paramref name="worldPosition"/> when the quality earns it.</summary>
         public void CelebrateQuality(float quality, Vector3 worldPosition)
         {
-            if (quality < perfectThreshold) return;
+            if (quality < niceThreshold) return;
+            // A good drink glows warm; a perfect one also sparkles.
+            Puff(worldPosition + Vector3.down * 0.6f, warmGlow, quality >= perfectThreshold ? 10 : 5, 0.7f, 0.45f, -0.15f);
+            if (quality < perfectThreshold)
+            {
+                Burst(worldPosition, perfectSparkle, 6, 1.4f, 0.08f, -0.2f);
+                return;
+            }
+
             Popup(perfectText, worldPosition);
             Burst(worldPosition, perfectSparkle, 18, 2.2f, 0.12f, -0.2f);
             AudioManager.Play(SfxId.Perfect);
+        }
+
+        /// <summary>A badly made drink: frost crystals and cold mist over the mug, "Brr…", the camera shivers.</summary>
+        public IEnumerator Chill(Vector3 mugPosition, Transform shakeTarget)
+        {
+            var top = mugPosition + Vector3.up * 0.7f;
+            Popup(chillText, top + Vector3.up * 0.5f, chillTextColour, 0.7f);
+            Burst(top, frostColour, 40, 2.2f, 0.11f, 0.35f);
+            Puff(top, mistColour, 16, 1f, 0.7f, -0.1f);
+            if (shakeTarget != null) yield return Shake(shakeTarget);
+            yield return new WaitForSeconds(chillHoldSeconds);
+        }
+
+        /// <summary>Short decaying shiver (restores the exact start position).</summary>
+        public IEnumerator Shake(Transform target)
+        {
+            var start = target.localPosition;
+            yield return Tweens.RunLinear(shakeSeconds, t =>
+            {
+                var offset = Random.insideUnitCircle * shakeAmount * (1f - t);
+                target.localPosition = start + new Vector3(offset.x, offset.y, 0f);
+            });
+            target.localPosition = start;
+        }
+
+        /// <summary>Soft round puffs that drift and grow (falls back to square bursts if there is no soft emitter).</summary>
+        public void Puff(Vector3 worldPosition, Color colour, int count, float speed = 0.6f, float size = 0.4f, float gravity = -0.1f)
+        {
+            var system = softBurst != null ? softBurst : burst;
+            if (system == null) return;
+            var main = system.main;
+            main.gravityModifier = gravity;
+            for (var i = 0; i < count; i++)
+            {
+                var direction = Random.insideUnitCircle;
+                system.Emit(new ParticleSystem.EmitParams
+                {
+                    position = worldPosition + (Vector3)(Random.insideUnitCircle * 0.2f),
+                    velocity = new Vector3(direction.x * 0.6f, Mathf.Abs(direction.y) * 0.4f + 0.3f, 0f) * speed,
+                    startColor = colour,
+                    startSize = size * Random.Range(0.6f, 1.2f),
+                    startLifetime = Random.Range(0.8f, 1.6f),
+                    rotation = Random.Range(0f, 360f),
+                }, 1);
+            }
         }
 
         /// <summary>
@@ -123,11 +189,13 @@ namespace Courtyard.Kitchen
             }
         }
 
-        public void Popup(string text, Vector3 worldPosition)
+        public void Popup(string text, Vector3 worldPosition, Color? colour = null, float scale = 1f)
         {
             var popup = Instantiate(popupTemplate, popupTemplate.transform.parent);
             popup.gameObject.SetActive(true);
             popup.text = text;
+            if (colour.HasValue) popup.color = colour.Value;
+            popup.fontSize *= scale;
             popup.transform.position = new Vector3(worldPosition.x, worldPosition.y, popupTemplate.transform.position.z);
             StartCoroutine(PopupRoutine(popup));
         }

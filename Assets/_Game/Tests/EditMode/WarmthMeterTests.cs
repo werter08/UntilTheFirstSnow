@@ -72,5 +72,37 @@ namespace Courtyard.Tests
 
             Assert.That(last, Is.EqualTo(60f).Within(0.001f));
         }
-    }
+    
+        [Test]
+        public void Chill_LowersValue_AndCanDeplete()
+        {
+            var meter = new WarmthMeter(30f, 1f);
+            var depleted = 0;
+            meter.Depleted += () => depleted++;
+            meter.Chill(10f);
+            Assert.That(meter.Value, Is.EqualTo(20f));
+            meter.Chill(50f);
+            Assert.That(meter.Value, Is.EqualTo(0f));
+            Assert.That(depleted, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Chill_DoesNothing_OnALockedMeter()
+        {
+            var meter = new WarmthMeter(50f, 0f);
+            meter.Chill(80f);
+            Assert.That(meter.Value, Is.EqualTo(WarmthMeter.Max));
+        }
+
+        [Test]
+        public void StepDelta_WarmsWhenGood_ChillsWhenBad()
+        {
+            var level = UnityEngine.ScriptableObject.CreateInstance<LevelDefinition>();
+            Assert.That(level.StepWarmthDelta(0.8f), Is.GreaterThan(0f));
+            Assert.That(level.StepWarmthDelta(0.1f), Is.LessThan(0f));
+            Assert.That(level.StepWarmthDelta(0f), Is.LessThan(level.StepWarmthDelta(0.39f)), "Worse drinks chill more.");
+            Assert.That(level.DrinkWarmthDelta(0.2f), Is.LessThan(0f));
+            UnityEngine.Object.DestroyImmediate(level);
+        }
+}
 }

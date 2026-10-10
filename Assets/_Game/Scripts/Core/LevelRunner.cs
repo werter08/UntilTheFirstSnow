@@ -57,6 +57,7 @@ namespace Courtyard.Core
         private bool _draining;
         private float _idle;
         private bool _failed;
+        private bool _chilledByDrink;
 
         private void Start()
         {
@@ -132,9 +133,15 @@ namespace Courtyard.Core
                 if (step.Scored)
                 {
                     qualities.Add(quality);
-                    _warmth.Restore(step.WarmthTarget, quality * _level.WarmthPerStep);
+                    var delta = _level.StepWarmthDelta(quality);
+                    if (delta < 0f) yield return Chill(); // frost first, then the meter drops (and may run out)
+                    _chilledByDrink = delta < 0f;
+                    _warmth.Apply(step.WarmthTarget, delta);
+                    _chilledByDrink = false; // Depleted fires inside Apply; later drain-outs are plain cold
+                    if (_failed) yield break;
                     fx.Punch(counter.Mug.transform);
-                    fx.CelebrateQuality(quality, counter.Mug.transform.position + Vector3.up * 1.2f);
+                    if (delta >= 0f) fx.CelebrateQuality(quality, counter.Mug.transform.position + Vector3.up * 1.2f);
+                    counter.SetSteam(quality);
                 }
 
                 yield return story.Play(_level.GetBeats(BeatTrigger.AfterStep, i, IsGood(quality)));
@@ -142,7 +149,12 @@ namespace Courtyard.Core
 
             // Serve the drink.
             var finalQuality = qualities.Count > 0 ? qualities.Average() : 1f;
-            _warmth.Restore(WarmthTarget.Both, finalQuality * _level.DrinkWarmthBonus);
+            var drinkDelta = _level.DrinkWarmthDelta(finalQuality);
+            if (drinkDelta < 0f) yield return Chill();
+            _chilledByDrink = drinkDelta < 0f;
+            _warmth.Apply(WarmthTarget.Both, drinkDelta);
+            _chilledByDrink = false; // Depleted fires inside Apply; later drain-outs are plain cold
+            if (_failed) yield break;
             var lastGood = qualities.Count == 0 || IsGood(qualities[qualities.Count - 1]);
             var drinks = _level.DrinkResults.Where(d => d != null && d.icon != null && d.Shows(lastGood)).Select(d => d.icon).ToList();
             if (drinks.Count > 0) counter.ShowServedDrink(drinks[drinks.Count - 1]);
@@ -217,13 +229,20 @@ namespace Courtyard.Core
             _idle = nudgeAfterSeconds - nudgeRepeatSeconds;
         }
 
+        /// <summary>A badly made drink: frost on the mug, a shiver, and the meters drop.</summary>
+        private IEnumerator Chill()
+        {
+            AudioManager.Play(SfxId.Fail);
+            yield return fx.Chill(counter.Mug.transform.position, worldCamera.transform);
+        }
+
         private bool IsGood(float quality) => quality >= _level.GoodResultThreshold;
 
         private void OnMeterDepleted()
         {
             if (_failed) return;
             _failed = true;
-            StartCoroutine(Fail(_level.FailText, failColor));
+            StartCoroutine(Fail(_chilledByDrink ? _level.ColdDrinkText : _level.FailText, failColor));
         }
 
         private void OnStepRuined()

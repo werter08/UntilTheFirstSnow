@@ -864,6 +864,7 @@ namespace Courtyard.Editor
             }
 
             ApplySoftParticles(kitchen, scene);
+            ApplyMoreParticles(kitchen, scene);
             ApplyNeighbours(kitchen);
             ApplyFinale(scene, kitchen);
 
@@ -893,6 +894,67 @@ namespace Courtyard.Editor
                 else main.startSize = new ParticleSystem.MinMaxCurve(0.25f, 0.4f);
                 EditorUtility.SetDirty(system);
             }
+        }
+
+        /// <summary>
+        /// Extra particles: a soft puff emitter for FeedbackFx (warm glow, cold mist), dust motes drifting in the lamp
+        /// light, and his breath showing when the kitchen gets cold. Idempotent.
+        /// </summary>
+        private static void ApplyMoreParticles(Transform kitchen, Scene scene)
+        {
+            var soft = AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png");
+            if (soft == null) return;
+            var roots = scene.GetRootGameObjects();
+            var fx = roots.Select(g => g.GetComponentInChildren<FeedbackFx>(true)).First(f => f != null);
+            var vignette = roots.Select(g => g.GetComponentInChildren<UI.WarmthVignette>(true)).FirstOrDefault(v => v != null);
+
+            // Soft puffs: emitted on demand by FeedbackFx.Puff.
+            var puffs = SoftParticles(fx.transform, "SoftBurst", Vector2.zero, 0.01f, Vector2.zero, Color.white, 0.4f, 1.2f, 0f, "FX");
+            var puffMain = puffs.main;
+            puffMain.maxParticles = 300;
+            var puffMotion = puffs.velocityOverLifetime;
+            puffMotion.enabled = false;
+            FadeOut(puffs);
+            puffs.GetComponent<ParticleSystemRenderer>().sortingOrder = 19;
+            Wire(fx, "softBurst", puffs);
+
+            // Dust motes slowly drifting in the lamp light (behind the counter, in front of the wall).
+            var lamp = Find(kitchen, "CeilingLamp");
+            var dust = SoftParticles(kitchen, "LampDust", new Vector2(lamp.position.x, 2.6f), 3.6f, new Vector2(0.02f, -0.04f),
+                new Color(1f, 0.92f, 0.75f, 0.5f), 0.05f, 9f, 2.2f, "WallProps");
+            var dustShape = dust.shape;
+            dustShape.scale = new Vector3(3.6f, 2.6f, 0.05f);
+            var dustMain = dust.main;
+            dustMain.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.07f);
+            dustMain.prewarm = true;
+            var noise = dust.noise;
+            noise.enabled = true;
+            noise.strength = 0.12f;
+            noise.frequency = 0.25f;
+            noise.scrollSpeed = 0.1f;
+            var dustGrowth = dust.sizeOverLifetime;
+            dustGrowth.enabled = false;
+            FadeInOut(dust);
+            dust.GetComponent<ParticleSystemRenderer>().sortingOrder = 40;
+
+            // Cold breath: puffs rise from the bottom of the view when warmth runs low.
+            var breath = Find(kitchen, "ColdBreath", false) ?? Empty(kitchen, "ColdBreath", new Vector2(-0.4f, -5.7f));
+            breath.position = new Vector3(-0.4f, -4.9f, 0f);
+            var cold = GetOrAdd<ColdBreath>(breath);
+            Wire(cold, "fx", fx);
+            if (vignette != null) Wire(cold, "vignette", vignette);
+        }
+
+        private static void FadeOut(ParticleSystem system) => SetFade(system, new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.8f, 0.5f), new GradientAlphaKey(0f, 1f) });
+        private static void FadeInOut(ParticleSystem system) => SetFade(system, new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.25f), new GradientAlphaKey(1f, 0.7f), new GradientAlphaKey(0f, 1f) });
+
+        private static void SetFade(ParticleSystem system, GradientAlphaKey[] alpha)
+        {
+            var colour = system.colorOverLifetime;
+            colour.enabled = true;
+            var fade = new Gradient();
+            fade.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) }, alpha);
+            colour.color = fade;
         }
 
         /// <summary>A few windows across the courtyard whose lights go on and off.</summary>

@@ -28,6 +28,8 @@ namespace Courtyard.UI
             SetAlpha(warm, 0f);
         }
 
+        public bool IsBound => _group != null;
+
         /// <summary>Coldest meter, 0..1.</summary>
         public float Coldest
         {
