@@ -11,9 +11,13 @@ namespace Courtyard.Kitchen
     [RequireComponent(typeof(Light2D))]
     public sealed class HoverHighlight : MonoBehaviour
     {
-        [SerializeField, Min(0f)] private float intensity = 1.2f;
+        [SerializeField, Min(0f)] private float intensity = 0.7f;
         [SerializeField, Min(0.01f)] private float fadeSpeed = 10f;
         [SerializeField, Min(0.1f)] private float radiusPerSize = 1.1f;
+        [Tooltip("Largest glow radius (world units), so big things never wash out the scene.")]
+        [SerializeField, Min(0.2f)] private float maxRadius = 1.3f;
+        [Tooltip("Objects larger than this (curtains, the window) get no glow.")]
+        [SerializeField, Min(0.5f)] private float maxObjectSize = 2.6f;
 
         private Light2D _light;
         private Transform _target;
@@ -40,9 +44,15 @@ namespace Courtyard.Kitchen
         private void OnHoverStarted(Transform target)
         {
             if (target == null) return;
-            _target = target;
             var bounds = Bounds(target);
-            _light.pointLightOuterRadius = Mathf.Max(0.4f, Mathf.Max(bounds.extents.x, bounds.extents.y) * radiusPerSize * 2f);
+            if (Mathf.Max(bounds.size.x, bounds.size.y) > maxObjectSize)
+            {
+                _target = null; // big pieces (curtains, window) don't light up
+                return;
+            }
+
+            _target = target;
+            _light.pointLightOuterRadius = Mathf.Clamp(Mathf.Max(bounds.extents.x, bounds.extents.y) * radiusPerSize * 2f, 0.4f, maxRadius);
             _light.pointLightInnerRadius = _light.pointLightOuterRadius * 0.35f;
         }
 

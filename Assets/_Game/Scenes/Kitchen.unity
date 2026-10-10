@@ -19847,9 +19847,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 691019a63cc4a47768c90386a1b9ce38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Kitchen.HoverHighlight
-  intensity: 1.2
+  intensity: 0.7
   fadeSpeed: 10
   radiusPerSize: 1.1
+  maxRadius: 1.3
+  maxObjectSize: 2.6
 --- !u!114 &1031038832
 MonoBehaviour:
   m_ObjectHideFlags: 0
