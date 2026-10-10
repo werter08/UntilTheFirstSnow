@@ -304,8 +304,6 @@ namespace Courtyard.Editor
                 if (renderer.TryGetComponent<TMP_Text>(out _)) EditorUtility.SetDirty(renderer);
             }
 
-            var fx = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<FeedbackFx>(true)).FirstOrDefault(f => f != null);
-            if (fx != null) Wire(fx, "drinkSortingLayer", "FX");
         }
 
         /// <summary>2D lights must target every sorting layer, or sprites on new layers render black.</summary>

@@ -76,6 +76,7 @@ namespace Courtyard.Editor
 
         public static void Apply()
         {
+            MugOutlineBuilder.Build(PropsFolder, "mug_chipped", "mug_his", "mug_hers", "mug_decoy_2", "mug_decoy_1");
             ConfigureArtImports();
             ArtManifestBuilder.EnsureSortingLayers();
             _layout = ArtManifestBuilder.LoadOrCreateLayout();
@@ -397,13 +398,13 @@ namespace Courtyard.Editor
             if (v60Empty != null)
             {
                 var v60 = Find(tools, "V60");
-                PlaceAtScreenScale(v60, v60Empty, v60.localPosition, "Props", 4);
+                PlaceAtScreenScale(v60, v60Empty, v60.localPosition, "Props", 7);
                 Wire(counter, "dripperRenderer", v60.GetComponent<SpriteRenderer>());
                 Wire(counter, "dripperEmpty", v60Empty);
                 Wire(counter, "dripperGrounds", Load("v60_grounds"));
                 var shadowSprite = Load("v60_shadow");
                 if (shadowSprite != null)
-                    PlaceAtScreenScale(SpriteChild(v60, "Shadow"), shadowSprite, new Vector2(-0.07f, -v60Empty.bounds.extents.y + 0.02f), "Props", 3);
+                    PlaceAtScreenScale(SpriteChild(v60, "Shadow"), shadowSprite, new Vector2(-0.07f, -v60Empty.bounds.extents.y + 0.02f), "Props", 6);
             }
 
             // The drink is shown inside the mug: a drink tile over the top of the mug body (the tiles are exactly the
@@ -412,7 +413,23 @@ namespace Courtyard.Editor
             // As in the team's mockup: the cap's top edge and outline sit exactly on the mug's rim and outline.
             // Both PNGs carry 2 px of padding; caps are 110×66 px, the mug body is 110 px wide from its left edge.
             const float region = 0.66f;
-            var regionCentre = new Vector2(chipped.bounds.min.x + 0.02f + 0.55f, chipped.bounds.max.y - 0.02f - region * 0.5f);
+            var regionCentre = new Vector2(chipped.bounds.min.x + 0.02f + 0.55f, chipped.bounds.max.y + 0.07f - region * 0.5f);
+
+            // Drink tiles clipped to the mug's silhouette for this exact placement (no square corners past the rim).
+            MugOutlineBuilder.ClipDrinks(PropsFolder + "mug_chipped.png", DrinksFolder, regionCentre,
+                "drink_instant", "drink_black", "drink_pourover", "drink_latte", "drink_latte_heart", "drink_cinnamon");
+            AssetDatabase.Refresh();
+            ConfigureImports(DrinksFolder);
+            Sprite Drink(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(MugOutlineBuilder.InMugPath(n))
+                                      ?? AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + n + ".png");
+
+            // The mug body is opaque, so only its ink outline goes in front of the drink (body 1 < drink 2–4 < outline 5).
+            SetLayer(mug, "Props", 1);
+            var outline = SpriteChild(mug, "Outline");
+            PlaceAtScreenScale(outline, AssetDatabase.LoadAssetAtPath<Sprite>(MugOutlineBuilder.OutlinePath("mug_chipped")), Vector2.zero, "Props", 5);
+            Wire(counter, "mugOutline", outline.GetComponent<SpriteRenderer>());
+            WireArray(counter, "mugOutlineSprites", new[] { "mug_chipped", "mug_his", "mug_hers", "mug_decoy_2", "mug_decoy_1" }
+                .Select(n => (Object)AssetDatabase.LoadAssetAtPath<Sprite>(MugOutlineBuilder.OutlinePath(n))).ToArray());
 
             var oldGauge = mug.Find("Gauge");
             var fill = Find(mug, "Fill");
@@ -429,16 +446,16 @@ namespace Courtyard.Editor
             var line = Find(fill, "FillLine").GetComponent<SpriteRenderer>();
             line.size = new Vector2(1.12f, 0.045f);
             line.color = new Color(1f, 1f, 1f, 0.9f);
-            SetLayer(line.transform, "Props", 6);
+            SetLayer(line.transform, "Props", 8);
 
             var contents = Child(mug, "Contents");
             contents.localPosition = regionCentre;
             // Empty mug: the plain dark cap (the inside of an empty mug), always under the drink.
             var empty = SpriteChild(contents, "EmptyCap");
-            PlaceAtScreenScale(empty, AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_instant.png"), Vector2.zero, "Props", 2);
+            PlaceAtScreenScale(empty, Drink("drink_instant"), Vector2.zero, "Props", 2);
             var liquid = SpriteChild(contents, "Liquid");
             var liquidRenderer = liquid.GetComponent<SpriteRenderer>();
-            liquidRenderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_black.png");
+            liquidRenderer.sprite = Drink("drink_black");
             liquidRenderer.drawMode = SpriteDrawMode.Simple;
             liquidRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             liquid.localPosition = Vector3.zero;
@@ -473,9 +490,9 @@ namespace Courtyard.Editor
                 var drinks = Property(so, "mugDrinkSprites");
                 drinks.arraySize = 3;
                 // The plain dark tile is the inside of an EMPTY mug; instant coffee is the speckled dark one.
-                drinks.GetArrayElementAtIndex((int)MugDrink.Instant).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_black.png");
-                drinks.GetArrayElementAtIndex((int)MugDrink.Black).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_pourover.png");
-                drinks.GetArrayElementAtIndex((int)MugDrink.Latte).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_latte.png");
+                drinks.GetArrayElementAtIndex((int)MugDrink.Instant).objectReferenceValue = Drink("drink_black");
+                drinks.GetArrayElementAtIndex((int)MugDrink.Black).objectReferenceValue = Drink("drink_pourover");
+                drinks.GetArrayElementAtIndex((int)MugDrink.Latte).objectReferenceValue = Drink("drink_latte");
             });
 
             // Spoonfuls of instant coffee now show as grounds inside the mug (CounterStation.ShowSpoons).

@@ -26,6 +26,9 @@ namespace Courtyard.Kitchen
         [Header("Mug")]
         [SerializeField] private PointerTarget mug;
         [SerializeField] private SpriteRenderer mugBody;
+        [Tooltip("The mug's ink outline, drawn in front of the drink (indexed by MugStyle like mugSprites).")]
+        [SerializeField] private SpriteRenderer mugOutline;
+        [SerializeField] private Sprite[] mugOutlineSprites;
         [SerializeField] private SpriteBar mugFill;
         [SerializeField] private Transform mugFillLine;
         [SerializeField] private GameObject mugFoam;
@@ -145,6 +148,8 @@ namespace Courtyard.Kitchen
             var style = (int)props.brewMug;
             var hasArt = mugSprites != null && style < mugSprites.Length && mugSprites[style] != null;
             if (hasArt) mugBody.sprite = mugSprites[style];
+            if (mugOutline != null)
+                mugOutline.sprite = hasArt && mugOutlineSprites != null && style < mugOutlineSprites.Length ? mugOutlineSprites[style] : null;
             mugLeafPrint.SetActive(!hasArt && props.brewMug == MugStyle.Hers);
             SetMugGauge(false);
             SetMugLevel(0f);
