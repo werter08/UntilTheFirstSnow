@@ -408,8 +408,9 @@ namespace Courtyard.Kitchen
                 emission.rateOverTime = preset.emissionRate;
                 var velocity = preset.system.velocityOverLifetime;
                 velocity.enabled = true;
-                velocity.x = preset.wind;
-                preset.system.Simulate(5f, true, true); // start mid-weather, not with an empty sky
+                // Wind as a small range: every velocity axis must use the same curve mode as the builder's ranges.
+                velocity.x = new ParticleSystem.MinMaxCurve(preset.wind * 0.8f - 0.1f, preset.wind * 1.2f + 0.1f);
+                preset.system.Simulate(14f, true, true); // start mid-weather, not with an empty sky
                 preset.system.Play(true);
             }
         }

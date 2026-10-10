@@ -238,8 +238,63 @@ namespace Courtyard.Editor
                 main.startSizeX = new ParticleSystem.MinMaxCurve(w * 0.75f, w);
                 main.startSizeY = new ParticleSystem.MinMaxCurve(h * 0.75f, h);
                 main.startSizeZ = 1f;
-                if (system == "Rain") main.startRotation = 0f; // drops fall straight; leaves and snow keep spinning
+                ApplyWeatherMotion(particles, system);
                 EditorUtility.SetDirty(particles);
+            }
+        }
+
+        /// <summary>
+        /// How each weather falls: rain as fast stretched streaks, leaves slowly with spin and a side sway, snow slow and
+        /// soft with a slight drift.
+        /// </summary>
+        private static void ApplyWeatherMotion(ParticleSystem particles, string system)
+        {
+            var main = particles.main;
+            var velocity = particles.velocityOverLifetime;
+            var noise = particles.noise;
+            var spin = particles.rotationOverLifetime;
+            var renderer = particles.GetComponent<ParticleSystemRenderer>();
+            velocity.enabled = true;
+            velocity.space = ParticleSystemSimulationSpace.World;
+            velocity.z = new ParticleSystem.MinMaxCurve(0f, 0f); // all axes must share the curve mode (two constants)
+            switch (system)
+            {
+                case "Rain":
+                    velocity.x = new ParticleSystem.MinMaxCurve(-0.6f, -0.3f);
+                    velocity.y = new ParticleSystem.MinMaxCurve(-11f, -9f);
+                    main.startLifetime = new ParticleSystem.MinMaxCurve(0.6f, 0.8f);
+                    main.startRotation = 0f;
+                    renderer.renderMode = ParticleSystemRenderMode.Billboard; // the drawn drop is already a streak
+                    noise.enabled = false;
+                    spin.enabled = false;
+                    break;
+                case "Leaves":
+                    velocity.x = new ParticleSystem.MinMaxCurve(0.1f, 0.4f);
+                    velocity.y = new ParticleSystem.MinMaxCurve(-0.9f, -0.6f);
+                    main.startLifetime = new ParticleSystem.MinMaxCurve(8f, 11f);
+                    renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                    spin.enabled = true;
+                    spin.z = new ParticleSystem.MinMaxCurve(-1.6f, 1.6f); // radians/s, both ways
+                    noise.enabled = true;                                 // side sway as they fall
+                    noise.separateAxes = true;
+                    noise.strengthX = 0.6f;
+                    noise.strengthY = 0.1f;
+                    noise.frequency = 0.35f;
+                    noise.scrollSpeed = 0.2f;
+                    break;
+                case "Snow":
+                    velocity.x = new ParticleSystem.MinMaxCurve(-0.05f, 0.15f);
+                    velocity.y = new ParticleSystem.MinMaxCurve(-0.6f, -0.4f);
+                    main.startLifetime = new ParticleSystem.MinMaxCurve(10f, 14f);
+                    renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                    spin.enabled = true;
+                    spin.z = new ParticleSystem.MinMaxCurve(-0.4f, 0.4f);
+                    noise.enabled = true;                                 // slight drift
+                    noise.separateAxes = false;
+                    noise.strength = 0.18f;
+                    noise.frequency = 0.25f;
+                    noise.scrollSpeed = 0.1f;
+                    break;
             }
         }
 

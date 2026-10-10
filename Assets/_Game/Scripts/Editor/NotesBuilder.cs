@@ -97,23 +97,36 @@ namespace Courtyard.Editor
         private const string NoteArt = "Assets/_Game/Art/Props/note.png";
         private const string OpenNoteArt = "Assets/_Game/Art/Props/note_open.png";
 
-        /// <summary>The team's note drawing on the fridge (1:1); until then the sticky-note placeholders stay.</summary>
+        /// <summary>
+        /// The team's sticky notes on the fridge (1:1): yellow and pink alternate, each tilted by a fixed random angle
+        /// (−8°…8°, the same every build), magnets on top. Warns if two notes overlap by more than half.
+        /// Falls back to note.png, then to the placeholders.
+        /// </summary>
         private static void ApplyNoteArt(GameObject[] slots)
         {
-            var art = AssetDatabase.LoadAssetAtPath<Sprite>(NoteArt);
-            if (art == null)
+            Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/_Game/Art/Props/{n}.png");
+            var yellow = new[] { Load("note_yellow_1"), Load("note_yellow_2"), Load("note_yellow_3") }.Where(x => x != null).ToArray();
+            var pink = new[] { Load("note_pink_1"), Load("note_pink_2") }.Where(x => x != null).ToArray();
+            var single = AssetDatabase.LoadAssetAtPath<Sprite>(NoteArt);
+            if (yellow.Length == 0 && single == null)
             {
-                Debug.LogWarning($"NotesBuilder: {NoteArt} missing — the fridge notes stay sticky-note placeholders.");
+                Debug.LogWarning("NotesBuilder: no note drawings — the fridge notes stay sticky-note placeholders.");
                 return;
             }
 
-            foreach (var slot in slots)
+            for (var i = 0; i < slots.Length; i++)
             {
+                var art = yellow.Length == 0 ? single
+                    : i % 2 == 1 && pink.Length > 0 ? pink[(i / 2) % pink.Length]
+                    : yellow[(i / 2) % yellow.Length];
+                var slot = slots[i].transform;
                 var renderer = slot.GetComponent<SpriteRenderer>();
                 renderer.sprite = art;
                 renderer.drawMode = SpriteDrawMode.Simple;
                 renderer.color = Color.white;
-                slot.transform.localScale = Vector3.one;
+                slot.localScale = Vector3.one;
+                var angle = (float)(new System.Random(7919 * (i + 1)).NextDouble() * 16.0 - 8.0);
+                slot.localRotation = Quaternion.Euler(0f, 0f, angle);
                 var collider = slot.GetComponent<BoxCollider2D>();
                 if (collider != null)
                 {
@@ -121,8 +134,20 @@ namespace Courtyard.Editor
                     collider.offset = art.bounds.center;
                 }
 
-                var magnet = slot.transform.Find("Magnet");
-                if (magnet != null) magnet.localPosition = new Vector3(0f, art.bounds.max.y - 0.05f, 0f);
+                var magnet = slot.Find("Magnet");
+                if (magnet != null) magnet.localPosition = new Vector3(0f, art.bounds.max.y - 0.04f, 0f);
+            }
+
+            // Overlap check (axis-aligned, generous): at most half of a note may hide another.
+            for (var i = 0; i < slots.Length; i++)
+            for (var j = i + 1; j < slots.Length; j++)
+            {
+                var a = slots[i].GetComponent<SpriteRenderer>().bounds;
+                var b = slots[j].GetComponent<SpriteRenderer>().bounds;
+                var w = Mathf.Max(0f, Mathf.Min(a.max.x, b.max.x) - Mathf.Max(a.min.x, b.min.x));
+                var h = Mathf.Max(0f, Mathf.Min(a.max.y, b.max.y) - Mathf.Max(a.min.y, b.min.y));
+                var share = w * h / Mathf.Min(a.size.x * a.size.y, b.size.x * b.size.y);
+                if (share > 0.5f) Debug.LogWarning($"NotesBuilder: FridgeNote{i} and FridgeNote{j} overlap by {share:P0} — move one.");
             }
         }
 
