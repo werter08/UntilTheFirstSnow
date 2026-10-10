@@ -620,18 +620,9 @@ namespace Courtyard.Editor
         private static void BuildBootScene()
         {
             CreateCamera(new Color(0.12f, 0.13f, 0.18f));
-            var canvas = CreateCanvas();
-
-            var title = Label(canvas, "Title", "Until the First Snow", 96f, TextAlignmentOptions.Center, new Color(0.98f, 0.9f, 0.75f));
-            Place(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 80f), new Vector2(1600f, 160f));
-
-            var prompt = Label(canvas, "Prompt", "click to start", 40f, TextAlignmentOptions.Center, Color.white);
-            Place(prompt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), new Vector2(800f, 80f));
-            var promptGroup = prompt.gameObject.AddComponent<CanvasGroup>();
-
+            CreateCanvas();
             new GameObject("GameManager").AddComponent<GameManager>();
-            var boot = new GameObject("BootScreen").AddComponent<BootScreen>();
-            Wire(boot, "prompt", promptGroup);
+            // The title screen itself (autumn window, title, buttons) is built by MenuBuilder.
         }
 
         private static Camera CreateCamera(Color background)

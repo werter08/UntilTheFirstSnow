@@ -1632,27 +1632,10 @@ namespace Courtyard.Editor
             Wire(runner, "hudGroup", hud.GetComponent<CanvasGroup>());
         }
 
-        /// <summary>Title screen: a steaming mug under the title and autumn leaves drifting down.</summary>
+        /// <summary>The title screen is MenuBuilder's (the autumn window); the old title decor is removed.</summary>
         private static void ApplyToBoot(Scene scene)
         {
-            var root = SceneRoot(scene, "TitleDecor");
-            var mug = SpriteChild(root, "Mug");
-            var his = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "mug_his.png");
-            if (his == null) return;
-            FitMug(mug, his, new Vector2(0f, -3.4f), 1.3f, "Props", 1);
-            var steam = SoftParticles(root, "Steam", new Vector2(-0.3f, -2.45f), 0.5f, new Vector2(0f, 0.45f), new Color(1f, 1f, 1f, 0.3f), 0.3f, 1.8f, 5f, "FX");
-            var oldLeaves = root.Find("Leaves");
-            if (oldLeaves != null) Object.DestroyImmediate(oldLeaves.gameObject);
-            var leaves = Particles(root, "Leaves", new Vector2(0f, 5.8f), 19f, new Vector2(0.25f, -0.8f), new Color(0.9f, 0.5f, 0.2f), 0.16f, 14f, 3f, "FX", 0);
-            var spin = leaves.rotationOverLifetime;
-            spin.enabled = true;
-            spin.z = new ParticleSystem.MinMaxCurve(-2f, 2f);
-            var main = leaves.main;
-            main.playOnAwake = true;
-            main.prewarm = true;
-            main.startColor = new ParticleSystem.MinMaxGradient(new Color(0.9f, 0.45f, 0.2f), new Color(0.95f, 0.75f, 0.3f));
-            Motion(mug, sway: 0f, bob: 0.03f, speed: 0.5f, wind: 0f);
-            EditorUtility.SetDirty(steam);
+            foreach (var old in scene.GetRootGameObjects().Where(g => g.name == "TitleDecor")) Object.DestroyImmediate(old);
         }
 
         /// <summary>Ending: his and her mugs side by side in falling snow while the last lines and credits play.</summary>

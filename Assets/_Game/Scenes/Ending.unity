@@ -15432,6 +15432,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Audio.MusicCue
   music: {fileID: 8300000, guid: 18789e460d8a24a56a0880d5a5397dc8, type: 3}
+  ambience: {fileID: 0}
+  ambienceVolume: 0.5
 --- !u!4 &1718074569
 Transform:
   m_ObjectHideFlags: 0

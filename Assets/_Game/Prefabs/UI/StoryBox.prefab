@@ -598,6 +598,8 @@ MonoBehaviour:
   speakerLabel: {fileID: 4413388362795769075}
   continueHint: {fileID: 8508172986959365161}
   charactersPerSecond: 40
+  typingEveryCharacters: 2
+  typingMinGapSeconds: 0.06
   fadeDuration: 0.25
   defaultBackground: {r: 0.1, g: 0.1, b: 0.12, a: 0.88}
   defaultText: {r: 0.95, g: 0.93, b: 0.88, a: 1}
