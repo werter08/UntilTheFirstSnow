@@ -647,15 +647,17 @@ namespace Courtyard.Editor
                 Wire(counter, "frotherButton", Find(frother, "Button").GetComponent<SpriteRenderer>());
             }
 
-            var foam = Load("milk_foam");
+            // Foam rising on the milk: the team's small foam puff (milk_foam_puff), else the older big splash scaled down.
+            var puff = Load("milk_foam_puff");
+            var foam = puff != null ? puff : Load("milk_foam");
             if (foam != null)
             {
                 var blob = SpriteChild(station, "MilkFoamBlob");
                 var rim = top + jugSprite.bounds.size.y - 0.05f;
                 PlaceAtScreenScale(blob, foam, new Vector2(x + JugBodyOffset, rim - 0.08f), "Props", 4); // behind the frother
                 Wire(counter, "milkFoamBlob", blob);
-                Wire(counter, "foamMinScale", 0.08f); // a modest cap at the rim, not a splat
-                Wire(counter, "foamMaxScale", 0.38f);
+                Wire(counter, "foamMinScale", puff != null ? 0.3f : 0.08f);  // a modest cap at the rim, not a splat
+                Wire(counter, "foamMaxScale", puff != null ? 1.25f : 0.38f);
             }
         }
 

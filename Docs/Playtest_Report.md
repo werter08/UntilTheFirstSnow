@@ -77,6 +77,21 @@ Result: **23/23 PlayMode and 34/34 EditMode pass.** Run them from the Test Runne
 | B21 | Medium | Builders | Full decor rebuilds moved hand-placed objects (Mira's window, tree) and shrank the drawn coffee bag. | ✅ Fixed — HandPlaced marker respected everywhere; pack art only as fallback; late passes run last |
 | B22 | Low | Tests | All playtests failed when the Rendering Debugger's input clashed with the virtual mouse. | ✅ Fixed — debugger runtime UI off in playtests |
 
+## Visual check (WebGL build, 2026-10-10)
+
+Build: `Builds/WebGL` — succeeded, 0 errors, 38 MB (data 27 MB, wasm 13 MB), Gzip + decompression fallback. Browser
+playthrough is done by hand by the team. Visual problems seen in the editor captures while preparing the build:
+
+| # | Where | Problem | Suggestion |
+|---|---|---|---|
+| V1 | Day 30, counter right end | The salt jar sits against the fridge: its "Salt" label is cut by the fridge edge and the hanging scarf overlaps the jar. | Move the spice row ~0.3 left or the scarf a little right. |
+| V2 | Window | The tree is mostly hidden behind the left curtain (only ~75 px of crown shows; the bare Day 30 tree barely). | Move the tree right (≤ 30 px keeps it clear of Mira's window) or draw it to peek past the curtain. |
+| V3 | Window | The sky never shows: the opposite building's roof edge is above the window opening. | Lower the building or raise the roof in the art if sky is wanted. |
+| V4 | Mira's window | Her waving arm and the note are partly crossed by the kitchen window's middle bar. | Fine as framing; or nudge her window a few px. |
+| V5 | Day 30 | The warmest palette is very bright; with snow it reads washed out in places. | Lower Day 30's global light intensity slightly if it feels too bright in the browser. |
+| V6 | Honey jar | The honey jar is wider than the others (130 px); its strings touch the neighbours. | Space the four spice jars a bit wider. |
+| V7 | WebGL only | No audio filters in the browser: when cold, the music ducks instead of muffling. | Expected; nothing to fix. |
+
 ## What was added (life & juice)
 
 - **Courtyard through the window** (team's art): the opposite building, Mira's window in five states with a warm
