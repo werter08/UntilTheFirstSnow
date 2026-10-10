@@ -151,12 +151,6 @@ namespace Courtyard.Editor
             if (Fit(kitchen, "Shelf", "Oddblot_shelf", new Vector2(-7.3f, 1.6f), 1.9f, "Wall", 1))
                 Find(kitchen, "InstantCoffeeJar").gameObject.SetActive(false);
 
-            ApplyCoffeeBagAndSpoon(kitchen);
-            OutsideBuilder.ApplyToKitchen(kitchen); // after the manifest: the outside art owns its layers
-            ApplyPourStream(kitchen);
-            ApplyDoorScene(kitchen);
-            NotesBuilder.ApplyToKitchen(scene, kitchen);
-            ApplyShadows(kitchen); // last: props are in their final places
 
             // Bag of real beans from Day 5 ("Bought real beans today") stands at the left end of the counter.
             if (Load(PropsFolder, "coffee_bag") == null) // the team's bag (ApplyCoffeeBagAndSpoon) wins; pack bag only as fallback
@@ -192,6 +186,15 @@ namespace Courtyard.Editor
             }
 
             Fit(kitchen, "WallPicture", "Oddblot_walldeco", new Vector2(-5f, 2.55f), 1.25f, "Wall", 1);
+
+            // Last: everything above has placed its props; these passes build on the final positions and orders.
+            ApplyCoffeeBagAndSpoon(kitchen);
+            OutsideBuilder.ApplyToKitchen(kitchen); // after the manifest: the outside art owns its layers
+            ApplyPourStream(kitchen);
+            ApplyDoorScene(kitchen);
+            NotesBuilder.ApplyToKitchen(scene, kitchen);
+            ApplyHoverHighlight(kitchen);
+            ApplyShadows(kitchen); // last: props are in their final places
         }
 
         /// <summary>
@@ -1036,6 +1039,19 @@ namespace Courtyard.Editor
             var fade = new Gradient();
             fade.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) }, alpha);
             colour.color = fade;
+        }
+
+        /// <summary>One soft warm light that lights up whatever clickable / draggable thing the cursor is over.</summary>
+        private static void ApplyHoverHighlight(Transform kitchen)
+        {
+            var go = Find(kitchen, "HoverHighlight", false) ?? Empty(kitchen, "HoverHighlight", Vector2.zero);
+            var light = GetOrAdd<UnityEngine.Rendering.Universal.Light2D>(go);
+            light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;
+            light.color = new Color(1f, 0.9f, 0.7f);
+            light.intensity = 0f;
+            light.falloffIntensity = 0.7f;
+            light.targetSortingLayers = SortingLayer.layers.Select(l => l.id).ToArray();
+            GetOrAdd<HoverHighlight>(go);
         }
 
         /// <summary>The kettle pours drops of water (the team's raindrop) instead of a solid rectangle.</summary>

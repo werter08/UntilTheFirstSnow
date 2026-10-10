@@ -48,7 +48,7 @@ namespace Courtyard.Editor
         /// <summary>Day → music (Audio/Music), ambience (Audio/Ambience), ambience volume. Null = none.</summary>
         private static readonly (int day, string music, string ambience, float ambienceVolume)[] Days =
         {
-            (1, null, "amb_rain_light", 1f), // no music: silence, rain and the clock
+            (1, "music_day05", "amb_rain_light", 1f), // the title-screen track carries on into Day 1 (and Day 5)
             (5, "music_day05", "amb_rain_heavy", 0.8f),
             (10, "music_day10", "amb_birds", 0.6f),
             (20, "music_day20", "amb_wind", 0.8f),
@@ -58,6 +58,7 @@ namespace Courtyard.Editor
         private const string RoomTone = "amb_room_fridge";
         private const string ColdWind = "amb_wind";
         private const string EndingMusic = "music_day30";
+        private const string TitleMusic = "music_day05"; // starts on the title screen and carries on into Day 1
 
         [MenuItem("Courtyard/Setup/Apply Audio")]
         public static void Apply()
@@ -259,6 +260,20 @@ namespace Courtyard.Editor
             // The first one survives scene loads; later copies remove themselves (AudioManager.Awake).
             foreach (var path in BuildScript.Scenes)
                 EditScene(path, scene => EnsureAudioManager(scene, library, mixer));
+
+            // The title screen starts the first day's music (it continues into Day 1 without a restart).
+            EditScene(BuildScript.Scenes[0], scene =>
+            {
+                var cue = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<MusicCue>(true)).FirstOrDefault(c => c != null);
+                if (cue == null)
+                {
+                    var go = new GameObject("MusicCue");
+                    UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene);
+                    cue = go.AddComponent<MusicCue>();
+                }
+
+                Wire(cue, "music", Clip("Music", TitleMusic));
+            });
 
             // The Ending keeps Day 30's music playing.
             EditScene(BuildScript.Scenes[2], scene =>

@@ -88,7 +88,7 @@ MonoBehaviour:
   drinkResults:
   - icon: {fileID: 21300000, guid: aa6fe5bccbf8c4a9f87bbebfdd118db9, type: 3}
     condition: 0
-  music: {fileID: 0}
+  music: {fileID: 8300000, guid: dc1a398f9a2164d92b22d1c9492b60fa, type: 3}
   ambience: {fileID: 8300000, guid: db14c8867a0f84059879f09eef722958, type: 3}
   ambienceVolume: 1
   outroClip: {fileID: 0}

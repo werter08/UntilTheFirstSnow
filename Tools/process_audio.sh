@@ -67,7 +67,8 @@ loop sfx_grinder_loop.mp3 SFX/sfx_grinder_loop.ogg 13.0 15.0 0.01
 # ---------------------------------------------------------------- straight conversions
 for f in music_day05 music_day10 music_day20 music_day30; do convert "$f.mp3" "Music/$f.ogg"; done
 convert amb_rain_light.mp3          Ambience/amb_rain_light.ogg
-convert amb_rain_heavy.mp3          Ambience/amb_rain_heavy.ogg
+# Heavy rain: the source is 10 minutes; one steady minute (388–448 s) as a seamless loop (0.5 s crossfade) saves ~11 MB.
+loop amb_rain_heavy.mp3 Ambience/amb_rain_heavy.ogg 388 448 0.5
 convert amb_birds.mp3               Ambience/amb_birds.ogg
 convert amb_wind.mp3                Ambience/amb_wind.ogg
 convert amb_snow.mp3                Ambience/amb_snow.ogg
