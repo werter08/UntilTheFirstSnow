@@ -1996,6 +1996,7 @@ GameObject:
   m_Component:
   - component: {fileID: 240749796}
   - component: {fileID: 240749797}
+  - component: {fileID: 240749798}
   m_Layer: 0
   m_Name: V60
   m_TagString: Untagged
@@ -2012,7 +2013,7 @@ Transform:
   m_GameObject: {fileID: 240749795}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.165, y: -1.022, z: 0}
+  m_LocalPosition: {x: -0.18, y: -1.12, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2078,6 +2079,18 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &240749798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240749795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &254142872
 GameObject:
   m_ObjectHideFlags: 0
@@ -9662,6 +9675,7 @@ GameObject:
   - component: {fileID: 418934775}
   - component: {fileID: 418934774}
   - component: {fileID: 418934773}
+  - component: {fileID: 418934776}
   m_Layer: 0
   m_Name: FridgeNote1
   m_TagString: Untagged
@@ -9678,7 +9692,7 @@ Transform:
   m_GameObject: {fileID: 418934770}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.4, y: -0.2, z: 0}
+  m_LocalPosition: {x: 8.66, y: -1.35, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9825,6 +9839,18 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.55, y: 0.55}
   m_EdgeRadius: 0
+--- !u!114 &418934776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 418934770}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &428300967
 GameObject:
   m_ObjectHideFlags: 0
@@ -14580,6 +14606,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1055401161}
   - component: {fileID: 1055401162}
+  - component: {fileID: 1055401163}
   m_Layer: 0
   m_Name: TreeCrown
   m_TagString: Untagged
@@ -14596,7 +14623,7 @@ Transform:
   m_GameObject: {fileID: 1055401160}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.4, y: -1.25, z: 0}
+  m_LocalPosition: {x: -2.01, y: -1.12, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14661,6 +14688,18 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1055401163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055401160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &1062257018
 GameObject:
   m_ObjectHideFlags: 0
@@ -26499,7 +26538,7 @@ Transform:
   m_GameObject: {fileID: 1306198000}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.8500001, z: 0}
+  m_LocalPosition: {x: -0.03, y: 2.64, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -33071,7 +33110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81ee680bf0dce46a9b2776d9abcc62fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Core.LevelRunner
-  fallbackLevel: {fileID: 11400000, guid: be4310f74d9fb4abc881f8a0a7b2d436, type: 2}
+  fallbackLevel: {fileID: 11400000, guid: 92678b0a12f334f2ca2c2fdca5a65fa3, type: 2}
   worldCamera: {fileID: 2023764265}
   kitchen: {fileID: 1524385090}
   counter: {fileID: 390430975}
@@ -40458,6 +40497,7 @@ GameObject:
   - component: {fileID: 1644253403}
   - component: {fileID: 1644253402}
   - component: {fileID: 1644253401}
+  - component: {fileID: 1644253404}
   m_Layer: 0
   m_Name: FridgeNote0
   m_TagString: Untagged
@@ -40474,7 +40514,7 @@ Transform:
   m_GameObject: {fileID: 1644253398}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.4, y: 0.86666656, z: 0}
+  m_LocalPosition: {x: 7.56, y: 0.49, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -40621,6 +40661,18 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.55, y: 0.55}
   m_EdgeRadius: 0
+--- !u!114 &1644253404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644253398}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!114 &1645741886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42124,6 +42176,7 @@ GameObject:
   - component: {fileID: 1713967545}
   - component: {fileID: 1713967544}
   - component: {fileID: 1713967543}
+  - component: {fileID: 1713967546}
   m_Layer: 0
   m_Name: FridgeNote2
   m_TagString: Untagged
@@ -42140,7 +42193,7 @@ Transform:
   m_GameObject: {fileID: 1713967540}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.4, y: -1.2666669, z: 0}
+  m_LocalPosition: {x: 7.61, y: -1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -42287,6 +42340,18 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.55, y: 0.55}
   m_EdgeRadius: 0
+--- !u!114 &1713967546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1713967540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &1715607963
 GameObject:
   m_ObjectHideFlags: 0
@@ -53681,6 +53746,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1964089284}
   - component: {fileID: 1964089285}
+  - component: {fileID: 1964089286}
   m_Layer: 0
   m_Name: OutsideWall
   m_TagString: Untagged
@@ -53697,8 +53763,8 @@ Transform:
   m_GameObject: {fileID: 1964089283}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5749996, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 1.52, z: 0}
+  m_LocalScale: {x: 0.775, y: 0.7986384, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1524385089}
@@ -53762,6 +53828,18 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1964089286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964089283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &1965248408
 GameObject:
   m_ObjectHideFlags: 0
@@ -54494,6 +54572,7 @@ GameObject:
   - component: {fileID: 2043284260}
   - component: {fileID: 2043284259}
   - component: {fileID: 2043284262}
+  - component: {fileID: 2043284263}
   m_Layer: 0
   m_Name: MiraWindow
   m_TagString: Untagged
@@ -54510,7 +54589,7 @@ Transform:
   m_GameObject: {fileID: 2043284256}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.8500001, z: 0}
+  m_LocalPosition: {x: -0.03, y: 2.64, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -54677,6 +54756,18 @@ MonoBehaviour:
   note: {fileID: 21300000, guid: 55502ea82b2df4259b6400a805b6783e, type: 3}
   glow: {fileID: 1306198002}
   waveFrameSeconds: 0.4
+--- !u!114 &2043284263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2043284256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &2048537174
 GameObject:
   m_ObjectHideFlags: 0
@@ -55676,6 +55767,7 @@ GameObject:
   - component: {fileID: 2134688333}
   - component: {fileID: 2134688335}
   - component: {fileID: 2134688334}
+  - component: {fileID: 2134688336}
   m_Layer: 0
   m_Name: Steam
   m_TagString: Untagged
@@ -56084,7 +56176,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -56137,7 +56229,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -56190,7 +56282,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotationX:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -56243,7 +56335,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotationY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -60501,6 +60593,18 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &2134688336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2134688332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &2134725385
 GameObject:
   m_ObjectHideFlags: 0

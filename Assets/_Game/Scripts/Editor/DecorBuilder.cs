@@ -287,7 +287,7 @@ namespace Courtyard.Editor
             for (var i = 0; i < notePositions.Length; i++)
             {
                 var note = Find(kitchen, $"FridgeNote{i}");
-                note.localPosition = notePositions[i];
+                if (!IsHandPlaced(note)) note.localPosition = notePositions[i];
                 SetLayer(note, "Counter", 21);
                 AddMagnet(note, magnets[i], 0.25f);
                 SetLayer(note.Find("Magnet"), "Counter", 22);
@@ -933,7 +933,7 @@ namespace Courtyard.Editor
             if (soft == null) return;
             var systems = new[] { "Snow", "Steam", "SpoutSteam" }
                 .Select(n => scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ParticleSystem>(true)).FirstOrDefault(p => p.name == n))
-                .Where(p => p != null);
+                .Where(p => p != null && !IsHandPlaced(p.transform)); // hand-tuned particles keep their settings
             foreach (var system in systems)
             {
                 var sheet = system.textureSheetAnimation;

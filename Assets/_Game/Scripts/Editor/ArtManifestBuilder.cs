@@ -168,7 +168,7 @@ namespace Courtyard.Editor
             mug.localPosition = new Vector3(layout.ZoneX(CounterZone.Brew), mugBottom + mugHalf - mugSprite.bounds.center.y * stretch, 0f);
             var v60 = Find(tools, "V60");
             var v60Sprite = v60.GetComponent<SpriteRenderer>().sprite;
-            v60.localPosition = v60Sprite != null && v60Sprite.name.StartsWith("v60")
+            if (!IsHandPlaced(v60)) v60.localPosition = v60Sprite != null && v60Sprite.name.StartsWith("v60")
                 ? mug.localPosition + (Vector3)(layout.dripperOnMugPx / KitchenArtLayout.PixelsPerUnit)
                   + Vector3.up * (mugSprite.bounds.extents.y * (stretch - 1f)) // rim rises with the taller mug
                 : new Vector3(layout.ZoneX(CounterZone.Brew), mugBottom + mugHalf * 2f + 0.35f, 0f);
@@ -210,7 +210,8 @@ namespace Courtyard.Editor
             for (var i = 0; i < 3; i++)
             {
                 var figma = new Vector2(area.center.x, area.y + area.height * (i + 0.5f) / 3f);
-                Find(kitchen, $"FridgeNote{i}").localPosition = KitchenArtLayout.ToWorld(figma);
+                var note = Find(kitchen, $"FridgeNote{i}");
+                if (!IsHandPlaced(note)) note.localPosition = KitchenArtLayout.ToWorld(figma);
             }
 
             var frame = Load("window_frame");

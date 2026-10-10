@@ -204,6 +204,9 @@ namespace Courtyard.Editor
 
         // ---------------------------------------------------------------- world placeholders
 
+        /// <summary>True when the team placed this object by hand (<see cref="Core.HandPlaced"/>): keep its transform.</summary>
+        public static bool IsHandPlaced(Transform target) => target != null && target.GetComponent<Core.HandPlaced>() != null;
+
         public static Transform Empty(Transform parent, string name, Vector2 position)
         {
             var transform = new GameObject(name).transform;

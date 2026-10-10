@@ -80,9 +80,15 @@ namespace Courtyard.Editor
 
             // Opposite building. The export is cropped to the building: centred on x 960 with the roof edge at y 70.
             var opposite = Find(kitchen, "OutsideWall", false) ?? Empty(kitchen, "OutsideWall", Vector2.zero);
+            var keepWall = IsHandPlaced(opposite);
+            var wallScale = opposite.localScale;
             Sprite(opposite, wall, "Outside", 0);
-            var top = Px(960f, 70f);
-            opposite.position = new Vector3(top.x, top.y - wall.bounds.extents.y, 0f);
+            if (keepWall) opposite.localScale = wallScale; // hand-placed: keep the team's position and scale
+            else
+            {
+                var top = Px(960f, 70f);
+                opposite.position = new Vector3(top.x, top.y - wall.bounds.extents.y, 0f);
+            }
             foreach (var placeholder in new[] { "OppositeWall", "GalleryRailing", "NeighbourWindows" })
             {
                 var t = Find(kitchen, placeholder, false);
@@ -110,9 +116,11 @@ namespace Courtyard.Editor
             }
 
             var window = Find(kitchen, "MiraWindow");
+            var keepWindow = IsHandPlaced(window);
+            var windowScale = window.localScale;
             var renderer = Sprite(window, sprites[0], "Outside", 1);
-            window.position = (Vector3)Px(960f, 225f);
-            window.localScale = Vector3.one;
+            if (keepWindow) window.localScale = windowScale;
+            else window.position = (Vector3)Px(960f, 225f);
             foreach (Transform child in window) child.gameObject.SetActive(false); // placeholder silhouette, arm, note
             var collider = window.GetComponent<BoxCollider2D>();
             if (collider != null)
@@ -182,8 +190,11 @@ namespace Courtyard.Editor
             {
                 foreach (var name in trees) SetTrunkBasePivot(Folder + name + ".png");
                 trunk.gameObject.SetActive(false); // each drawing has its own trunk
+                var keepCrown = IsHandPlaced(crown);
+                var crownScale = crown.localScale;
                 Sprite(crown, Load(trees[0]), "Outside", 3); // preview; KitchenDirector picks the day's tree
-                crown.position = new Vector3(basePoint.x, basePoint.y, 0f);
+                if (keepCrown) crown.localScale = crownScale;
+                else crown.position = new Vector3(basePoint.x, basePoint.y, 0f);
                 return;
             }
 
