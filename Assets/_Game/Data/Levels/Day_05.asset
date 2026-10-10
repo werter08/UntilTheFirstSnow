@@ -72,10 +72,14 @@ MonoBehaviour:
   warmthPerStep: 15
   drinkWarmthBonus: 25
   goodResultThreshold: 0.7
+  badResultThreshold: 0.4
+  badStepChill: 20
+  badDrinkChill: 35
+  coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   ruinedText: "That's not how it goes\u2026 let's start over."
   drinkResults:
-  - icon: {fileID: 21300000, guid: 788d607d4eade43e68bd1c45ac218c5c, type: 3}
+  - icon: {fileID: 21300000, guid: 9ccb50f5f23784d0682848834224e1b5, type: 3}
     condition: 0
   ambience: {fileID: 0}
   outroClip: {fileID: 0}

@@ -33,6 +33,7 @@ MonoBehaviour:
     herMug: 0
     toppings: 0
     brewMug: 0
+    rackMugs: 
     mugsOnSill: 0
     scarf: 0
     blanket: 0
@@ -69,10 +70,14 @@ MonoBehaviour:
   warmthPerStep: 15
   drinkWarmthBonus: 25
   goodResultThreshold: 0.7
+  badResultThreshold: 0.4
+  badStepChill: 20
+  badDrinkChill: 35
+  coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
   failText: "Too cold\u2026 let's try again."
   ruinedText: "That's not how it goes\u2026 let's start over."
   drinkResults:
-  - icon: {fileID: 21300000, guid: aa6fe5bccbf8c4a9f87bbebfdd118db9, type: 3}
+  - icon: {fileID: 21300000, guid: 91d627434fcdd4e6abf3907d0bb14040, type: 3}
     condition: 0
   ambience: {fileID: 0}
   outroClip: {fileID: 0}
