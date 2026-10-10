@@ -192,6 +192,8 @@ MonoBehaviour:
   spoon: {fileID: 6712108707556685920}
   spoonLoad: {fileID: 5879990792989624871}
   jar: {fileID: 5691306432783900373}
+  spoonEmpty: {fileID: 0}
+  spoonFull: {fileID: 0}
   targetSpoons: 2
   pourPerSecond: 0.35
   targetFill: 0.85

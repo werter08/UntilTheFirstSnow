@@ -25,6 +25,13 @@ namespace Courtyard.Kitchen
 
         [Header("Mug")]
         [SerializeField] private PointerTarget mug;
+        [Header("Coffee bag (from Day 5) and Day 1's spoon")]
+        [SerializeField] private SpriteRenderer coffeeBag;
+        [SerializeField] private Sprite coffeeBagClosed;
+        [SerializeField] private Sprite coffeeBagOpen;
+        [Tooltip("The spoon lying on the counter on instant-coffee days; the step's own spoon takes its place.")]
+        [SerializeField] private Transform restingSpoon;
+
         [SerializeField] private SpriteRenderer mugBody;
         [Tooltip("The mug's ink outline, drawn in front of the drink (indexed by MugStyle like mugSprites).")]
         [SerializeField] private SpriteRenderer mugOutline;
@@ -143,6 +150,8 @@ namespace Courtyard.Kitchen
             var props = level.Props;
             grinder.SetActive(props.grinder);
             dripper.SetActive(HasStep<Minigames.PourOverStep>(level)); // only on days that actually pour over
+            if (restingSpoon != null) restingSpoon.gameObject.SetActive(HasStep<Minigames.InstantCoffeeStep>(level));
+            SetCoffeeBagOpen(false);
             milkStation.SetActive(props.milk);
             toppingShelf.SetActive(props.toppings);
             var style = (int)props.brewMug;
@@ -174,6 +183,21 @@ namespace Courtyard.Kitchen
         }
 
         public ParticleSystem MugSteam => mugSteam;
+        public Transform RestingSpoon => restingSpoon;
+
+        /// <summary>The bag of beans is open while grinding (no-op without the drawn bag).</summary>
+        public void SetCoffeeBagOpen(bool open)
+        {
+            if (coffeeBag == null) return;
+            var sprite = open ? coffeeBagOpen : coffeeBagClosed;
+            if (sprite != null) coffeeBag.sprite = sprite;
+        }
+
+        /// <summary>Shows or hides the spoon lying on the counter (the step's spoon replaces it while in use).</summary>
+        public void SetRestingSpoon(bool visible)
+        {
+            if (restingSpoon != null) restingSpoon.gameObject.SetActive(visible);
+        }
 
         /// <summary>The drink steams as well as it was made: a cold, sloppy drink barely steams.</summary>
         public void SetSteam(float quality)

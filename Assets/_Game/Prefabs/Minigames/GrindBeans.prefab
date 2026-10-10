@@ -57,6 +57,9 @@ MonoBehaviour:
   fillPerTurn: 0.12
   minLevelToFinish: 0.15
   qualityFalloff: 0.35
+  fullSpeedDegrees: 720
+  stillSeconds: 0.12
+  speedSmoothing: 10
 --- !u!1 &1695648775326594813
 GameObject:
   m_ObjectHideFlags: 0

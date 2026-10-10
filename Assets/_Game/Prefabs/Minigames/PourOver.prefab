@@ -206,6 +206,8 @@ MonoBehaviour:
   pourRadius: 1.4
   bandWeight: 0.6
   minFillToFinish: 0.1
+  waterSeconds: 8
+  streamFadeSeconds: 0.35
   kettleFollow: 14
   coffeeColor: {r: 0.35, g: 0.2, b: 0.1, a: 1}
 --- !u!1 &4305450660075222437

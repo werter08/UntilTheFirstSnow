@@ -48,6 +48,7 @@ namespace Courtyard.Minigames
             handle.DragEnded += OnDragEnded;
             handle.Interactable = true;
             NudgeTarget = handle.transform;
+            _counter.SetCoffeeBagOpen(true); // beans come out of the open bag
 
             meter.SetValue(0f);
             var height = meter.MaxHeight;
@@ -63,6 +64,7 @@ namespace Courtyard.Minigames
             handle.Dragged -= OnDragged;
             handle.DragEnded -= OnDragEnded;
             AudioManager.StopLoop(SfxId.Grind, 0.1f);
+            _counter.SetCoffeeBagOpen(false);
         }
 
         private void Update()

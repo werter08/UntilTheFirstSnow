@@ -19,6 +19,9 @@ namespace Courtyard.Minigames
         [Tooltip("Coffee on the spoon; shown while the spoon is loaded.")]
         [SerializeField] private SpriteRenderer spoonLoad;
         [SerializeField] private Collider2D jar;
+        [Tooltip("Drawn spoon, empty and with coffee (optional: without them the Load overlay shows the coffee).")]
+        [SerializeField] private Sprite spoonEmpty;
+        [SerializeField] private Sprite spoonFull;
 
         [Header("Tuning")]
         [SerializeField, Min(1)] private int targetSpoons = 2;
@@ -56,6 +59,14 @@ namespace Courtyard.Minigames
             _counter = ctx.Counter;
             _fx = ctx.Fx;
             _camera = ctx.WorldCamera;
+            // The spoon lying on the counter becomes the one in the player's hand.
+            var resting = _counter.RestingSpoon;
+            if (resting != null && resting.gameObject.activeInHierarchy)
+            {
+                spoon.transform.SetPositionAndRotation(resting.position, resting.rotation);
+                _counter.SetRestingSpoon(false);
+            }
+
             _spoonRest = spoon.transform.position;
             spoon.DragStarted += OnSpoonDragStarted;
             spoon.Dragged += OnSpoonDragged;
@@ -67,7 +78,7 @@ namespace Courtyard.Minigames
             _counter.SetMugGauge(true);
             _counter.ShowFillLine(targetFill);
             _counter.SetMugDrink(MugDrink.Instant, coffeeColor);
-            spoonLoad.enabled = false;
+            ShowLoad(false);
             NudgeTarget = spoon.transform;
             _counter.ShowSpoons(0);
         }
@@ -90,6 +101,7 @@ namespace Courtyard.Minigames
             _counter.KettleStream.enabled = false;
             _counter.Kettle.position = _counter.KettleRest;
             AudioManager.StopTrack(SfxId.Pour);
+            _counter.SetRestingSpoon(_counter.RestingSpoon != null); // back on the counter
         }
 
         // ---------------------------------------------------------------- spoon
@@ -106,7 +118,7 @@ namespace Courtyard.Minigames
             if (_spoonLoaded || !jar.OverlapPoint(world)) return;
 
             _spoonLoaded = true;
-            spoonLoad.enabled = true;
+            ShowLoad(true);
             AudioManager.Play(SfxId.Spoon);
             _fx.Punch(jar.transform, 0.6f);
             _fx.Burst(world, coffeeColor, 4, 0.7f, 0.05f);
@@ -117,7 +129,7 @@ namespace Courtyard.Minigames
             if (_spoonLoaded && (_counter.IsOverMug(world) || _counter.IsAboveMug(world, 0.7f)))
             {
                 _spoonLoaded = false;
-                spoonLoad.enabled = false;
+                ShowLoad(false);
                 _spoons++;
                 _counter.ShowSpoons(_spoons);
                 AudioManager.Play(SfxId.SpoonTink);
@@ -135,6 +147,14 @@ namespace Courtyard.Minigames
 
             var from = spoon.transform.position;
             _spoonReturn = StartCoroutine(Tweens.Run(spoonReturnSeconds, t => spoon.transform.position = Vector3.Lerp(from, _spoonRest, t)));
+        }
+
+        /// <summary>Coffee on the spoon: the drawn full spoon when there is one, otherwise the Load overlay.</summary>
+        private void ShowLoad(bool loaded)
+        {
+            var drawn = spoonEmpty != null && spoonFull != null;
+            if (drawn) spoon.GetComponent<SpriteRenderer>().sprite = loaded ? spoonFull : spoonEmpty;
+            spoonLoad.enabled = loaded && !drawn;
         }
 
         // ---------------------------------------------------------------- kettle

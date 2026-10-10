@@ -154,11 +154,27 @@ namespace Courtyard.Editor
                 });
             }
 
-            // The spoon is held in front of everything on the counter.
+            // The spoon is held in front of everything on the counter. With the drawn spoon (spoon.png /
+            // spoon_full.png), it shows the art and swaps to the full spoon after a scoop.
+            var spoonArt = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/Props/spoon.png");
+            var spoonFullArt = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/Props/spoon_full.png");
             Patch(Folder + InstantCoffee + ".prefab", root =>
             {
                 var spoon = root.transform.Find("Spoon");
                 foreach (var r in spoon.GetComponentsInChildren<SpriteRenderer>(true)) r.sortingLayerName = "PropsFront";
+                if (spoonArt == null || spoonFullArt == null) return;
+
+                var renderer = spoon.GetComponent<SpriteRenderer>();
+                renderer.sprite = spoonArt;
+                renderer.drawMode = SpriteDrawMode.Simple;
+                renderer.color = Color.white;
+                spoon.localScale = Vector3.one;
+                var collider = spoon.GetComponent<BoxCollider2D>();
+                collider.size = spoonArt.bounds.size + new Vector3(0.2f, 0.2f, 0f); // a little easier to grab
+                collider.offset = spoonArt.bounds.center;
+                var step = root.GetComponent<InstantCoffeeStep>();
+                Wire(step, "spoonEmpty", spoonArt);
+                Wire(step, "spoonFull", spoonFullArt);
             });
         }
 

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using Courtyard.Core;
 using Courtyard.Kitchen;
@@ -128,6 +129,7 @@ namespace Courtyard.Editor
             if (Fit(kitchen, "Shelf", "Oddblot_shelf", new Vector2(-7.3f, 1.6f), 1.9f, "Wall", 1))
                 Find(kitchen, "InstantCoffeeJar").gameObject.SetActive(false);
 
+            ApplyCoffeeBagAndSpoon(kitchen);
             ApplyShadows(kitchen); // last: props are in their final places
 
             // Bag of real beans from Day 5 ("Bought real beans today") stands at the left end of the counter.
@@ -982,6 +984,104 @@ namespace Courtyard.Editor
             var fade = new Gradient();
             fade.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) }, alpha);
             colour.color = fade;
+        }
+
+        /// <summary>Figma pixel (1920×1080, y down) → world units.</summary>
+        private static Vector2 Px(float x, float y) => new((x - 960f) / 100f, (540f - y) / 100f);
+
+        /// <summary>
+        /// The drawn coffee bag (closed; open while grinding) at x 620 with its bottom on y 840, from Day 5 (it replaces
+        /// the pack bag), and Day 1's spoon lying at (700, 820) turned ~30°, pivot where the handle meets the bowl.
+        /// Each part waits (with a warning) until its PNG is in Art/Props.
+        /// </summary>
+        private static void ApplyCoffeeBagAndSpoon(Transform kitchen)
+        {
+            var tools = Find(kitchen, "Counter Tools");
+            var counter = tools.GetComponent<CounterStation>();
+
+            var bag = Load(PropsFolder, "coffee_bag");
+            var bagOpen = Load(PropsFolder, "coffee_bag_open");
+            if (bag == null) Debug.LogWarning($"DecorBuilder: {PropsFolder}coffee_bag.png missing — the pack bag stays.");
+            else
+            {
+                var beans = Find(kitchen, "BeansJar");
+                var renderer = beans.GetComponent<SpriteRenderer>();
+                renderer.sprite = bag;
+                renderer.drawMode = SpriteDrawMode.Simple;
+                renderer.color = Color.white;
+                beans.localScale = Vector3.one;
+                beans.localRotation = Quaternion.identity;
+                var bottom = Px(620f, 840f);
+                beans.position = new Vector3(bottom.x, bottom.y - bag.bounds.min.y, beans.position.z);
+                var collider = beans.GetComponent<BoxCollider2D>();
+                if (collider != null)
+                {
+                    collider.size = bag.bounds.size;
+                    collider.offset = bag.bounds.center;
+                }
+
+                Wire(counter, "coffeeBag", renderer);
+                Wire(counter, "coffeeBagClosed", bag);
+                if (bagOpen != null) Wire(counter, "coffeeBagOpen", bagOpen);
+                else Debug.LogWarning($"DecorBuilder: {PropsFolder}coffee_bag_open.png missing — the bag stays closed while grinding.");
+            }
+
+            if (!File.Exists(PropsFolder + "spoon.png"))
+            {
+                Debug.LogWarning($"DecorBuilder: {PropsFolder}spoon.png missing — Day 1 keeps the placeholder spoon.");
+                return;
+            }
+
+            var pivot = SpoonPivot(PropsFolder + "spoon.png");
+            SetPivot(PropsFolder + "spoon.png", pivot);
+            if (File.Exists(PropsFolder + "spoon_full.png")) SetPivot(PropsFolder + "spoon_full.png", pivot);
+            var spoonSprite = Load(PropsFolder, "spoon");
+            var resting = SpriteChild(tools, "RestingSpoon");
+            PlaceAtScreenScale(resting, spoonSprite, Vector2.zero, "Props", 2);
+            var at = Px(700f, 820f);
+            resting.position = new Vector3(at.x, at.y, tools.position.z);
+            resting.localRotation = Quaternion.Euler(0f, 0f, 30f);
+            Wire(counter, "restingSpoon", resting);
+        }
+
+        /// <summary>
+        /// Pivot (0..1) where the spoon's handle meets its bowl: the bowl is the run of wide rows; the pivot is its edge
+        /// on the handle's side, centred on that row. Measured from the artist's alpha, so it follows the drawing.
+        /// </summary>
+        private static Vector2 SpoonPivot(string path)
+        {
+            var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            texture.LoadImage(File.ReadAllBytes(path));
+            var pixels = texture.GetPixels32();
+            int w = texture.width, h = texture.height;
+            Object.DestroyImmediate(texture);
+
+            var widths = new int[h];
+            var centres = new float[h];
+            for (var y = 0; y < h; y++)
+            {
+                int min = w, max = -1;
+                for (var x = 0; x < w; x++)
+                {
+                    if (pixels[y * w + x].a < 128) continue;
+                    min = Mathf.Min(min, x);
+                    max = Mathf.Max(max, x);
+                }
+
+                widths[y] = max >= min ? max - min + 1 : 0;
+                centres[y] = max >= min ? (min + max) * 0.5f : w * 0.5f;
+            }
+
+            var widest = widths.Max();
+            var bowl = Enumerable.Range(0, h).Where(y => widths[y] >= widest * 0.6f).ToArray();
+            var opaque = Enumerable.Range(0, h).Where(y => widths[y] > 0).ToArray();
+            if (bowl.Length == 0 || opaque.Length == 0) return new Vector2(0.5f, 0.5f);
+
+            // Texture rows go bottom-up. The handle is on the side with more opaque rows beyond the bowl.
+            var below = bowl.Min() - opaque.Min();
+            var above = opaque.Max() - bowl.Max();
+            var neck = above > below ? bowl.Max() : bowl.Min();
+            return new Vector2(centres[neck] / w, (neck + 0.5f) / h);
         }
 
         /// <summary>
