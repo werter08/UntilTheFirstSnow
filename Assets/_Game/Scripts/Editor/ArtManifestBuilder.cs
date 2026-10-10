@@ -50,7 +50,7 @@ namespace Courtyard.Editor
             ["WallProps"] = new[]
             {
                 "Shelf", "InstantCoffeeJar", "Clock", "ClockTime", "Calendar", "CalendarHeader", "CalendarDay",
-                "WallPicture", "MugRack", "ChippedMug", "HerMug", "CeilingLamp",
+                "WallPicture", "MugRack", "ChippedMug", "HerMug", "CeilingLamp", "RackMug0", "RackMug1", "RackMug2", "RackMug3",
             },
             ["Counter"] = new[] { "Counter", "CounterEdge" },
             ["Fridge"] = new[] { "Fridge", "FridgeNote0", "FridgeNote1", "FridgeNote2", "Magnet", "ShoppingList" },

@@ -82,6 +82,10 @@ namespace Courtyard.Kitchen
         [SerializeField] private GameObject[] fridgeNotes;
         [Tooltip("Day 30: his and her mugs side by side on the window sill.")]
         [SerializeField] private GameObject sillMugs;
+        [Tooltip("Wall rack slots, left to right; filled with earlier days' mugs.")]
+        [SerializeField] private SpriteRenderer[] rackSlots;
+        [Tooltip("Mug art per MugStyle (Chipped, His, Hers, Yellow, Green).")]
+        [SerializeField] private Sprite[] rackMugSprites;
 
         private LevelDefinition _level;
         private MiraWindowState _windowState;
@@ -116,7 +120,8 @@ namespace Courtyard.Kitchen
             var props = level.Props;
             beans.SetActive(props.beans);
             cinnamon.SetActive(props.cinnamon);
-            herMug.SetActive(props.herMug);
+            if (herMug != null) herMug.SetActive(props.herMug);
+            FillRack(props.rackMugs);
             scarf.SetActive(props.scarf);
             blanket.SetActive(props.blanket);
             var stage = (int)props.plantStage;
@@ -168,6 +173,29 @@ namespace Courtyard.Kitchen
         public void SetSillMugs(bool visible)
         {
             if (sillMugs != null) sillMugs.SetActive(visible);
+            if (!visible) return;
+            // His and her mugs leave the rack for the sill: never two copies of the same mug.
+            for (var i = 0; i < _rack.Count; i++)
+                if (_rack[i].style is MugStyle.His or MugStyle.Hers) _rack[i].slot.gameObject.SetActive(false);
+        }
+
+        private readonly System.Collections.Generic.List<(Transform slot, MugStyle style)> _rack = new();
+
+        /// <summary>Mugs on the wall rack right now (for ChooseMug).</summary>
+        public System.Collections.Generic.IReadOnlyList<(Transform slot, MugStyle style)> RackMugs => _rack;
+
+        private void FillRack(MugStyle[] mugs)
+        {
+            _rack.Clear();
+            if (rackSlots == null) return;
+            for (var i = 0; i < rackSlots.Length; i++)
+            {
+                var has = mugs != null && i < mugs.Length && (int)mugs[i] < rackMugSprites.Length && rackMugSprites[(int)mugs[i]] != null;
+                rackSlots[i].gameObject.SetActive(has);
+                if (!has) continue;
+                rackSlots[i].sprite = rackMugSprites[(int)mugs[i]];
+                _rack.Add((rackSlots[i].transform, mugs[i]));
+            }
         }
 
         private void OnEnable()

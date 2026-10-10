@@ -79,6 +79,7 @@ namespace Courtyard.Editor
                     collider.offset = sprites[i].bounds.center;
                     var leaf = mug.Find("LeafPrint");
                     if (leaf != null) Object.DestroyImmediate(leaf.gameObject);
+                    mug.gameObject.SetActive(false); // the real wall rack is used; these are a fallback only
                 }
 
                 Wire(root.GetComponent<ChooseMugStep>(), "herMugIndex", 2);

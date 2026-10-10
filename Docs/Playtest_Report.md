@@ -33,7 +33,7 @@ two portions of one spice, more than two spices, or serving with fewer than two.
 | MiraVisit | 10 | ✅ | Knock, her window goes dark, she's at the door (placeholder art). |
 | SteamMilk | 10, 20, 30 | ✅ (B4 fixed) | Frother shakes, foam rises, spills when overdone; foam puff on the mug. |
 | GuessHerDrink / HerDrinkFromMemory | 10 / 30 | ✅ | Toggle two jars (sprinkle), serve. Wrong → gentle "It's… nice", day continues. |
-| ChooseMug | 20 | ✅ | Hers = 1.0, decoy = 0.6 (no hard fail). |
+| ChooseMug | 20 | ✅ | Picked from the real wall rack (no copies). Hers = 1.0, other = 0.6 (no hard fail). |
 | Fail / restart | 20 | ✅ | "Too cold… let's try again." and the day restarts. |
 
 ## Bugs
@@ -54,6 +54,7 @@ two portions of one spice, more than two spices, or serving with fewer than two.
 | B12 | Medium | Spices | Toppings were toggled by clicking jars; nothing went into the cup. | ✅ Changed — carry each spice to the cup; portions show on the drink |
 | B13 | Low | Milk | Foam splat was huge and covered the frother. | ✅ Fixed — small cap at the rim, behind the frother |
 | B14 | Low | Spices | A fast flick could drop a jar just outside the cup and lose the portion. | ✅ Fixed — jar or hand over the cup counts |
+| B15 | Medium | Mugs | The same mug appeared twice (counter + rack / sill). | ✅ Fixed — a new mug each day (chipped, his, hers, yellow, green); earlier days' mugs hang on the wall rack |
 
 ## What was added (life & juice)
 

@@ -387,10 +387,9 @@ namespace Courtyard.Editor
             Edit(counter, so =>
             {
                 var array = Property(so, "mugSprites");
-                array.arraySize = 3;
-                array.GetArrayElementAtIndex((int)MugStyle.Chipped).objectReferenceValue = chipped;
-                array.GetArrayElementAtIndex((int)MugStyle.His).objectReferenceValue = Load("mug_his");
-                array.GetArrayElementAtIndex((int)MugStyle.Hers).objectReferenceValue = Load("mug_hers");
+                var byStyle = MugSpritesByStyle(Load);
+                array.arraySize = byStyle.Length;
+                for (var i = 0; i < byStyle.Length; i++) array.GetArrayElementAtIndex(i).objectReferenceValue = byStyle[i];
             });
 
             // V60 art (placed on the mug by the manifest pass) and its little shadow on the rim.
@@ -483,11 +482,26 @@ namespace Courtyard.Editor
             for (var i = 0; i < 3; i++)
                 Find(mug, $"SpoonMarker{i}").GetComponent<SpriteRenderer>().enabled = false;
 
-            // Spare mugs on the wall rack.
-            FitMug(Find(kitchen, "ChippedMug"), Load("mug_decoy_2"), new Vector2(4.9f, 0.99f), 0.4f);
-            FitMug(Find(kitchen, "HerMug"), Load("mug_hers"), new Vector2(5.75f, 0.99f), 0.4f);
-            var rackLeaf = Find(kitchen, "HerMug").Find("LeafPrint");
-            if (rackLeaf != null) rackLeaf.gameObject.SetActive(false);
+            // Wall rack: one slot per earlier day; KitchenDirector fills it from the level data (each day has its own
+            // mug, earlier ones wait on the rack — never two copies of the same mug).
+            Find(kitchen, "ChippedMug").gameObject.SetActive(false);
+            Find(kitchen, "HerMug").gameObject.SetActive(false);
+            var plank = Find(kitchen, "MugRack").GetComponent<SpriteRenderer>();
+            plank.size = new Vector2(3.1f, 0.1f);
+            plank.transform.localPosition = new Vector3(RackCentreX, RackY, 0f);
+            var director = kitchen.GetComponent<KitchenDirector>();
+            var slots = new Object[4];
+            for (var i = 0; i < slots.Length; i++)
+            {
+                var slot = Find(kitchen, $"RackMug{i}", false) ?? Empty(kitchen, $"RackMug{i}", Vector2.zero);
+                if (slot.GetComponent<SpriteRenderer>() == null) slot.gameObject.AddComponent<SpriteRenderer>();
+                FitMug(slot, chipped, new Vector2(RackCentreX - 1.08f + 0.72f * i, RackY + 0.05f + chipped.bounds.extents.y * RackScale), RackScale, "WallProps", 2);
+                slots[i] = slot.GetComponent<SpriteRenderer>();
+            }
+
+            Wire(director, "herMug", (Object)null);
+            WireArray(director, "rackSlots", slots);
+            WireArray(director, "rackMugSprites", MugSpritesByStyle(Load).Cast<Object>().ToArray());
 
             // Day 30: his and her mugs side by side on the sill (Figma x 900 / 1020, standing on y 600).
             var sill = Child(kitchen, "SillMugs");
@@ -836,8 +850,11 @@ namespace Courtyard.Editor
             Poke(Find(kitchen, "Clock"), Find(kitchen, "Clock"), swing: 4f, punch: 0.15f, sound: Audio.SfxId.UiClick);
             Poke(Find(kitchen, "WallPicture"), Find(kitchen, "WallPicture"), swing: 7f, punch: 0f, sound: Audio.SfxId.UiClick);
             Poke(Find(kitchen, "Shelf"), Find(kitchen, "Shelf"), swing: 0f, punch: 0.12f, sound: Audio.SfxId.MugClink);
-            Poke(Find(kitchen, "ChippedMug"), Find(kitchen, "ChippedMug"), swing: 0f, punch: 0.3f, sound: Audio.SfxId.MugClink);
-            Poke(Find(kitchen, "HerMug"), Find(kitchen, "HerMug"), swing: 0f, punch: 0.3f, sound: Audio.SfxId.MugClink);
+            for (var i = 0; i < 4; i++)
+            {
+                var rackMug = Find(kitchen, $"RackMug{i}", false);
+                if (rackMug != null) Poke(rackMug, rackMug, swing: 0f, punch: 0.3f, sound: Audio.SfxId.MugClink);
+            }
             Poke(Find(kitchen, "BeansJar"), Find(kitchen, "BeansJar"), swing: 0f, punch: 0.35f, sound: Audio.SfxId.Spoon,
                 particles: 4, colour: new Color(0.35f, 0.22f, 0.15f));
             for (var i = 0; i < 3; i++)
@@ -1041,6 +1058,16 @@ namespace Courtyard.Editor
             });
             return fidget;
         }
+
+        private const float RackCentreX = 5.05f;
+        private const float RackY = 0.75f;
+        private const float RackScale = 0.42f;
+
+        /// <summary>Mug art indexed by MugStyle: Chipped, His, Hers, Yellow, Green.</summary>
+        private static Sprite[] MugSpritesByStyle(System.Func<string, Sprite> load) => new[]
+        {
+            load("mug_chipped"), load("mug_his"), load("mug_hers"), load("mug_decoy_2"), load("mug_decoy_1"),
+        };
 
         private static void FitMug(Transform target, Sprite sprite, Vector2 centre, float scale, string layer = "Wall", int order = 2)
         {

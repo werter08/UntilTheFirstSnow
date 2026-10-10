@@ -15,6 +15,8 @@ namespace Courtyard.Core
         public bool toppings;
         [UnityEngine.Tooltip("Mug on the counter today (Day 1 chipped, his terracotta, or her maple-leaf mug).")]
         public MugStyle brewMug;
+        [UnityEngine.Tooltip("Mugs from earlier days, standing on the wall rack (never the one on the counter).")]
+        public MugStyle[] rackMugs;
         [UnityEngine.Tooltip("Day 30: his and her mugs side by side on the window sill.")]
         public bool mugsOnSill;
         public bool scarf;

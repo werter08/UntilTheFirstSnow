@@ -68,7 +68,11 @@ namespace Courtyard.Tests
         {
             var jar = Counter.ToppingJars.First(j => j.Topping == topping);
             yield return Drag(jar.transform.position, Counter.MugTop + new Vector3(0f, 0.6f, 0f));
-            yield return Wait(1.2f); // shake + jar goes back
+            yield return Wait(0.3f);
+            var step = Object.FindAnyObjectByType<PickToppingsStep>();
+            var deadline = Time.realtimeSinceStartup + 5f; // shake + jar goes back
+            while (step != null && GetField<bool>(step, "_busy") && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return Wait(0.1f);
         }
 
         protected IEnumerator PlayGrindBeans()
@@ -149,9 +153,10 @@ namespace Courtyard.Tests
         protected IEnumerator PlayChooseMug(bool hers = true)
         {
             yield return AdvanceTo<ChooseMugStep>();
-            var step = Object.FindAnyObjectByType<ChooseMugStep>();
-            var index = GetField<int>(step, "herMugIndex");
-            yield return Click(step.transform.Find(hers ? $"Mug{index}" : $"Mug{(index + 1) % 3}"));
+            var rack = Object.FindAnyObjectByType<KitchenDirector>().RackMugs;
+            Assert.That(rack.Count, Is.GreaterThan(1), "ChooseMug needs mugs on the wall rack.");
+            var pick = rack.First(m => (m.style == MugStyle.Hers) == hers).slot;
+            yield return Click(pick);
             yield return WaitForCompletion();
         }
 

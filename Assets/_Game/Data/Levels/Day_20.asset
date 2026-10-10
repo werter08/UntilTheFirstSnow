@@ -32,7 +32,8 @@ MonoBehaviour:
     cinnamon: 1
     herMug: 1
     toppings: 0
-    brewMug: 1
+    brewMug: 3
+    rackMugs: 000000000100000002000000
     mugsOnSill: 0
     scarf: 0
     blanket: 0
@@ -79,6 +80,7 @@ MonoBehaviour:
   drinkWarmthBonus: 25
   goodResultThreshold: 0.7
   failText: "Too cold\u2026 let's try again."
+  ruinedText: "That's not how it goes\u2026 let's start over."
   drinkResults:
   - icon: {fileID: 21300000, guid: 722a94e002662491386aea713d5f2d88, type: 3}
     condition: 0

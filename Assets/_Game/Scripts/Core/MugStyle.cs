@@ -6,5 +6,7 @@ namespace Courtyard.Core
         Chipped,
         His,
         Hers,
+        Yellow,
+        Green, // appended: serialized as indices
     }
 }

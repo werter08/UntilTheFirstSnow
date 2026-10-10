@@ -45,6 +45,7 @@ namespace Courtyard.Editor
             public float Drain;
             public float OutroSeconds;
             public (string icon, BeatCondition condition)[] Drinks = System.Array.Empty<(string, BeatCondition)>();
+            public MugStyle[] Rack = System.Array.Empty<MugStyle>();
         }
 
         public static Recipe EnsureMiraUsual() =>
@@ -123,6 +124,9 @@ namespace Courtyard.Editor
                     props.FindPropertyRelative("mugsOnSill").boolValue = spec.Props.mugsOnSill;
                     props.FindPropertyRelative("sweater").enumValueIndex = (int)spec.Props.sweater;
                     props.FindPropertyRelative("lampOff").boolValue = spec.Props.lampOff;
+                    var rack = props.FindPropertyRelative("rackMugs");
+                    rack.arraySize = spec.Rack.Length;
+                    for (var i = 0; i < spec.Rack.Length; i++) rack.GetArrayElementAtIndex(i).enumValueIndex = (int)spec.Rack[i];
                     WriteDrinks(so.FindProperty("drinkResults"), spec.Drinks);
                     var walkers = so.FindProperty("outroWalkers");
                     var names = spec.Day == 20 ? new[] { "mug_his", "mug_hers" } : System.Array.Empty<string>();
@@ -251,6 +255,7 @@ namespace Courtyard.Editor
                 Window = MiraWindowState.LitWarmSilhouette,
                 Palette = Palette(new Color(0.7f, 0.68f, 0.75f), 0.9f, new Color(1f, 0.85f, 0.65f), 0.6f),
                 Props = new KitchenProps { beans = true, grinder = true, brewMug = MugStyle.His, plantStage = PlantStage.Wilted },
+                Rack = new[] { MugStyle.Chipped },
                 Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.WaveBack },
                 Beats = new[]
                 {
@@ -268,6 +273,7 @@ namespace Courtyard.Editor
                 Window = MiraWindowState.LitWarm,
                 Palette = Palette(new Color(1f, 0.92f, 0.78f), 1.1f, new Color(1f, 0.82f, 0.55f), 0.5f),
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Hers, plantStage = PlantStage.Recovering, fridgeNotes = 1, sweater = Sweater.Grey },
+                Rack = new[] { MugStyle.Chipped, MugStyle.His },
                 // MiraVisit (knock at the door) sits between PourOver and SteamMilk so her lines follow the brief's order.
                 Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.MiraVisit, P.SteamMilk, P.GuessHerDrink },
                 Beats = new[]
@@ -288,7 +294,8 @@ namespace Courtyard.Editor
                 Day = 20, Clock = "23:40", Time = TimeOfDay.Night, Weather = Weather.Wind, Tree = TreeStage.HalfBare,
                 Window = MiraWindowState.NoteOnGlass,
                 Palette = Palette(new Color(0.45f, 0.5f, 0.75f), 0.7f, new Color(1f, 0.75f, 0.45f), 1f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, brewMug = MugStyle.His, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, brewMug = MugStyle.Yellow, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
+                Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers }, // ChooseMug picks hers from here
                 Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.SteamMilk, P.ChooseMug },
                 Beats = new[]
                 {
@@ -309,7 +316,8 @@ namespace Courtyard.Editor
                 Day = 30, Clock = "17:00", Time = TimeOfDay.Evening, Weather = Weather.Snow, Tree = TreeStage.BareSnow,
                 Window = MiraWindowState.Empty,
                 Palette = Palette(new Color(1f, 0.85f, 0.7f), 0.95f, new Color(1f, 0.72f, 0.42f), 1.1f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Hers, mugsOnSill = true, herMug = true, scarf = true, blanket = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Green, mugsOnSill = true, herMug = true, scarf = true, blanket = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
+                Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers, MugStyle.Yellow },
                 Steps = new[] { P.KettleBoil, P.SteamMilk, P.HerDrinkFromMemory },
                 Beats = new[]
                 {

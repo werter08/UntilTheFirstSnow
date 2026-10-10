@@ -174,7 +174,7 @@ public abstract class MinigameStep : MonoBehaviour {
 | **GrindBeans** | Drag the grinder handle in circles; the grind meter fills; stop in the "medium" zone | final grind level vs. target |
 | **PourOver** | Hold the mouse to pour from the kettle and move it in a circle over the V60; the flow-rate bar must stay in a band; fill to the line | % of time in band + final fill accuracy |
 | **SteamMilk** | Hold to steam; foam level and temperature rise; release in the zone (too long gives a squeal SFX) | release timing |
-| **ChooseMug** | Click one of 3 mugs; hers (with a small leaf print) was shown on Day 10 | correct = 1, wrong = 0.6 (no hard fail) |
+| **ChooseMug** | Click a mug on the wall rack (one new mug per day; earlier days' mugs hang there, never duplicated); hers (maple leaf) was used on Day 10 | correct = 1, wrong = 0.6 (no hard fail) |
 | **GuessHerDrink** | Carry spices (cinnamon, honey, cocoa, salt) to the cup one portion at a time, then click the cup | matches recipe `Mira_Usual`; **too much (2× one spice, >2 total) or too little ruins it → the day restarts** |
 | **HerDrinkFromMemory** | Same as GuessHerDrink but with no hint; uses `Mira_Usual` | matches recipe |
 
