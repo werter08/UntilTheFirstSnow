@@ -132,7 +132,8 @@ namespace Courtyard.Kitchen
             }
             for (var i = 0; i < fridgeNotes.Length; i++)
                 fridgeNotes[i].SetActive(i < props.fridgeNotes);
-            if (sillMugs != null) sillMugs.SetActive(props.mugsOnSill);
+            // On the finale day the two mugs reach the sill only once the drink is served (LevelRunner.Finale).
+            if (sillMugs != null) sillMugs.SetActive(props.mugsOnSill && !level.Finale);
 
             ApplyWeather(level.Weather);
             AmbientMotion.Wind = level.Weather switch
@@ -163,6 +164,11 @@ namespace Courtyard.Kitchen
         }
 
         public void SetMiraAtDoor(bool visible) => miraAtDoor.SetActive(visible);
+
+        public void SetSillMugs(bool visible)
+        {
+            if (sillMugs != null) sillMugs.SetActive(visible);
+        }
 
         private void OnEnable()
         {

@@ -39,8 +39,16 @@ namespace Courtyard.Tests
             yield return AdvanceTo<KettleBoilStep>();
             var group = FindDeep("CalendarGroup");
             yield return Click(FindDeep("Calendar"));
-            yield return Wait(0.05f);
-            Assert.That(Mathf.Abs(Mathf.DeltaAngle(0f, group.localEulerAngles.z)), Is.GreaterThan(0.2f), "Calendar should swing when clicked.");
+            // The swing is a damped spring (crosses zero), so look at the largest deflection over a short while.
+            var maxAngle = 0f;
+            var until = Time.time + 0.4f;
+            while (Time.time < until)
+            {
+                maxAngle = Mathf.Max(maxAngle, Mathf.Abs(Mathf.DeltaAngle(0f, group.localEulerAngles.z)));
+                yield return null;
+            }
+
+            Assert.That(maxAngle, Is.GreaterThan(0.5f), "Calendar should swing when clicked.");
         }
 
         [UnityTest, Timeout(120000)]

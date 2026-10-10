@@ -169,6 +169,13 @@ namespace Courtyard.Core
         private IEnumerator Finale()
         {
             if (finaleFocus == null) yield break;
+
+            // The served mug joins his on the window sill.
+            yield return fader.FadeOut(Color.black, fadeDuration * 0.6f);
+            counter.Mug.gameObject.SetActive(false);
+            kitchen.SetSillMugs(true);
+            yield return fader.FadeIn(fadeDuration * 0.6f);
+
             var cam = worldCamera.transform;
             var fromPos = cam.position;
             var toPos = new Vector3(finaleFocus.position.x, finaleFocus.position.y + 0.6f, fromPos.z);
