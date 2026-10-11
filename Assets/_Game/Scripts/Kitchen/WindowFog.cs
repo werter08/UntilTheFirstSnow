@@ -6,7 +6,8 @@ using UnityEngine.InputSystem;
 namespace Courtyard.Kitchen
 {
     /// <summary>
-    /// Fog on the window glass (cold days). Between steps, dragging the mouse over the glass wipes it — painted into a
+    /// Fog on the window glass (cold days). Dragging the mouse over the glass wipes it — any time the hand isn't busy
+    /// with something it picked up or pressed (a tool, her window) — painted into a
     /// small alpha texture with a soft round brush — and the fog slowly comes back. No score, no text: only the pointing
     /// hand while over the glass.
     /// </summary>
@@ -26,7 +27,7 @@ namespace Courtyard.Kitchen
         [SerializeField, Range(0f, 0.3f)] private float edgeSoftness = 0.08f;
         [SerializeField] private Camera worldCamera;
 
-        /// <summary>Wiping is allowed right now (set by the level runner: never during a minigame step).</summary>
+        /// <summary>Wiping is allowed right now (set by the level runner: e.g. not while a note is open).</summary>
         public Func<bool> CanWipe { get; set; }
 
         private SpriteRenderer _renderer;
@@ -40,6 +41,7 @@ namespace Courtyard.Kitchen
         private bool _dirty;
         private bool _hovering;
         private Vector2? _lastTexel;
+        private int _busyHands; // something is pressed or dragged: that press isn't a wipe
 
         private void Awake()
         {
@@ -70,7 +72,36 @@ namespace Courtyard.Kitchen
             _renderer.sprite = Sprite.Create(_texture, new Rect(0, 0, _w, _h), new Vector2(0.5f, 0.5f), _w / size.x);
         }
 
-        private void OnDisable() => SetHover(false);
+        private void OnEnable()
+        {
+            PointerTarget.AnyPressed += OnTargetPressed;
+            PointerTarget.AnyReleased += OnTargetReleased;
+            DragTarget.AnyDragStarted += OnTargetPressed;
+            DragTarget.AnyDragEnded += OnTargetReleased;
+        }
+
+        private void OnDisable()
+        {
+            PointerTarget.AnyPressed -= OnTargetPressed;
+            PointerTarget.AnyReleased -= OnTargetReleased;
+            DragTarget.AnyDragStarted -= OnTargetPressed;
+            DragTarget.AnyDragEnded -= OnTargetReleased;
+            _busyHands = 0;
+            SetHover(false);
+        }
+
+        // Decor that just wiggles when poked (curtains, plant, her window) doesn't stop a wipe; tools do.
+        private static bool IsTool(Transform target) => target != null && target.GetComponent<Fidget>() == null;
+
+        private void OnTargetPressed(Transform target, HandPose pose)
+        {
+            if (IsTool(target)) _busyHands++;
+        }
+
+        private void OnTargetReleased(Transform target)
+        {
+            if (IsTool(target)) _busyHands = Mathf.Max(0, _busyHands - 1);
+        }
 
         private void OnDestroy()
         {
@@ -80,8 +111,9 @@ namespace Courtyard.Kitchen
 
         private void Update()
         {
-            var allowed = CanWipe == null || CanWipe();
             var pointer = Pointer.current;
+            if (pointer != null && !pointer.press.isPressed) _busyHands = 0; // nothing can still be held once the button is up
+            var allowed = (CanWipe == null || CanWipe()) && _busyHands == 0;
             var overGlass = false;
             if (allowed && pointer != null && worldCamera != null)
             {

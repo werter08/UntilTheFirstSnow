@@ -21,6 +21,14 @@ MonoBehaviour:
     strip: {fileID: 21300000, guid: c22e3e564de774d91969c8ea3fa0057c, type: 3}
     anchor: {x: -2.0664709, y: -0.44513476}
     angle: -81.96725
+  - sprite: {fileID: 21300000, guid: df3880f38933f4005906fba9bd6f471d, type: 3}
+    strip: {fileID: 21300000, guid: a7c0631d0e77147858b5f41cd85e332e, type: 3}
+    anchor: {x: -1.9884247, y: -0.5640406}
+    angle: -83.49104
+  - sprite: {fileID: 21300000, guid: c6d301948e2534a2c8a679c3e556d484, type: 3}
+    strip: {fileID: 21300000, guid: 97e3bcd6db55343029086cc451ac4735, type: 3}
+    anchor: {x: -2.6836514, y: -0.42034706}
+    angle: -85.42608
   - sprite: {fileID: 21300000, guid: 7340db144cfd44510b09336a00915a57, type: 3}
     strip: {fileID: 21300000, guid: f7767f607d66e430c8235141171cc557, type: 3}
     anchor: {x: -0.22496301, y: -1.8243182}

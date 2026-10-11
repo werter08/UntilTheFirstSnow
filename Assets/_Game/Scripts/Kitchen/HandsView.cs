@@ -97,6 +97,7 @@ namespace Courtyard.Kitchen
 
         private void OnDisable()
         {
+            Cursor.visible = true;
             PointerTarget.AnyPressed -= OnGrab;
             PointerTarget.AnyReleased -= OnRelease;
             PointerTarget.AnyHoverStarted -= OnHoverStarted;
@@ -137,6 +138,10 @@ namespace Courtyard.Kitchen
             var wanted = holding ? (_heldPose == HandPose.Hidden ? 0f : 1f) : hovering ? hoverAlpha : 0f;
             _alpha = Mathf.MoveTowards(_alpha, wanted, fadeSpeed * Time.deltaTime);
             SetAlpha(_alpha);
+
+            // Like most games with on-screen hands: the hand replaces the cursor while it's there (over something usable,
+            // or holding something — including a step's own drawn hand); the cursor is back everywhere else.
+            Cursor.visible = !(holding || hovering);
         }
 
         private void SetPose(HandPose pose)

@@ -55,10 +55,16 @@ namespace Courtyard.Minigames
         [Header("Carried: the team's drawing of his arm holding the jug")]
         [Tooltip("Arm + jug drawing per sweater (Grey, Beige); drawn pouring to the right, mirrored for a cup on the left.")]
         [SerializeField] private Sprite[] carrySprites;
+        [Tooltip("Sleeve strips for the drawings, so the sleeve runs past the screen edge like every other hand.")]
+        [SerializeField] private SleeveLibrary sleeves;
         [Tooltip("Jug centre and spout tip in the drawing (pixels from its top-left), and the jug's drawn height.")]
         [SerializeField] private Vector2 artJugCentre = new(358f, 68f);
         [SerializeField] private Vector2 artSpout = new(396f, 1f);
         [SerializeField, Min(1f)] private float artJugHeight = 136f;
+        [Tooltip("Tilt while pouring with the drawing (the whole arm turns with it, so less than the bare jug's).")]
+        [SerializeField] private float carriedTiltDegrees = 18f;
+        [Tooltip("The continued sleeve bends down by this much, so the arm comes from the lower right like the other hands.")]
+        [SerializeField] private float sleeveBendDegrees = 28f;
         [Tooltip("The foam on top of the jug shrinks to this as the milk pours out.")]
         [SerializeField, Range(0f, 1f)] private float foamLeft = 0.35f;
         [SerializeField, Min(0.1f)] private float pourPitch = 1.2f;
@@ -145,7 +151,6 @@ namespace Courtyard.Minigames
             _carry = new GameObject("CarriedJug", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
             _carry.transform.SetParent(_jug, false);
             _carry.sprite = sprite;
-            _carry.flipX = mirrored;
             _carry.sortingLayerID = body.sortingLayerID;
             _carry.sortingOrder = body.sortingOrder + 3;
             _carry.enabled = false;
@@ -153,11 +158,15 @@ namespace Courtyard.Minigames
             // Same jug size as on the counter; the drawn jug sits exactly where the counter jug is.
             var ppu = sprite.pixelsPerUnit;
             var k = body.bounds.size.y / (artJugHeight / ppu);
-            _carry.transform.localScale = Vector3.one * (k / Mathf.Max(0.0001f, _jug.lossyScale.y));
-            Vector3 FromCentre(Vector2 px)
+            // Mirrored by scale (not flipX), so the sleeve that continues past the screen edge mirrors with it.
+            var size = k / Mathf.Max(0.0001f, _jug.lossyScale.y);
+            _carry.transform.localScale = new Vector3(mirrored ? -size : size, size, 1f);
+            _carry.gameObject.AddComponent<SleeveExtender>().Init(sleeves, sleeveBendDegrees);
+            tiltDegrees = Mathf.Sign(tiltDegrees) * Mathf.Abs(carriedTiltDegrees);
+            Vector3 FromCentre(Vector2 px) // drawing pixels (from its top-left) → world offset from the sprite's pivot
             {
-                var dx = px.x - sprite.rect.width * 0.5f;
-                var dy = sprite.rect.height * 0.5f - px.y;
+                var dx = px.x - sprite.pivot.x;
+                var dy = (sprite.rect.height - px.y) - sprite.pivot.y;
                 return new Vector3(mirrored ? -dx : dx, dy, 0f) / ppu * k;
             }
 

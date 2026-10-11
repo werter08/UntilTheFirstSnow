@@ -88,7 +88,7 @@ namespace Courtyard.Core
             counter.Prepare(_level);
             hands.SetSweater(_level.Props.sweater);
             var fog = kitchen.Fog;
-            if (fog != null) fog.CanWipe = () => _activeStep == null && !kitchen.NoteCard.IsOpen; // never during a step
+            if (fog != null) fog.CanWipe = () => !kitchen.NoteCard.IsOpen; // tools and her window block it while held (WindowFog)
 
             if (GameManager.Instance != null && GameManager.Instance.Epilogue)
             {

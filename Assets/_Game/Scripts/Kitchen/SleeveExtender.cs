@@ -15,9 +15,25 @@ namespace Courtyard.Kitchen
         [SerializeField, Min(1f)] private float length = 25f;
 
         private SpriteRenderer _arm;
+        private float _bend;
         private Sprite _shown;
 
         private void Awake() => _arm = GetComponent<SpriteRenderer>();
+
+        /// <summary>For an arm made at runtime (the carried milk jug): its library and a strip renderer of its own.</summary>
+        /// <param name="bendDegrees">Turns the continued sleeve from the drawing's line (an elbow: + bends it down).</param>
+        public void Init(SleeveLibrary sleeveLibrary, float bendDegrees = 0f)
+        {
+            library = sleeveLibrary;
+            _bend = bendDegrees;
+            if (strip == null)
+            {
+                strip = new GameObject("Sleeve", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
+                strip.transform.SetParent(transform, false);
+            }
+
+            _shown = null;
+        }
 
         private void LateUpdate()
         {
@@ -44,7 +60,7 @@ namespace Courtyard.Kitchen
             strip.sortingOrder = _arm.sortingOrder + 1; // covers the cuff end beyond the slice
             var t = strip.transform;
             t.localPosition = entry.anchor;
-            t.localRotation = Quaternion.Euler(0f, 0f, entry.angle);
+            t.localRotation = Quaternion.Euler(0f, 0f, entry.angle + _bend);
             var stripHeight = entry.strip.bounds.size.y;
             var parentScale = Mathf.Max(0.0001f, transform.lossyScale.y);
             t.localScale = new Vector3(1f, length / parentScale / stripHeight, 1f);

@@ -242,6 +242,7 @@ namespace Courtyard.Editor
             {
                 var step = root.GetComponent<PourMilkStep>();
                 Wire(step, "dropSprite", UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/FX/glow_radial.png"));
+                Wire(step, "sleeves", UnityEditor.AssetDatabase.LoadAssetAtPath<Kitchen.SleeveLibrary>("Assets/_Game/Data/Art/SleeveLibrary.asset"));
                 if (carried.All(c => c != null)) WireArray(step, "carrySprites", carried);
             });
             return steps;
@@ -404,18 +405,29 @@ namespace Courtyard.Editor
                 }));
         }
 
+        /// <summary>The hand on the jug's handle in the arm-and-jug drawing (409×170, x from the left, y from the bottom).</summary>
+        private static readonly Vector2 CarriedJugGrip = new(300f / 409f, 1f - 60f / 170f);
+
         /// <summary>The arm holding the milk jug, sliced 1:1 from the team's sheet (one per sleeve), imported as a sprite.</summary>
         private static Object CarriedJug(string sleeve)
         {
             var path = $"Assets/_Game/Art/Sprites/Hands/Hand_MilkJug_{sleeve}.png";
             if (UnityEditor.AssetImporter.GetAtPath(path) is UnityEditor.TextureImporter importer &&
-                (importer.textureType != UnityEditor.TextureImporterType.Sprite || importer.mipmapEnabled))
+                (importer.textureType != UnityEditor.TextureImporterType.Sprite || importer.mipmapEnabled ||
+                 importer.spriteImportMode != UnityEditor.SpriteImportMode.Single || importer.spritePivot != CarriedJugGrip))
             {
                 importer.textureType = UnityEditor.TextureImporterType.Sprite;
                 importer.spriteImportMode = UnityEditor.SpriteImportMode.Single;
                 importer.spritePixelsPerUnit = 100f;
                 importer.mipmapEnabled = false;
                 importer.alphaIsTransparency = true;
+                // Pivot on the grip (the hand on the handle), like every hand drawing: the sleeve builder finds the
+                // sleeve's far end from it and continues the sleeve past the screen edge.
+                var settings = new UnityEditor.TextureImporterSettings();
+                importer.ReadTextureSettings(settings);
+                settings.spriteAlignment = (int)SpriteAlignment.Custom;
+                settings.spritePivot = CarriedJugGrip;
+                importer.SetTextureSettings(settings);
                 importer.SaveAndReimport();
             }
 
