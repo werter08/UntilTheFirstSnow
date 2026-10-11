@@ -245,7 +245,7 @@ namespace Courtyard.Editor
 
         /// <summary>
         /// How each weather falls: rain as fast stretched streaks, leaves slowly with spin and a side sway, snow slow and
-        /// soft with a slight drift.
+        /// soft with a slight drift. Every particle fades in at birth and out before it dies.
         /// </summary>
         private static void ApplyWeatherMotion(ParticleSystem particles, string system)
         {
@@ -257,6 +257,18 @@ namespace Courtyard.Editor
             velocity.enabled = true;
             velocity.space = ParticleSystemSimulationSpace.World;
             velocity.z = new ParticleSystem.MinMaxCurve(0f, 0f); // all axes must share the curve mode (two constants)
+
+            // Soft in and out: a particle never pops into or out of the courtyard when its life starts or ends.
+            var fade = particles.colorOverLifetime;
+            fade.enabled = true;
+            var fadeIn = system == "Rain" ? 0.05f : 0.08f;
+            var fadeOut = system == "Rain" ? 0.7f : 0.75f;
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, fadeIn), new GradientAlphaKey(1f, fadeOut), new GradientAlphaKey(0f, 1f) });
+            fade.color = new ParticleSystem.MinMaxGradient(gradient);
+
             switch (system)
             {
                 case "Rain":
