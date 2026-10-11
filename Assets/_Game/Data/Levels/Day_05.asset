@@ -54,7 +54,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Real beans. No idea why I bought them.
+    text: Got real beans on the way home. Felt like it.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
@@ -62,7 +62,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Grind. Pour slowly. Breathe.
+    text: Okay, that smells way better than instant.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -70,7 +70,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: She waved. I waved back with a mug. Smooth.
+    text: She waved at me. I waved back... with a mug. Very cool. Super smooth.
     setsMiraWindow: 0
     miraWindowAfter: 0
   twoMeters: 0
@@ -85,7 +85,7 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 12
   badDrinkChill: 20
-  calendarLine: Rain again. I bought real beans on the way home.
+  calendarLine: Raining. Again.
   tutorialHints: 0
   pulseRecipeCard: 1
   recipeCardText: '<b>Instant coffee</b>
@@ -101,8 +101,8 @@ MonoBehaviour:
 
     3) slow circles, keep the flow green, fill to the
     line'
-  coldDrinkText: "Cold and bitter\u2026 that didn't help at all."
-  failText: "Too cold\u2026 let's try that again."
+  coldDrinkText: Ugh. Cold and bitter.
+  failText: Too cold. Let's try that again.
   drinkResults:
   - icon: {fileID: 21300000, guid: 788d607d4eade43e68bd1c45ac218c5c, type: 3}
     condition: 0

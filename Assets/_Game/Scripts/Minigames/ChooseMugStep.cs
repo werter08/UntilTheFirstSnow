@@ -22,7 +22,7 @@ namespace Courtyard.Minigames
         [Tooltip("Day 20: the picked mug flies from the rack to the brewing spot.")]
         [SerializeField, Min(0.05f)] private float flySeconds = 0.6f;
         [Header("Why it went wrong")]
-        [SerializeField] private string wrongMugText = "Hmm… that's not her mug.";
+        [SerializeField] private string wrongMugText = "Hmm... that's not her mug.";
 
         private readonly List<(PointerTarget target, System.Action handler)> _subscriptions = new();
         private FeedbackFx _fx;

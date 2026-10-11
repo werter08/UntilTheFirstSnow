@@ -59,7 +59,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Sunday. Even the light looks softer.
+    text: Sunday. Nowhere to be.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
@@ -67,8 +67,8 @@ MonoBehaviour:
     condition: 0
     style: 2
     speaker: Mira
-    text: "Hi\u2026 I'm Mira, from across the yard. I ran out of coffee. Could I
-      borrow some?"
+    text: Hi! Sorry, um... I'm Mira, from across the yard. I ran out of coffee. Could
+      I borrow a little?
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
@@ -76,7 +76,7 @@ MonoBehaviour:
     condition: 0
     style: 2
     speaker: Mira
-    text: "Something sweet, please. Cinnamon\u2026 and maybe honey?"
+    text: Oh, and I like it sweet. Cinnamon and honey, if you have them?
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -84,7 +84,7 @@ MonoBehaviour:
     condition: 1
     style: 2
     speaker: Mira
-    text: Wow. Best cup I've had all month.
+    text: Okay, wow. That's really good. Thank you!
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -92,7 +92,7 @@ MonoBehaviour:
     condition: 2
     style: 2
     speaker: Mira
-    text: "It's\u2026 nice. Thank you, really."
+    text: Mm. Thanks... it's nice.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -100,7 +100,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: I think I'm smiling. Strange feeling.
+    text: I think I've been smiling for ten minutes.
     setsMiraWindow: 0
     miraWindowAfter: 0
   twoMeters: 0
@@ -115,15 +115,15 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 8
   badDrinkChill: 20
-  calendarLine: Sunday. No rush today.
+  calendarLine: Sunday. No work.
   tutorialHints: 0
   pulseRecipeCard: 0
   recipeCardText: "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour
     to the line\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind
     to the green\n3) slow circles, keep the flow green, fill to the line\n\n<b>Milk</b>
     \u2014 hold to steam, let go in the green"
-  coldDrinkText: "Cold and bitter\u2026 that didn't help at all."
-  failText: "Too cold\u2026 let's try that again."
+  coldDrinkText: Ugh. Cold and bitter.
+  failText: Too cold. Let's try that again.
   drinkResults:
   - icon: {fileID: 21300000, guid: 722a94e002662491386aea713d5f2d88, type: 3}
     condition: 0

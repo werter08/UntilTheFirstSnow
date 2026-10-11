@@ -23,7 +23,7 @@ namespace Courtyard.Minigames
         [Tooltip("Starts together with the previous step (Day 1: spoon the coffee in while the kettle heats); it is told " +
                  "when the previous one is done.")]
         [SerializeField] private bool startsWithPrevious;
-        [Tooltip("Results below this explain what went wrong, above the tool (\"Too much water\"…).")]
+        [Tooltip("Results below this explain what went wrong, above the tool (\"Too much water\"...).")]
         [SerializeField, Range(0f, 1f)] private float explainBelow = 0.6f;
 
         /// <summary>Raised once with the result quality in [0, 1].</summary>

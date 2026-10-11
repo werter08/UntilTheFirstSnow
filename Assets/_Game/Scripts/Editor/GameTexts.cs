@@ -23,8 +23,8 @@ namespace Courtyard.Editor
         private const string NotesPath = "Assets/_Game/Data/Story/FridgeNotes.asset";
         private const string EndingPath = "Assets/_Game/Data/Story/Ending.asset";
 
-        private const string BadDrink = "Cold and bitter… that didn't help at all.";
-        private const string TooCold = "Too cold… let's try that again.";
+        private const string BadDrink = "Ugh. Cold and bitter.";
+        private const string TooCold = "Too cold. Let's try that again.";
 
         private sealed class Beat
         {
@@ -54,16 +54,16 @@ namespace Courtyard.Editor
         private static readonly (string prefab, string hint, bool always)[] Hints =
         {
             (P.KettleBoil, "Turn the kettle on. Turn it off when it boils.", false),
-            (P.InstantCoffee, "Two spoons of coffee into the cup. Then pour water to the line.", false),
+            (P.InstantCoffee, "Two spoons of coffee. Then pour water up to the line.", false),
             (P.GrindBeans, "Turn the handle in circles. Stop in the green.", false),
-            (P.PourOver, "Pour in slow circles. Keep the flow in the green. Fill to the line.", false),
+            (P.PourOver, "Pour slowly, in circles. Keep it in the green. Fill to the line.", false),
             (P.WaveBack, "She's waving. Click your mug to wave back.", true),
             (P.MiraVisit, "", false),
-            (P.TakeHerCup, "Take the jar from her.", true),
+            (P.TakeHerCup, "Take the jar.", true),
             (P.SteamMilk, "Hold to steam the milk. Let go in the green.", false),
             (P.GuessHerDrink, "Add two spices to her cup, one at a time. Then click the cup.", true),
-            (P.ChooseMug, "First, her mug. Which one is hers?", true),
-            (P.HerDrinkFromMemory, "Make her usual. You know it by now.", true),
+            (P.ChooseMug, "Her mug first. Which one is hers?", true),
+            (P.HerDrinkFromMemory, "Make her usual.", true),
             (P.AutoFillHisMug, "", false),
             (P.PourWater, "One spoon of coffee into her cup. Then pour water to the line.", false), // her coffee
             (P.ReadHerWindow, "Something's on her window. Tap it.", true),
@@ -89,73 +89,73 @@ namespace Courtyard.Editor
 
             yield return new Day
             {
-                Number = 1, Calendar = "Day 1. Same as yesterday.", BadDrink = BadDrink, TooCold = TooCold,
+                Number = 1, Calendar = "Monday.", BadDrink = BadDrink, TooCold = TooCold,
                 Tutorial = true, PulseRecipe = true, Recipe = RecipeInstant,
                 Beats = new[]
                 {
-                    Start(thought, "6:40. Again."),
-                    After(0, thought, "Instant coffee. Tastes like Monday."),
-                    End(thought, "…Someone across the courtyard is already awake."),
+                    Start(thought, "6:40. Snoozed twice. Still tired."),
+                    After(0, thought, "Instant again. Whatever. At least it's hot."),
+                    End(thought, "Huh. Someone across the yard is up this early too."),
                 },
             };
             yield return new Day
             {
-                Number = 5, Calendar = "Rain again. I bought real beans on the way home.", BadDrink = BadDrink, TooCold = TooCold,
+                Number = 5, Calendar = "Raining. Again.", BadDrink = BadDrink, TooCold = TooCold,
                 PulseRecipe = true, Recipe = RecipeInstant + RecipePourOver,
                 Beats = new[]
                 {
-                    Start(thought, "Real beans. No idea why I bought them."),
-                    After(2, thought, "Grind. Pour slowly. Breathe."), // after grinding (step 1 puts the V60 on)
-                    End(thought, "She waved. I waved back with a mug. Smooth."),
+                    Start(thought, "Got real beans on the way home. Felt like it."),
+                    After(2, thought, "Okay, that smells way better than instant."), // after grinding (step 1 puts the V60 on)
+                    End(thought, "She waved at me. I waved back... with a mug. Very cool. Super smooth."),
                 },
             };
             yield return new Day
             {
-                Number = 10, Calendar = "Sunday. No rush today.", BadDrink = BadDrink, TooCold = TooCold,
+                Number = 10, Calendar = "Sunday. No work.", BadDrink = BadDrink, TooCold = TooCold,
                 Recipe = RecipeInstant + RecipePourOver + RecipeMilk,
                 Beats = new[]
                 {
-                    Start(thought, "Sunday. Even the light looks softer."),
-                    After(4, dialogue, "Hi… I'm Mira, from across the yard. I ran out of coffee. Could I borrow some?", "Mira"),
-                    After(5, dialogue, "Something sweet, please. Cinnamon… and maybe honey?", "Mira"),
-                    End(dialogue, "Wow. Best cup I've had all month.", "Mira", BeatCondition.GoodResult),
-                    End(dialogue, "It's… nice. Thank you, really.", "Mira", BeatCondition.PoorResult),
-                    End(thought, "I think I'm smiling. Strange feeling."),
+                    Start(thought, "Sunday. Nowhere to be."),
+                    After(4, dialogue, "Hi! Sorry, um... I'm Mira, from across the yard. I ran out of coffee. Could I borrow a little?", "Mira"), // after her knock
+                    After(5, dialogue, "Oh, and I like it sweet. Cinnamon and honey, if you have them?", "Mira"), // after taking her jar
+                    End(dialogue, "Okay, wow. That's really good. Thank you!", "Mira", BeatCondition.GoodResult),
+                    End(dialogue, "Mm. Thanks... it's nice.", "Mira", BeatCondition.PoorResult),
+                    End(thought, "I think I've been smiling for ten minutes."),
                 },
             };
             yield return new Day
             {
-                Number = 20, Calendar = "Freezing tonight. Her window is still lit.",
-                BadDrink = "Cold and bitter… that won't warm anyone.", TooCold = TooCold,
+                Number = 20, Calendar = "Minus three tonight.",
+                BadDrink = "Ugh. That won't warm anyone up.", TooCold = TooCold,
                 Recipe = RecipeInstant + RecipePourOver + RecipeMilk + RecipeTwoMugs,
                 // "My heating broke :(" is read from her window (ReadHerWindow, step 0), not shown as a line.
                 Beats = new[]
                 {
-                    After(0, note, "Hold on. Coffee's coming."),
-                    After(7, thought, "Two cups tonight. Hers first."), // after his cup fills beside hers
-                    End(thought, "Funny. A few weeks ago I couldn't even keep myself warm."),
+                    After(0, note, "hang on. making coffee."), // his reply, after reading her window
+                    After(7, thought, "Two mugs. Hers first."), // after his cup fills beside hers
+                    End(thought, "Three weeks ago I could barely make coffee for myself."),
                 },
             };
             yield return new Day
             {
-                Number = 30, Calendar = "First snow.", BadDrink = "Hmm. Not quite her usual.", TooCold = "", // Day 30 can't fail
+                Number = 30, Calendar = "First snow.", BadDrink = "Hmm. Not quite how she likes it.", TooCold = "", // Day 30 can't fail
                 Recipe = RecipeInstant + RecipePourOver + RecipeMilk + RecipeTwoMugs, // never her recipe: Day 30 is from memory
                 Beats = new[]
                 {
-                    Start(dialogue, "It's snowing! Make me the usual?", "Mira"),
-                    After(2, thought, "I don't need a recipe for this one."),
+                    Start(dialogue, "It's snowing!! Make me the usual?", "Mira"),
+                    After(2, thought, "Cinnamon, honey. Don't even have to think about it."),
                     End(thought, "Autumn's over."),
-                    End(thought, "And for the first time in a long while… I'm warm."),
+                    End(thought, "It's freezing outside. Weird. I'm not cold at all."),
                 },
             };
         }
 
         private static readonly (int afterDay, string from, string text)[] FridgeNotes =
         {
-            (1, "", "Buy real coffee. Seriously."),
-            (5, "", "The girl across the yard waved. I waved back. With a mug."),
-            (10, "Mira", "Thank you for the coffee! My usual: cinnamon + honey ♥"),
-            (20, "Mira", "Heating's fixed. Thanks for the coffee at midnight."),
+            (1, "", "BUY REAL COFFEE."),
+            (5, "", "Next time maybe say hi. Not just wave."),
+            (10, "M", "Thanks for saving my Sunday!\n(cinnamon + honey, don't forget)"),
+            (20, "M", "Heating's back. Thank you for last night."),
             (30, "", "First snow. Two mugs on the sill."),
         };
 
@@ -166,8 +166,8 @@ namespace Courtyard.Editor
             (BeatStyle.Thought, "A cozy lofi story about coffee and love."),
             (BeatStyle.Note, "Made in 72 hours for Mini Jam 221: Autumn.\nLimitation: Staying Warm."),
             (BeatStyle.Note, "Design, code & art: Begench\nMusic: Purrple Cat (CC BY-SA 4.0)\nRain & wind: Helton Yan (CC BY 4.0)"),
-            (BeatStyle.Note, "Sound effects: Polarsound Productions, MorphCore, Kenney (CC0)\nDecor: ODDBLOT\nFonts: Amaranth, Playpen Sans (OFL)"),
-            (BeatStyle.Thought, "Thank you for playing. Stay warm."),
+            (BeatStyle.Note, "Sound effects: Polarsound Productions, MorphCore, Kenney (CC0), Freesound contributors\nDecor: ODDBLOT\nFonts: Amaranth, Playpen Sans (SIL OFL)"),
+            (BeatStyle.Thought, "Thanks for playing. Stay warm."),
         };
 
         // ---------------------------------------------------------------- apply
@@ -202,7 +202,9 @@ namespace Courtyard.Editor
                     var step = root.GetComponent<MinigameStep>();
                     Wire(step, "hintText", hint);
                     Wire(step, "alwaysShowHint", always);
-                    if (prefab == P.HerDrinkFromMemory) Wire(step, "wrongTasteText", "Not quite her usual…");
+                    if (prefab == P.HerDrinkFromMemory) Wire(step, "wrongTasteText", "Not quite her usual...");
+                    if (prefab == P.ReadHerWindow) Wire(step, "noteText", "my heating died :(");
+                    NoEllipsis(step);
                 });
             }
         }
@@ -302,6 +304,7 @@ namespace Courtyard.Editor
                     EditorUtility.SetDirty(text);
                 }
 
+                foreach (var fx in root.GetComponentsInChildren<Kitchen.FeedbackFx>(true)) NoEllipsis(fx);
                 foreach (var runner in root.GetComponentsInChildren<LevelRunner>(true))
                     Wire(runner, "newNoteHint", "New note on the fridge. Click it to read.");
             }
@@ -327,6 +330,25 @@ namespace Courtyard.Editor
                 if (ok) Debug.Log($"GameTexts: {name} checks cinnamon + honey ({recipe.name}).");
                 else Debug.LogError($"GameTexts: {name} does not check exactly cinnamon + honey.");
             }
+        }
+
+        /// <summary>
+        /// The game font (Amaranth) has no "…" glyph — it would show in a fallback font. Every text field on the
+        /// component uses three dots instead (the handwritten notes font has it, but notes don't go through here).
+        /// </summary>
+        private static void NoEllipsis(Object component)
+        {
+            var so = new SerializedObject(component);
+            var property = so.GetIterator();
+            var changed = false;
+            while (property.Next(true))
+            {
+                if (property.propertyType != SerializedPropertyType.String || !property.stringValue.Contains("…")) continue;
+                property.stringValue = property.stringValue.Replace("…", "...");
+                changed = true;
+            }
+
+            if (changed) so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>Edits a prefab in place (keeps its file IDs).</summary>

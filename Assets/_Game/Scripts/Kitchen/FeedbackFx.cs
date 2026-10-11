@@ -34,7 +34,7 @@ namespace Courtyard.Kitchen
         [SerializeField, Range(0f, 1f)] private float niceThreshold = 0.7f;
 
         [Header("Cold (a badly made drink)")]
-        [SerializeField] private string chillText = "Brr… cold.";
+        [SerializeField] private string chillText = "Brr... cold.";
         [SerializeField] private Color chillTextColour = new(0.62f, 0.82f, 1f);
         [SerializeField] private Color frostColour = new(0.8f, 0.92f, 1f);
         [SerializeField] private Color mistColour = new(0.88f, 0.94f, 1f, 0.75f);

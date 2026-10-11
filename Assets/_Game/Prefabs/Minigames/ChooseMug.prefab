@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25df5fdc706e44bb7ad43f48f23b74d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.ChooseMugStep
-  hintText: First, her mug. Which one is hers?
+  hintText: Her mug first. Which one is hers?
   scored: 1
   warmthTarget: 2
   zone: 5
@@ -63,7 +63,7 @@ MonoBehaviour:
   pickedLift: 0.3
   liftSeconds: 0.25
   flySeconds: 0.6
-  wrongMugText: "Hmm\u2026 that's not her mug."
+  wrongMugText: Hmm... that's not her mug.
 --- !u!1 &5271582471886665342
 GameObject:
   m_ObjectHideFlags: 0

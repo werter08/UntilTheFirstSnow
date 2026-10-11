@@ -51,7 +51,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: 6:40. Again.
+    text: 6:40. Snoozed twice. Still tired.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
@@ -59,7 +59,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Instant coffee. Tastes like Monday.
+    text: Instant again. Whatever. At least it's hot.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -67,7 +67,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: "\u2026Someone across the courtyard is already awake."
+    text: Huh. Someone across the yard is up this early too.
     setsMiraWindow: 0
     miraWindowAfter: 0
   twoMeters: 0
@@ -82,15 +82,15 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
-  calendarLine: Day 1. Same as yesterday.
+  calendarLine: Monday.
   tutorialHints: 1
   pulseRecipeCard: 1
   recipeCardText: '<b>Instant coffee</b>
 
     1) boil water   2) two spoons   3)
     pour to the line'
-  coldDrinkText: "Cold and bitter\u2026 that didn't help at all."
-  failText: "Too cold\u2026 let's try that again."
+  coldDrinkText: Ugh. Cold and bitter.
+  failText: Too cold. Let's try that again.
   drinkResults:
   - icon: {fileID: 21300000, guid: aa6fe5bccbf8c4a9f87bbebfdd118db9, type: 3}
     condition: 0
@@ -101,3 +101,5 @@ MonoBehaviour:
   outroHoldSeconds: 0
   outroWalkers: []
   finale: 0
+  remakeText: It's bad. Let's remake it.
+  serveAtDoor: 0

@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80d10500b181d49b99065ad8f90a23ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.PickToppingsStep
-  hintText: Make her usual. You know it by now.
+  hintText: Make her usual.
   scored: 1
   warmthTarget: 0
   zone: 0
@@ -61,5 +61,5 @@ MonoBehaviour:
   tooMuchOneText: "Too much {0} \u2014 one portion each."
   tooManyText: "Too many spices \u2014 just two."
   tooFewText: "Not enough \u2014 it needs two spices."
-  wrongTasteText: "Not quite her usual\u2026"
+  wrongTasteText: Not quite her usual...
   carryTilt: -12

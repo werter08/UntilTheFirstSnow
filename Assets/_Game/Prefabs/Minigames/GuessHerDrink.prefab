@@ -61,5 +61,5 @@ MonoBehaviour:
   tooMuchOneText: "Too much {0} \u2014 one portion each."
   tooManyText: "Too many spices \u2014 just two."
   tooFewText: "Not enough \u2014 it needs two spices."
-  wrongTasteText: "Not quite her taste\u2026"
+  wrongTasteText: Not quite her taste...
   carryTilt: -12

@@ -38,7 +38,7 @@ namespace Courtyard.Minigames
         [SerializeField] private string tooMuchOneText = "Too much {0} — one portion each.";
         [SerializeField] private string tooManyText = "Too many spices — just two.";
         [SerializeField] private string tooFewText = "Not enough — it needs two spices.";
-        [SerializeField] private string wrongTasteText = "Not quite her taste…";
+        [SerializeField] private string wrongTasteText = "Not quite her taste...";
         private Topping? _overdone;
 
         [Tooltip("Tilt (degrees) of a jar while it is carried.")]

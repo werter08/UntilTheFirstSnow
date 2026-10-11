@@ -58,12 +58,13 @@ MonoBehaviour:
     condition: 0
     style: 1
     speaker: 
-    text: 'Sound effects: Polarsound Productions, MorphCore, Kenney (CC0)
+    text: 'Sound effects: Polarsound Productions, MorphCore, Kenney (CC0), Freesound
+      contributors
 
-      Decor:
-      ODDBLOT
+      Decor: ODDBLOT
 
-      Fonts: Amaranth, Playpen Sans (OFL)'
+      Fonts: Amaranth, Playpen Sans (SIL
+      OFL)'
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -71,6 +72,6 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Thank you for playing. Stay warm.
+    text: Thanks for playing. Stay warm.
     setsMiraWindow: 0
     miraWindowAfter: 0

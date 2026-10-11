@@ -10976,7 +10976,7 @@ MonoBehaviour:
   softBurst: {fileID: 1362132362}
   warmGlow: {r: 1, g: 0.72, b: 0.42, a: 0.55}
   niceThreshold: 0.7
-  chillText: "Brr\u2026 cold."
+  chillText: Brr... cold.
   chillTextColour: {r: 0.62, g: 0.82, b: 1, a: 1}
   frostColour: {r: 0.78, g: 0.9, b: 1, a: 1}
   mistColour: {r: 0.9, g: 0.95, b: 1, a: 0.5}

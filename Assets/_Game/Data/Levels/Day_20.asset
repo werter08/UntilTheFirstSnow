@@ -57,7 +57,7 @@ MonoBehaviour:
     condition: 0
     style: 1
     speaker: 
-    text: Hold on. Coffee's coming.
+    text: hang on. making coffee.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
@@ -65,7 +65,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Two cups tonight. Hers first.
+    text: Two mugs. Hers first.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -73,7 +73,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Funny. A few weeks ago I couldn't even keep myself warm.
+    text: Three weeks ago I could barely make coffee for myself.
     setsMiraWindow: 0
     miraWindowAfter: 0
   twoMeters: 1
@@ -88,15 +88,15 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
-  calendarLine: Freezing tonight. Her window is still lit.
+  calendarLine: Minus three tonight.
   tutorialHints: 0
   pulseRecipeCard: 0
   recipeCardText: "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour
     to the line\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind
     to the green\n3) slow circles, keep the flow green, fill to the line\n\n<b>Milk</b>
     \u2014 hold to steam, let go in the green\n\nTwo mugs tonight. Hers first."
-  coldDrinkText: "Cold and bitter\u2026 that won't warm anyone."
-  failText: "Too cold\u2026 let's try that again."
+  coldDrinkText: Ugh. That won't warm anyone up.
+  failText: Too cold. Let's try that again.
   drinkResults:
   - icon: {fileID: 21300000, guid: 722a94e002662491386aea713d5f2d88, type: 3}
     condition: 0
