@@ -80,6 +80,7 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(5);
             yield return PlayKettleBoil();
+            yield return PlayPlaceV60();
             yield return AdvanceTo<GrindBeansStep>();
             var step = Object.FindAnyObjectByType<GrindBeansStep>();
             float Grind() => GetField<float>(step, "_grind");
@@ -161,6 +162,7 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(10);
             yield return PlayKettleBoil();
+            yield return PlayPlaceV60();
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlayTakeHerCup();
@@ -239,6 +241,7 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();
             yield return PlayChooseMug(hers: false);
             Assert.That(LastQuality, Is.EqualTo(0.6f).Within(0.001f));
+            yield return PlayPlaceV60();
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlaySteamMilk();

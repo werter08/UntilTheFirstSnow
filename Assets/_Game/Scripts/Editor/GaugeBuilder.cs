@@ -56,12 +56,16 @@ namespace Courtyard.Editor
             {
                 var canvas = scene.GetRootGameObjects().First(g => g.name == "Canvas").transform;
                 var parent = canvas.Find("HUD") ?? canvas; // hidden with the HUD while a note is read
-                var old = parent.Find("MinigameGauge");
-                if (old != null) Object.DestroyImmediate(old.gameObject);
-                var gauge = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
-                gauge.name = "MinigameGauge";
                 var runner = scene.GetRootGameObjects().Select(g => g.GetComponent<LevelRunner>()).First(r => r != null);
-                Wire(runner, "gauge", gauge.GetComponent<MinigameGauge>());
+                // Two: most steps use one; the pour-over watches the water and the flow at once.
+                foreach (var (name, field) in new[] { ("MinigameGauge", "gauge"), ("MinigameGauge2", "gauge2") })
+                {
+                    var old = parent.Find(name);
+                    if (old != null) Object.DestroyImmediate(old.gameObject);
+                    var gauge = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+                    gauge.name = name;
+                    Wire(runner, field, gauge.GetComponent<MinigameGauge>());
+                }
             });
             AssetDatabase.SaveAssets();
         }
@@ -213,7 +217,7 @@ namespace Courtyard.Editor
             var steps = new (string prefab, string icon, string[] oldMeters)[]
             {
                 (P.GrindBeans, "icon_grind", new[] { "GrindMeter", "GrindMeterBack" }),
-                (P.PourOver, "icon_flow", new[] { "FlowMeter", "FlowMeterBack" }),
+                (P.PourOver, "", new[] { "FlowMeter", "FlowMeterBack" }), // flow: no icon; the water gauge has the drop
                 (P.SteamMilk, "icon_milk", new[] { "Thermometer" }),
                 (P.InstantCoffee, "icon_flow", System.Array.Empty<string>()), // the fill gauge while pouring
                 (P.PourWater, "icon_flow", System.Array.Empty<string>()),
@@ -231,7 +235,8 @@ namespace Courtyard.Editor
                         if (old != null) Object.DestroyImmediate(old.gameObject);
                     }
 
-                    Wire(root.GetComponent<MinigameStep>(), "gaugeIcon", Load(icon));
+                    Wire(root.GetComponent<MinigameStep>(), "gaugeIcon", string.IsNullOrEmpty(icon) ? null : Load(icon));
+                    if (prefab == P.PourOver) Wire(root.GetComponent<MinigameStep>(), "waterIcon", Load("icon_flow"));
                     PrefabUtility.SaveAsPrefabAsset(root, path);
                 }
                 finally

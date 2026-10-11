@@ -52,6 +52,7 @@ namespace Courtyard.UI
         private bool _shown;
         private Coroutine _fade;
         private Vector2 _markerBase;
+        private Vector2 _offset;
 
         public float Value => _value;
         public bool IsShown => _shown;
@@ -68,9 +69,11 @@ namespace Courtyard.UI
         /// Shows the gauge above <paramref name="tool"/>: green zone <paramref name="green"/> (0..1), optional red zone,
         /// and the step's icon (none = no icon).
         /// </summary>
-        public void Show(Renderer tool, Camera worldCamera, Vector2 green, Vector2? red, Sprite stepIcon, float value = 0f)
+        public void Show(Renderer tool, Camera worldCamera, Vector2 green, Vector2? red, Sprite stepIcon, float value = 0f,
+            Vector2? offset = null)
         {
             _tool = tool;
+            _offset = offset ?? new Vector2(0f, aboveTool);
             _camera = worldCamera;
             _green = new Vector2(Mathf.Clamp01(Mathf.Min(green.x, green.y)), Mathf.Clamp01(Mathf.Max(green.x, green.y)));
             _red = red;
@@ -148,7 +151,7 @@ namespace Courtyard.UI
             var parent = (RectTransform)_rect.parent;
             var uiCamera = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen, uiCamera, out var local)) return false;
-            position = local + Vector2.up * aboveTool;
+            position = local + _offset;
 
             // Keep it on screen.
             var half = _rect.rect.size * 0.5f;

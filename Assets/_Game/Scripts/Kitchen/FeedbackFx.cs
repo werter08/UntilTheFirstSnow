@@ -146,6 +146,32 @@ namespace Courtyard.Kitchen
             yield return new WaitForSeconds(serveHoldSeconds);
         }
 
+        /// <summary>
+        /// Little squares thrown in an arc from <paramref name="from"/> so they land at <paramref name="to"/> after
+        /// <paramref name="seconds"/> (e.g. ground coffee falling from the grinder into the V60).
+        /// </summary>
+        public void Throw(Vector3 from, Vector3 to, Color colour, int count, float seconds = 0.45f, float size = 0.06f)
+        {
+            if (burst == null) return;
+            var main = burst.main;
+            main.gravityModifier = 1f;
+            var g = Mathf.Abs(Physics.gravity.y);
+            for (var i = 0; i < count; i++)
+            {
+                var target = to + (Vector3)(Random.insideUnitCircle * 0.12f);
+                var v = (target - from) / seconds + Vector3.up * (0.5f * g * seconds);
+                burst.Emit(new ParticleSystem.EmitParams
+                {
+                    position = from + (Vector3)(Random.insideUnitCircle * 0.05f),
+                    velocity = v,
+                    startColor = colour,
+                    startSize = size * Random.Range(0.6f, 1.2f),
+                    startLifetime = seconds,
+                    rotation = Random.Range(0f, 360f),
+                }, 1);
+            }
+        }
+
         /// <summary>A puff of little squares: sparkles, coffee dust, droplets, sprinkles.</summary>
         public void Burst(Vector3 worldPosition, Color colour, int count, float speed = 1.4f, float size = 0.08f, float gravity = 0.6f)
         {

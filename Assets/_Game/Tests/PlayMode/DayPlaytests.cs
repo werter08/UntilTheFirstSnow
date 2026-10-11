@@ -22,6 +22,7 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(5);
             yield return PlayKettleBoil();
+            yield return PlayPlaceV60();
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlayWaveBack();
@@ -33,6 +34,7 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(10);
             yield return PlayKettleBoil();
+            yield return PlayPlaceV60();
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlayTakeHerCup();
@@ -54,6 +56,7 @@ namespace Courtyard.Tests
             yield return PlayChooseMug();
             Assert.That(LastQuality, Is.EqualTo(1f), "Her mug is the right one.");
             Assert.That(Counter.MugPresent, Is.True, "Her mug should now stand at the brewing spot.");
+            yield return PlayPlaceV60();
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlaySteamMilk();

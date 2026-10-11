@@ -18,6 +18,13 @@ namespace Courtyard.Minigames
         [SerializeField] private PointerTarget pourZone;
         [Tooltip("Icon on the flow gauge.")]
         [SerializeField] private Sprite gaugeIcon;
+        [Tooltip("Icon on the water gauge.")]
+        [SerializeField] private Sprite waterIcon;
+        [Tooltip("Where the two gauges sit, from the cup's top (reference px): flow, then water above it.")]
+        [SerializeField] private Vector2 flowGaugeOffset = new(450f, 110f);
+        [SerializeField] private Vector2 waterGaugeOffset = new(450f, 190f);
+        [Tooltip("The pour finishes by itself once the water reaches the line while the flow is green (and has mostly been).")]
+        [SerializeField, Range(0f, 1f)] private float passBandShare = 0.5f;
         [Tooltip("Flow this fast reads as too fast (red on the gauge).")]
         [SerializeField, Range(0f, 1f)] private float tooFastFlow = 0.8f;
 
@@ -46,6 +53,7 @@ namespace Courtyard.Minigames
         private CounterStation _counter;
         private FeedbackFx _fx;
         private UI.MinigameGauge _gauge;
+        private UI.MinigameGauge _water;
         private float _splashTimer;
         private Camera _camera;
         private Vector2 _lastPointer;
@@ -79,9 +87,16 @@ namespace Courtyard.Minigames
             _counter.SetMugGauge(true);
             _counter.ShowFillLine(targetFill);
 
+            // Two gauges beside the cup: the flow (slow circles keep it green) and the water in the cup.
             _gauge = ctx.Gauge;
             if (_gauge != null)
-                _gauge.Show(_counter.KettleBody, ctx.WorldCamera, new Vector2(bandMin, bandMax), new Vector2(tooFastFlow, 1f), gaugeIcon);
+                _gauge.Show(_counter.MugBody, ctx.WorldCamera, new Vector2(bandMin, bandMax), new Vector2(tooFastFlow, 1f), gaugeIcon,
+                    0f, flowGaugeOffset);
+            _water = ctx.SecondGauge;
+            var good = (1f - 0.6f) * fillTolerance; // quality ≥ 0.6 for the fill
+            if (_water != null)
+                _water.Show(_counter.MugBody, ctx.WorldCamera, new Vector2(targetFill - good, Mathf.Min(1f, targetFill + good)),
+                    RedAbove(targetFill, fillTolerance), waterIcon, _counter.MugLevel, waterGaugeOffset);
         }
 
         private void OnDestroy()
@@ -95,6 +110,7 @@ namespace Courtyard.Minigames
             _counter.KettleStream.color = _streamColour;
             AudioManager.StopTrack(SfxId.Pour);
             if (_gauge != null) _gauge.Hide();
+            if (_water != null) _water.Hide();
         }
 
         private bool _holding;
@@ -160,11 +176,20 @@ namespace Courtyard.Minigames
             else if (_flow > bandMax) _fastTime += Time.deltaTime;
 
             _counter.SetMugLevel(_counter.MugLevel + fillPerSecond * Time.deltaTime);
+            if (_water != null) _water.SetValue(_counter.MugLevel);
             _splashTimer -= Time.deltaTime;
             if (_splashTimer <= 0f && _fx != null)
             {
                 _splashTimer = 0.15f;
                 _fx.Burst(_counter.Mug.transform.position + Vector3.up * 0.6f, coffeeColor, 2, 0.7f, 0.05f, 1.2f);
+            }
+
+            // Both green: the water has reached the line while pouring in slow circles — done.
+            var flowGreen = _flow >= bandMin && _flow <= bandMax;
+            if (_counter.MugLevel >= targetFill && flowGreen && _bandTime >= _pourTime * passBandShare)
+            {
+                Finish();
+                return;
             }
 
             if (_counter.MugLevel >= 1f) Finish();
@@ -214,6 +239,7 @@ namespace Courtyard.Minigames
             _counter.StartCoroutine(_counter.LiftDripper()); // runs on the counter: this step is destroyed right after
 
             if (_gauge != null) _gauge.Release();
+            if (_water != null) _water.Release();
             var bandScore = _pourTime > 0f ? _bandTime / _pourTime : 0f;
             var fillScore = Mathf.Clamp01(1f - Mathf.Abs(_counter.MugLevel - targetFill) / fillTolerance);
             var quality = bandWeight * bandScore + (1f - bandWeight) * fillScore;

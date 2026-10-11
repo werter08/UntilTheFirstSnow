@@ -185,8 +185,44 @@ namespace Courtyard.Kitchen
             cupCover.color = c;
         }
 
+        [Header("V60 put on the cup by hand")]
+        [Tooltip("Lets the player carry the V60 to the cup (PlaceV60 step).")]
+        [SerializeField] private DragTarget dripperDrag;
+        [Tooltip("Where the V60 waits until it's put on the cup (local, on the window sill).")]
+        [SerializeField] private Vector3 dripperSideLocal = new(-1.3f, 1.2f, 0f);
+
+        public DragTarget DripperDrag => dripperDrag;
+        public Vector3 DripperOnMugLocal => _dripperRest ?? dripper.transform.localPosition;
+        public Vector3 DripperSideLocal => dripperSideLocal;
+
+        /// <summary>The V60 is sitting on the cup (not waiting on the sill, not lifted, not over his cup).</summary>
+        public bool DripperOnMug => CupCovered;
+
+        /// <summary>The V60's top centre (world), where the grounds fall in.</summary>
+        public Vector3 DripperTop
+        {
+            get
+            {
+                var r = dripperRenderer != null ? dripperRenderer : dripper.GetComponentInChildren<SpriteRenderer>();
+                return new Vector3(r.bounds.center.x, r.bounds.max.y - 0.1f, 0f);
+            }
+        }
+
+        /// <summary>The V60 on the cup, or waiting on the sill for the player to put it on.</summary>
+        public void PlaceDripper(bool onMug)
+        {
+            dripper.SetActive(true);
+            dripper.transform.localPosition = onMug ? DripperOnMugLocal : dripperSideLocal;
+            dripper.transform.localRotation = Quaternion.identity;
+            SetDripperAlpha(1f);
+        }
+
+        private static bool PlacesV60(System.Collections.Generic.IEnumerable<Minigames.MinigameStep> steps) =>
+            steps.Any(s => s is Minigames.PlaceV60Step);
+
         private void Awake()
         {
+            _dripperRest = dripper.transform.localPosition; // as placed in the scene: on the cup
             _kettleRest = kettle.position;
             if (frother != null) _frotherRest = frother.localPosition;
             if (milkFoamBlob != null) _foamBase = milkFoamBlob.localPosition;
@@ -211,9 +247,9 @@ namespace Courtyard.Kitchen
         {
             var props = level.Props;
             grinder.SetActive(props.grinder);
-            dripper.SetActive(HasStep<Minigames.PourOverStep>(level)); // only on days that actually pour over
-            if (_dripperRest.HasValue) dripper.transform.localPosition = _dripperRest.Value;
-            SetDripperAlpha(1f);
+            // Only on days that pour over: on the cup, or waiting on the sill when the player puts it on (PlaceV60).
+            dripper.SetActive(HasStep<Minigames.PourOverStep>(level));
+            if (dripper.activeSelf) PlaceDripper(!PlacesV60(level.Steps));
             if (restingSpoon != null) restingSpoon.gameObject.SetActive(HasStep<Minigames.InstantCoffeeStep>(level));
             SetCoffeeBagOpen(false);
             if (_hisCup != null) Destroy(_hisCup);
@@ -267,11 +303,10 @@ namespace Courtyard.Kitchen
             ShowSpoons(0);
             SetSteam(0.7f);
             SetDripperGrounds(false);
-            if (later.Any(s => s is Minigames.PourOverStep) && MugPresent)
+            if (later.Any(s => s is Minigames.PourOverStep))
             {
-                dripper.SetActive(true);
-                if (_dripperRest.HasValue) dripper.transform.localPosition = _dripperRest.Value;
-                SetDripperAlpha(1f);
+                if (PlacesV60(later)) PlaceDripper(false); // back on the sill: it's put on the cup again
+                else if (MugPresent) PlaceDripper(true);
             }
 
             if (restingSpoon != null) restingSpoon.gameObject.SetActive(later.Any(s => s is Minigames.InstantCoffeeStep));
@@ -297,7 +332,7 @@ namespace Courtyard.Kitchen
         public void SetMugPresent(bool present)
         {
             mug.gameObject.SetActive(present);
-            if (!present) dripper.SetActive(false);
+            if (!present && CupCovered) dripper.SetActive(false); // a V60 waiting on the sill stays
         }
 
         /// <summary>
@@ -312,10 +347,8 @@ namespace Courtyard.Kitchen
             mug.gameObject.SetActive(true);
             SetMugLevel(0f);
             mugFoam.SetActive(false);
-            if (!pourOverNext) return;
-            dripper.SetActive(true);
-            if (_dripperRest.HasValue) dripper.transform.localPosition = _dripperRest.Value;
-            SetDripperAlpha(1f);
+            if (!pourOverNext || (dripper.activeSelf && !CupCovered)) return; // the V60 on the sill is put on by hand
+            PlaceDripper(true);
         }
 
         private static bool MugChosenFirst(LevelDefinition level)
@@ -573,7 +606,8 @@ namespace Courtyard.Kitchen
         /// <summary>Target line drawn across the mug at <paramref name="level"/> (0..1).</summary>
         public void ShowFillLine(float level)
         {
-            mugFillLine.gameObject.SetActive(true);
+            // The fill gauge shows the line now; the old white line drawn on the cup stays hidden.
+            mugFillLine.gameObject.SetActive(false);
             mugFillLine.localPosition = new Vector3(mugFillLine.localPosition.x, level * mugFill.MaxHeight, 0f);
         }
 
@@ -628,6 +662,7 @@ namespace Courtyard.Kitchen
             grinderHandle.Interactable = value;
             mug.Interactable = value;
             milkJug.Interactable = value;
+            if (dripperDrag != null) dripperDrag.Interactable = value;
             foreach (var jar in toppingJars) jar.Target.Interactable = value;
         }
     }

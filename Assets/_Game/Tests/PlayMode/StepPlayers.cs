@@ -18,10 +18,10 @@ namespace Courtyard.Tests
             var step = Object.FindAnyObjectByType<KettleBoilStep>();
             var switchT = Counter.KettleSwitch.transform;
             // A click right after the story box closes can land while it's still fading out: click again, like a player.
-            for (var attempt = 0; attempt < 3 && GetField<object>(step, "_state").ToString() == "Idle"; attempt++)
+            for (var attempt = 0; attempt < 6 && GetField<object>(step, "_state").ToString() == "Idle"; attempt++)
             {
                 yield return Click(switchT);
-                yield return Wait(0.1f);
+                yield return Wait(0.3f);
             }
 
             Assert.That(GetField<object>(step, "_state").ToString(), Is.EqualTo("Heating"), "Kettle switch click did not start heating.");
@@ -174,6 +174,22 @@ namespace Courtyard.Tests
 
             yield return Click(Counter.Mug.transform);
             yield return WaitForCompletion();
+        }
+
+        /// <summary>Pick the V60 up from the sill and set it on the cup.</summary>
+        protected IEnumerator PlayPlaceV60()
+        {
+            yield return AdvanceTo<PlaceV60Step>();
+            // A grab right after the story box closes can miss (it's still fading): try again, like a player.
+            for (var attempt = 0; attempt < 3 && LastQuality < 0f; attempt++)
+            {
+                var v60 = Counter.DripperDrag.GetComponent<SpriteRenderer>().bounds.center;
+                yield return Drag(v60, Counter.MugTop + new Vector3(0f, 0.7f, 0f));
+                yield return Wait(0.6f);
+            }
+
+            yield return WaitForCompletion();
+            Assert.That(Counter.DripperOnMug, Is.True, "The V60 should sit on the cup.");
         }
 
         /// <summary>Her coffee (PourWater): one spoon of coffee into her cup, then the water to the line.</summary>

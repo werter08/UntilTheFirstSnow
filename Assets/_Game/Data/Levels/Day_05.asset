@@ -44,6 +44,7 @@ MonoBehaviour:
     fridgeNotes: 0
   steps:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
+  - {fileID: 6597141609809672998, guid: 30fd308ca45df4ce59694189acc7d57a, type: 3}
   - {fileID: 104158219434757867, guid: dccb5e1aee3234a4484f894ced79da0d, type: 3}
   - {fileID: 6738547792549017874, guid: 61b9f335f46924425b3f7ffe28e6e34a, type: 3}
   - {fileID: 6981510139676740986, guid: 6465633501467497a9f3a147c7d72909, type: 3}
@@ -57,7 +58,7 @@ MonoBehaviour:
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
-    stepIndex: 1
+    stepIndex: 2
     condition: 0
     style: 0
     speaker: 
@@ -112,3 +113,5 @@ MonoBehaviour:
   outroHoldSeconds: 0
   outroWalkers: []
   finale: 0
+  remakeText: It's bad. Let's remake it.
+  serveAtDoor: 0

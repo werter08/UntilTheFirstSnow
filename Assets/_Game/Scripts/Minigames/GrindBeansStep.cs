@@ -127,9 +127,17 @@ namespace Courtyard.Minigames
                 _dustDegrees = 0f;
                 if (_fx != null)
                 {
-                    _fx.Burst(_counter.GrinderArm.position + Vector3.down * 1.9f, new Color(0.4f, 0.26f, 0.16f), 3, 0.6f, 0.05f);
+                    // The grounds go somewhere: in an arc from the grinder into the V60 on the cup.
+                    var grounds = new Color(0.4f, 0.26f, 0.16f);
+                    var grinder = _counter.GrinderRenderer.bounds;
+                    var outlet = new Vector3(grinder.max.x - 0.15f, grinder.center.y - grinder.extents.y * 0.35f, 0f);
+                    if (_counter.DripperOnMug) _fx.Throw(outlet, _counter.DripperTop, grounds, 3);
+                    else _fx.Burst(_counter.GrinderArm.position + Vector3.down * 1.9f, grounds, 3, 0.6f, 0.05f);
                     _fx.Punch(_counter.GrinderArm.parent, 0.08f);
                 }
+
+                // Grounds pile up in the V60 as soon as some have fallen in.
+                if (_grind >= 0.25f) _counter.SetDripperGrounds(true);
             }
             if (_grind >= 1f) Finish();
         }

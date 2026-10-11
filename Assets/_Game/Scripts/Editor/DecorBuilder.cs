@@ -196,6 +196,7 @@ namespace Courtyard.Editor
             ApplyScarf(kitchen);
             RestoreHandPlaced(handPlaced);
             ApplyRackShelf(kitchen);
+            ApplyV60Pickup(kitchen);
             ApplyClickables(kitchen);
             ApplyInteractionFeedback(scene);
             ApplyRecipeCard(scene, kitchen);
@@ -1172,6 +1173,32 @@ namespace Courtyard.Editor
             Wire(GetOrAdd<InteractionFeedback>(fx.transform), "fx", fx);
         }
 
+        /// <summary>
+        /// The V60 can be picked up (PlaceV60 step): a collider and a drag handle; it waits on the window sill (left of the
+        /// window's middle, standing on the sill) until it's put on the cup. Its on-cup spot is wherever it's placed in the scene.
+        /// </summary>
+        private static void ApplyV60Pickup(Transform kitchen)
+        {
+            var counter = kitchen.GetComponentInChildren<CounterStation>(true);
+            var v60 = Find(kitchen, "V60", false);
+            var renderer = v60 != null ? v60.GetComponent<SpriteRenderer>() : null;
+            var sill = Find(kitchen, "WindowSill", false)?.GetComponent<SpriteRenderer>();
+            if (counter == null || renderer == null || renderer.sprite == null) return;
+
+            var collider = GetOrAdd<BoxCollider2D>(v60);
+            collider.size = renderer.sprite.bounds.size;
+            collider.offset = renderer.sprite.bounds.center;
+            var drag = GetOrAdd<DragTarget>(v60);
+            WireEnum(drag, "handPose", HandPose.Grip);
+            Wire(counter, "dripperDrag", drag);
+
+            if (sill == null) return;
+            // Standing on the sill: its drawing's bottom on the sill's top, a little left of the window's middle.
+            var bottomOffset = v60.position.y - VisibleBottom(renderer);
+            var world = new Vector3(-1.3f, sill.bounds.max.y - 0.06f + bottomOffset, v60.position.z);
+            Edit(counter, so => so.FindProperty("dripperSideLocal").vector3Value = v60.parent.InverseTransformPoint(world));
+        }
+
         /// <summary>Day 30's finale: the two mugs on the sill are full — his americano, her cappuccino.</summary>
         private static void ApplySillDrinks(Transform kitchen)
         {
@@ -1376,12 +1403,28 @@ namespace Courtyard.Editor
             cup.localPosition = cupKeep ?? (cupArt != null ? DoorPx(872f + cupArt.rect.width * 0.5f, 375f + cupArt.rect.height * 0.5f) : new Vector3(1.0f, -1.2f, 0f));
             var cupSprite = cup.GetComponent<SpriteRenderer>().sprite;
 
+            // When her cup goes back to her full: her drink over the cup's dark top band (px 8–158 × 9–49 of the
+            // drawing), under her fingers. Hidden until served.
+            var drinkArt = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + "drink_cinnamon.png");
+            if (cupArt != null && drinkArt != null)
+            {
+                var full = SpriteChild(cup, "Drink");
+                var r = full.GetComponent<SpriteRenderer>();
+                r.sprite = drinkArt;
+                r.sortingLayerName = "Props";
+                r.sortingOrder = 3;
+                var ppu = cupArt.pixelsPerUnit;
+                full.localPosition = new Vector3((83f - cupArt.rect.width * 0.5f) / ppu, (cupArt.rect.height * 0.5f - 29f) / ppu, 0f);
+                full.localScale = new Vector3(151f / ppu / drinkArt.bounds.size.x, 41f / ppu / drinkArt.bounds.size.y, 1f);
+                full.gameObject.SetActive(false);
+            }
+
             // Her fingers over the cup (cut from the figure), aligned with the figure.
             var hands = SpriteChild(view, "Fingers");
             hands.gameObject.SetActive(fingers != null && figure != null);
             if (fingers != null && figure != null)
             {
-                PlaceAtScreenScale(hands, fingers, Vector2.zero, "Props", 3);
+                PlaceAtScreenScale(hands, fingers, Vector2.zero, "Props", 4);
                 hands.localPosition = mira.localPosition;
             }
 

@@ -30,6 +30,7 @@ namespace Courtyard.Editor
         public const string AutoFillHisMug = "AutoFillHisMug";
         public const string PourWater = "PourWater";
         public const string ReadHerWindow = "ReadHerWindow";
+        public const string PlaceV60 = "PlaceV60";
 
         private static readonly Color Coffee = new(0.35f, 0.2f, 0.1f);
         private static readonly Color Water = new(0.75f, 0.85f, 0.95f);
@@ -224,6 +225,7 @@ namespace Courtyard.Editor
                 (AutoFillHisMug, BuildAutoFillHisMug),
                 (PourWater, () => throw new System.InvalidOperationException("PourWater is copied from InstantCoffee")),
                 (ReadHerWindow, BuildReadHerWindow),
+                (PlaceV60, BuildPlaceV60),
             };
 
             return builders.ToDictionary(
@@ -374,6 +376,16 @@ namespace Courtyard.Editor
             });
             // Day 1: spoon the coffee in while the kettle heats.
             Patch(Folder + InstantCoffee + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "startsWithPrevious", true));
+        }
+
+        /// <summary>Pour-over days: carry the V60 from the sill onto the cup (unscored).</summary>
+        private static GameObject BuildPlaceV60()
+        {
+            var root = new GameObject(PlaceV60);
+            var step = root.AddComponent<PlaceV60Step>();
+            Wire(step, "hintText", "Put the V60 on the cup.");
+            Wire(step, "scored", false);
+            return root;
         }
 
         /// <summary>Day 20: her note on the window — tap it to read (unscored).</summary>

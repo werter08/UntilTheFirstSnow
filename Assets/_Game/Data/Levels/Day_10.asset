@@ -44,6 +44,7 @@ MonoBehaviour:
     fridgeNotes: 1
   steps:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
+  - {fileID: 6597141609809672998, guid: 30fd308ca45df4ce59694189acc7d57a, type: 3}
   - {fileID: 104158219434757867, guid: dccb5e1aee3234a4484f894ced79da0d, type: 3}
   - {fileID: 6738547792549017874, guid: 61b9f335f46924425b3f7ffe28e6e34a, type: 3}
   - {fileID: 5262487450328234932, guid: 8b01d6c73ddfa4e92b1fd201f6a01f3c, type: 3}
@@ -62,7 +63,7 @@ MonoBehaviour:
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
-    stepIndex: 3
+    stepIndex: 4
     condition: 0
     style: 2
     speaker: Mira
@@ -71,7 +72,7 @@ MonoBehaviour:
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
-    stepIndex: 4
+    stepIndex: 5
     condition: 0
     style: 2
     speaker: Mira

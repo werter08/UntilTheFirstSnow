@@ -55,6 +55,7 @@ namespace Courtyard.Core
         [SerializeField] private RecipeCard recipeCard;
         [Tooltip("The shared \"stop in the green\" gauge the minigames use.")]
         [SerializeField] private MinigameGauge gauge;
+        [SerializeField] private MinigameGauge gauge2;
 
 
         private WarmthGroup _warmth;
@@ -150,7 +151,7 @@ namespace Courtyard.Core
                     _activeStep = StartStep(i);
                     _activeStep.Completed += q => quality = q;
                     counter.SetAllInteractable(false);
-                    _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader, gauge));
+                    _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader, gauge, gauge2));
                     StartCoroutine(FadeStepParts(_activeStep.transform, 0f, 1f)); // its own tools fade in
                 }
 
@@ -158,7 +159,7 @@ namespace Courtyard.Core
                 if (i + 1 < _level.Steps.Count && _level.Steps[i + 1].StartsWithPrevious)
                 {
                     early = StartStep(i + 1);
-                    early.Begin(new MinigameContext(_level, i + 1, worldCamera, kitchen, counter, fx, hands, fader, gauge));
+                    early.Begin(new MinigameContext(_level, i + 1, worldCamera, kitchen, counter, fx, hands, fader, gauge, gauge2));
                     StartCoroutine(FadeStepParts(early.transform, 0f, 1f));
                 }
 
@@ -169,6 +170,7 @@ namespace Courtyard.Core
                 // Let the result land (the last pour, the meter, the punch) before the step's tools fade away.
                 HideHint();
                 if (gauge != null) gauge.Hide();
+                if (gauge2 != null) gauge2.Hide();
                 if (early == null) counter.SetAllInteractable(false);
                 var step = _activeStep;
                 _activeStep = null;
@@ -277,6 +279,7 @@ namespace Courtyard.Core
             yield return fader.FadeOut(Color.black, doorFadeSeconds);
             AudioManager.ResumeTrack(SfxId.Footsteps);
             kitchen.ShowDoor(worldCamera, true);
+            kitchen.SetHerDoorCupFull(true); // the cup goes back to her full
             yield return new WaitForSeconds(0.6f);
             AudioManager.StopLoop(SfxId.Footsteps, 0.3f);
             yield return fader.FadeIn(doorFadeSeconds);

@@ -67,6 +67,7 @@ namespace Courtyard.Editor
             (P.AutoFillHisMug, "", false),
             (P.PourWater, "One spoon of coffee into her cup. Then pour water to the line.", false), // her coffee
             (P.ReadHerWindow, "Something's on her window. Tap it.", true),
+            (P.PlaceV60, "Put the V60 on the cup.", false),
         };
 
         // ---------------------------------------------------------------- the recipe card (grows over the autumn)
@@ -104,7 +105,7 @@ namespace Courtyard.Editor
                 Beats = new[]
                 {
                     Start(thought, "Real beans. No idea why I bought them."),
-                    After(1, thought, "Grind. Pour slowly. Breathe."),
+                    After(2, thought, "Grind. Pour slowly. Breathe."), // after grinding (step 1 puts the V60 on)
                     End(thought, "She waved. I waved back with a mug. Smooth."),
                 },
             };
@@ -115,8 +116,8 @@ namespace Courtyard.Editor
                 Beats = new[]
                 {
                     Start(thought, "Sunday. Even the light looks softer."),
-                    After(3, dialogue, "Hi… I'm Mira, from across the yard. I ran out of coffee. Could I borrow some?", "Mira"),
-                    After(4, dialogue, "Something sweet, please. Cinnamon… and maybe honey?", "Mira"),
+                    After(4, dialogue, "Hi… I'm Mira, from across the yard. I ran out of coffee. Could I borrow some?", "Mira"),
+                    After(5, dialogue, "Something sweet, please. Cinnamon… and maybe honey?", "Mira"),
                     End(dialogue, "Wow. Best cup I've had all month.", "Mira", BeatCondition.GoodResult),
                     End(dialogue, "It's… nice. Thank you, really.", "Mira", BeatCondition.PoorResult),
                     End(thought, "I think I'm smiling. Strange feeling."),
@@ -131,7 +132,7 @@ namespace Courtyard.Editor
                 Beats = new[]
                 {
                     After(0, note, "Hold on. Coffee's coming."),
-                    After(6, thought, "Two cups tonight. Hers first."), // after his cup fills beside hers
+                    After(7, thought, "Two cups tonight. Hers first."), // after his cup fills beside hers
                     End(thought, "Funny. A few weeks ago I couldn't even keep myself warm."),
                 },
             };

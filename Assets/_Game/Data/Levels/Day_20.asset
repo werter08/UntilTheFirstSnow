@@ -46,6 +46,7 @@ MonoBehaviour:
   - {fileID: 1341194604355340700, guid: 882840575360146608a1e18f7a591c81, type: 3}
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
   - {fileID: 6987173642302428769, guid: dba18201d2f5e422891f48785c2142cd, type: 3}
+  - {fileID: 6597141609809672998, guid: 30fd308ca45df4ce59694189acc7d57a, type: 3}
   - {fileID: 104158219434757867, guid: dccb5e1aee3234a4484f894ced79da0d, type: 3}
   - {fileID: 6738547792549017874, guid: 61b9f335f46924425b3f7ffe28e6e34a, type: 3}
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
@@ -60,7 +61,7 @@ MonoBehaviour:
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
-    stepIndex: 6
+    stepIndex: 7
     condition: 0
     style: 0
     speaker: 

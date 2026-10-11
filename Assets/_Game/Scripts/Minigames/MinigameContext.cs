@@ -8,9 +8,10 @@ namespace Courtyard.Minigames
     public sealed class MinigameContext
     {
         public MinigameContext(LevelDefinition level, int stepIndex, Camera worldCamera, KitchenDirector kitchen, CounterStation counter, FeedbackFx fx, HandsView hands,
-            UI.ScreenFader fader = null, UI.MinigameGauge gauge = null)
+            UI.ScreenFader fader = null, UI.MinigameGauge gauge = null, UI.MinigameGauge secondGauge = null)
         {
             Gauge = gauge;
+            SecondGauge = secondGauge;
             Fader = fader;
             Level = level;
             StepIndex = stepIndex;
@@ -34,5 +35,8 @@ namespace Courtyard.Minigames
 
         /// <summary>The shared "stop in the green" gauge (grind, pour flow, milk). May be null.</summary>
         public UI.MinigameGauge Gauge { get; }
+
+        /// <summary>A second gauge for steps that watch two things at once (pour-over: water and flow). May be null.</summary>
+        public UI.MinigameGauge SecondGauge { get; }
     }
 }

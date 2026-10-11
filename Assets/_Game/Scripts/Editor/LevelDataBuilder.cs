@@ -300,11 +300,11 @@ namespace Courtyard.Editor
                 Palette = Palette(new Color(0.7f, 0.68f, 0.75f), 0.9f, new Color(1f, 0.85f, 0.65f), 0.6f),
                 Props = new KitchenProps { beans = true, grinder = true, brewMug = MugStyle.His, plantStage = PlantStage.Wilted },
                 Rack = new[] { MugStyle.Chipped },
-                Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.WaveBack },
+                Steps = new[] { P.KettleBoil, P.PlaceV60, P.GrindBeans, P.PourOver, P.WaveBack },
                 Beats = new[]
                 {
                     Start(thought, "Bought real beans today. No idea why."),
-                    After(1, thought, "Grind. Pour slowly. Breathe."),
+                    After(2, thought, "Grind. Pour slowly. Breathe."),
                     End(thought, "She waved. I waved back with my mug. Smooth."),
                 },
                 Drain = 0f,
@@ -322,12 +322,12 @@ namespace Courtyard.Editor
                 // MiraVisit (knock at the door) sits between PourOver and SteamMilk so her lines follow the brief's order.
                 // At the door (MiraVisit) he takes her cup (TakeHerCup); milk and spices then go into her cup.
                 // Her cup: boil, pour the water, steam the milk, the spices — then it's handed to her at the door.
-                Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.MiraVisit, P.TakeHerCup, P.KettleBoil, P.PourWater, P.SteamMilk, P.GuessHerDrink },
+                Steps = new[] { P.KettleBoil, P.PlaceV60, P.GrindBeans, P.PourOver, P.MiraVisit, P.TakeHerCup, P.KettleBoil, P.PourWater, P.SteamMilk, P.GuessHerDrink },
                 Beats = new[]
                 {
                     Start(thought, "Sunday. The light is different today."),
-                    After(3, dialogue, "Hi… I'm Mira, from across. I ran out of coffee. Could I borrow some?", mira),
-                    After(4, dialogue, "Something sweet… with cinnamon? Surprise me.", mira),
+                    After(4, dialogue, "Hi… I'm Mira, from across. I ran out of coffee. Could I borrow some?", mira),
+                    After(5, dialogue, "Something sweet… with cinnamon? Surprise me.", mira),
                     End(dialogue, "Okay. That's the best cup I've had this month.", mira, BeatCondition.GoodResult),
                     End(dialogue, "It's… nice. Thank you.", mira, BeatCondition.PoorResult),
                     End(thought, "I think I'm smiling. Weird feeling."),
@@ -345,12 +345,12 @@ namespace Courtyard.Editor
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, brewMug = MugStyle.Yellow, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers }, // ChooseMug picks hers from here
                 // Her mug first (to the brewing spot), her drink, then his cup fills by itself beside it.
-                Steps = new[] { P.ReadHerWindow, P.KettleBoil, P.ChooseMug, P.GrindBeans, P.PourOver, P.SteamMilk, P.AutoFillHisMug },
+                Steps = new[] { P.ReadHerWindow, P.KettleBoil, P.ChooseMug, P.PlaceV60, P.GrindBeans, P.PourOver, P.SteamMilk, P.AutoFillHisMug },
                 Beats = new[]
                 {
                     // Her "heating broke" note is read from her window (ReadHerWindow); final copy lives in GameTexts.
                     After(0, note, "Hold on."),
-                    After(6, thought, "Two cups tonight. Hers first."),
+                    After(7, thought, "Two cups tonight. Hers first."),
                     End(thought, "Funny. A month ago I couldn't keep myself warm."),
                 },
                 TwoMeters = true,

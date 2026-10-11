@@ -263,6 +263,13 @@ namespace Courtyard.Kitchen
 
         public PointerTarget HerCupAtDoor => doorView != null ? herCupAtDoor : null;
 
+        /// <summary>Her cup at the door: empty when she brings it, full of her drink when it goes back to her.</summary>
+        public void SetHerDoorCupFull(bool full)
+        {
+            var drink = herCupAtDoor != null ? herCupAtDoor.transform.Find("Drink") : null;
+            if (drink != null) drink.gameObject.SetActive(full);
+        }
+
         /// <summary>Moves the camera to the front door (Mira with her cup) and back (call while the screen is black).</summary>
         public void ShowDoor(Camera cam, bool atDoor)
         {

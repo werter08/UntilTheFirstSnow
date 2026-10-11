@@ -34,16 +34,17 @@ _Assets/_Game/Data/Levels/Day_05.asset_
 **Steps and their hints**
 
 0. KettleBoil — Turn the kettle on. Turn it off when it boils.
-1. GrindBeans — Turn the handle in circles. Stop in the green.
-2. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
-3. WaveBack — She's waving. Click your mug to wave back.
+1. PlaceV60 — Put the V60 on the cup.
+2. GrindBeans — Turn the handle in circles. Stop in the green.
+3. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
+4. WaveBack — She's waving. Click your mug to wave back.
 
 **Story**
 
 | When | Style | Who | Text |
 |---|---|---|---|
 | LevelStart | Thought |  | Real beans. No idea why I bought them. |
-| AfterStep(1) | Thought |  | Grind. Pour slowly. Breathe. |
+| AfterStep(2) | Thought |  | Grind. Pour slowly. Breathe. |
 | LevelEnd | Thought |  | She waved. I waved back with a mug. Smooth. |
 
 ## Day 10 — 09:15
@@ -57,22 +58,23 @@ _Assets/_Game/Data/Levels/Day_10.asset_
 **Steps and their hints**
 
 0. KettleBoil — Turn the kettle on. Turn it off when it boils.
-1. GrindBeans — Turn the handle in circles. Stop in the green.
-2. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
-3. MiraVisit — _(empty)_
-4. TakeHerCup — Take the jar from her.
-5. KettleBoil — Turn the kettle on. Turn it off when it boils.
-6. PourWater — One spoon of coffee into her cup. Then pour water to the line.
-7. SteamMilk — Hold to steam the milk. Let go in the green.
-8. GuessHerDrink — Add two spices to her cup, one at a time. Then click the cup.
+1. PlaceV60 — Put the V60 on the cup.
+2. GrindBeans — Turn the handle in circles. Stop in the green.
+3. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
+4. MiraVisit — _(empty)_
+5. TakeHerCup — Take the jar from her.
+6. KettleBoil — Turn the kettle on. Turn it off when it boils.
+7. PourWater — One spoon of coffee into her cup. Then pour water to the line.
+8. SteamMilk — Hold to steam the milk. Let go in the green.
+9. GuessHerDrink — Add two spices to her cup, one at a time. Then click the cup.
 
 **Story**
 
 | When | Style | Who | Text |
 |---|---|---|---|
 | LevelStart | Thought |  | Sunday. Even the light looks softer. |
-| AfterStep(3) | Dialogue | Mira | Hi… I'm Mira, from across the yard. I ran out of coffee. Could I borrow some? |
-| AfterStep(4) | Dialogue | Mira | Something sweet, please. Cinnamon… and maybe honey? |
+| AfterStep(4) | Dialogue | Mira | Hi… I'm Mira, from across the yard. I ran out of coffee. Could I borrow some? |
+| AfterStep(5) | Dialogue | Mira | Something sweet, please. Cinnamon… and maybe honey? |
 | LevelEnd · GoodResult | Dialogue | Mira | Wow. Best cup I've had all month. |
 | LevelEnd · PoorResult | Dialogue | Mira | It's… nice. Thank you, really. |
 | LevelEnd | Thought |  | I think I'm smiling. Strange feeling. |
@@ -90,17 +92,18 @@ _Assets/_Game/Data/Levels/Day_20.asset_
 0. ReadHerWindow — Something's on her window. Tap it.
 1. KettleBoil — Turn the kettle on. Turn it off when it boils.
 2. ChooseMug — First, her mug. Which one is hers?
-3. GrindBeans — Turn the handle in circles. Stop in the green.
-4. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
-5. SteamMilk — Hold to steam the milk. Let go in the green.
-6. AutoFillHisMug — _(empty)_
+3. PlaceV60 — Put the V60 on the cup.
+4. GrindBeans — Turn the handle in circles. Stop in the green.
+5. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
+6. SteamMilk — Hold to steam the milk. Let go in the green.
+7. AutoFillHisMug — _(empty)_
 
 **Story**
 
 | When | Style | Who | Text |
 |---|---|---|---|
 | AfterStep(0) | Note |  | Hold on. Coffee's coming. |
-| AfterStep(6) | Thought |  | Two cups tonight. Hers first. |
+| AfterStep(7) | Thought |  | Two cups tonight. Hers first. |
 | LevelEnd | Thought |  | Funny. A few weeks ago I couldn't even keep myself warm. |
 
 ## Day 30 — 17:00
@@ -174,9 +177,9 @@ Title screen prompt, HUD labels, hints set on components, the ending's credits, 
 - `Caption`: You
 - `Caption`: Mira
 - `ContinueHint`: click to continue
-- `Label`: DAY
 - `Label`: Hints: on
 - `CloseHint`: click to close
+- `Label`: DAY
 - `HintsToggle.onText`: Hints: on
 - `HintsToggle.offText`: Hints: off
 - `LevelRunner.newNoteHint`: New note on the fridge. Click it to read.
