@@ -81,10 +81,25 @@ namespace Courtyard.Tests
             yield return Wait(0.1f);
         }
 
+        /// <summary>Pick the grinder up and let go of it over the V60 (it settles there, held by a hand).</summary>
+        protected IEnumerator CarryGrinderToCup(GrindBeansStep step)
+        {
+            for (var attempt = 0; attempt < 3 && !step.OverCup; attempt++)
+            {
+                var body = Counter.GrinderRenderer.bounds;
+                var top = Counter.DripperTop;
+                yield return Drag(body.center, new Vector3(top.x, top.y + body.extents.y + 0.5f, 0f));
+                yield return Wait(0.8f);
+            }
+
+            Assert.That(step.OverCup, Is.True, "The grinder should settle over the V60.");
+        }
+
         protected IEnumerator PlayGrindBeans()
         {
             yield return AdvanceTo<GrindBeansStep>();
             var step = Object.FindAnyObjectByType<GrindBeansStep>();
+            yield return CarryGrinderToCup(step);
             float Grind() => GetField<float>(step, "_grind");
             var axle = Counter.GrinderArm.position;
             var knob = Counter.GrinderHandle.transform.position;

@@ -48,6 +48,9 @@ namespace Courtyard.Minigames
         /// <summary>A step whose result is always the same (no input), e.g. his auto-filled cup; null = played.</summary>
         public virtual float? FixedQuality => null;
 
+        /// <summary>Where this step's result shows ("Perfect!", the warm puff): its own tool. Null = the cup.</summary>
+        public Renderer ResultAt { get; protected set; }
+
         /// <summary>Why the last result was poor (empty when it went fine).</summary>
         public string Mistake { get; private set; } = string.Empty;
         public bool IsComplete { get; private set; }

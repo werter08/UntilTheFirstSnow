@@ -34,8 +34,8 @@ MonoBehaviour:
     cinnamon: 1
     herMug: 1
     toppings: 1
-    brewMug: 4
-    rackMugs: 00000000010000000200000003000000
+    brewMug: 2
+    rackMugs: 00000000010000000300000004000000
     mugsOnSill: 1
     scarf: 1
     plantStage: 3

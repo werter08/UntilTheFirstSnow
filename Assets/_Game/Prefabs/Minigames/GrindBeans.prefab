@@ -62,3 +62,6 @@ MonoBehaviour:
   speedSmoothing: 10
   tooFineText: "Ground too fine \u2014 stop in the green."
   tooCoarseText: "Too coarse \u2014 grind a little more."
+  settleReach: 1.6
+  settleSeconds: 0.25
+  returnSeconds: 0.4

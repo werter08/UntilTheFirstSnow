@@ -41,6 +41,36 @@ namespace Courtyard.Kitchen
 
         public void Detach() => _attached = null;
 
+        /// <summary>
+        /// A second hand that holds something still (e.g. the grinder over the cup while the player's hand turns the
+        /// crank): a copy of the hand in <paramref name="pose"/>, parented to <paramref name="holder"/> at
+        /// <paramref name="worldPosition"/>. Destroy the returned object to let go.
+        /// </summary>
+        public GameObject HoldStill(Transform holder, Vector3 worldPosition, HandPose pose)
+        {
+            var copy = Instantiate(gameObject, holder);
+            copy.name = "HoldingHand";
+            Destroy(copy.GetComponent<HandsView>());
+            copy.transform.position = new Vector3(worldPosition.x, worldPosition.y, transform.position.z);
+            copy.transform.rotation = Quaternion.identity;
+            var copiedHand = copy.GetComponentsInChildren<SpriteRenderer>(true);
+            foreach (var entry in poses)
+            {
+                if (entry.pose != pose) continue;
+                var sprite = entry.For(_sweater);
+                foreach (var r in copiedHand)
+                    if (r.name == hand.name && sprite != null) r.sprite = sprite;
+            }
+
+            foreach (var r in copiedHand)
+            {
+                var c = r.color;
+                r.color = new Color(c.r, c.g, c.b, 1f);
+            }
+
+            return copy;
+        }
+
         private void OnEnable()
         {
             PointerTarget.AnyPressed += OnGrab;

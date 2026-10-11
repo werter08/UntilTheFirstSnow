@@ -178,6 +178,7 @@ Title screen prompt, HUD labels, hints set on components, the ending's credits, 
 - `Caption`: Mira
 - `ContinueHint`: click to continue
 - `Label`: Hints: on
+- `Label`: Restart day
 - `CloseHint`: click to close
 - `Label`: DAY
 - `HintsToggle.onText`: Hints: on

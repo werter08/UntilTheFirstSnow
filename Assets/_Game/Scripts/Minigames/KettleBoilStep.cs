@@ -42,7 +42,8 @@ namespace Courtyard.Minigames
             _counter.KettleSwitch.Pressed += OnSwitchClicked; // on press: the click sounds the moment the finger goes down
             _counter.KettleSwitch.Interactable = true;
             _counter.KettleView.SetHeating(false);
-            NudgeTarget = _counter.SwitchLight.transform;
+            NudgeTarget = _counter.Kettle; // the whole kettle wiggles: switch it on
+            ResultAt = _counter.KettleBody;
         }
 
         private void OnDestroy()
@@ -76,6 +77,7 @@ namespace Courtyard.Minigames
             {
                 case State.Idle:
                     _state = State.Heating;
+                    NudgeTarget = null; // now the player waits for the boil: nothing to nudge (and the switch stays still)
                     _counter.KettleView.SetHeating(true);
                     AudioManager.Play(SfxId.KettleSwitch);
                     AudioManager.StartLoop(SfxId.KettleBoil, 0.3f);

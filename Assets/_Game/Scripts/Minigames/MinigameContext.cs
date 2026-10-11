@@ -8,10 +8,11 @@ namespace Courtyard.Minigames
     public sealed class MinigameContext
     {
         public MinigameContext(LevelDefinition level, int stepIndex, Camera worldCamera, KitchenDirector kitchen, CounterStation counter, FeedbackFx fx, HandsView hands,
-            UI.ScreenFader fader = null, UI.MinigameGauge gauge = null, UI.MinigameGauge secondGauge = null)
+            UI.ScreenFader fader = null, UI.MinigameGauge gauge = null, UI.MinigameGauge secondGauge = null, UI.HintView hint = null)
         {
             Gauge = gauge;
             SecondGauge = secondGauge;
+            Hint = hint;
             Fader = fader;
             Level = level;
             StepIndex = stepIndex;
@@ -38,5 +39,8 @@ namespace Courtyard.Minigames
 
         /// <summary>A second gauge for steps that watch two things at once (pour-over: water and flow). May be null.</summary>
         public UI.MinigameGauge SecondGauge { get; }
+
+        /// <summary>The hint line, for steps that tell the player what to do next (e.g. "click the cup"). May be null.</summary>
+        public UI.HintView Hint { get; }
     }
 }

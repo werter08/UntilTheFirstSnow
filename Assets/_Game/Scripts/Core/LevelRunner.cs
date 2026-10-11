@@ -151,7 +151,7 @@ namespace Courtyard.Core
                     _activeStep = StartStep(i);
                     _activeStep.Completed += q => quality = q;
                     counter.SetAllInteractable(false);
-                    _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader, gauge, gauge2));
+                    _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader, gauge, gauge2, hint));
                     StartCoroutine(FadeStepParts(_activeStep.transform, 0f, 1f)); // its own tools fade in
                 }
 
@@ -159,7 +159,7 @@ namespace Courtyard.Core
                 if (i + 1 < _level.Steps.Count && _level.Steps[i + 1].StartsWithPrevious)
                 {
                     early = StartStep(i + 1);
-                    early.Begin(new MinigameContext(_level, i + 1, worldCamera, kitchen, counter, fx, hands, fader, gauge, gauge2));
+                    early.Begin(new MinigameContext(_level, i + 1, worldCamera, kitchen, counter, fx, hands, fader, gauge, gauge2, hint));
                     StartCoroutine(FadeStepParts(early.transform, 0f, 1f));
                 }
 
@@ -174,6 +174,7 @@ namespace Courtyard.Core
                 if (early == null) counter.SetAllInteractable(false);
                 var step = _activeStep;
                 _activeStep = null;
+                var resultAt = step.ResultAt != null ? step.ResultAt : counter.MugBody; // the step's own tool
                 yield return new WaitForSeconds(stepHoldSeconds);
                 yield return FadeStepParts(step.transform, 1f, 0f);
                 Destroy(step.gameObject);
@@ -188,8 +189,9 @@ namespace Courtyard.Core
                     _warmth.Apply(_level.TargetFor(step), delta); // two-meter days: her drink warms her, his cup him
                     _chilledByDrink = false; // Depleted fires inside Apply; later drain-outs are plain cold
                     if (_failed) yield break;
-                    fx.Punch(counter.Mug.transform);
-                    if (delta >= 0f) fx.CelebrateQuality(quality, counter.Mug.transform.position + Vector3.up * 1.2f);
+                    fx.Punch(resultAt.transform);
+                    var above = new Vector3(resultAt.bounds.center.x, resultAt.bounds.max.y + 0.5f, 0f);
+                    if (delta >= 0f) fx.CelebrateQuality(quality, above); // "Perfect!" over the kettle, the grinder, the cup…
                     counter.SetSteam(quality);
 
                     // A bad drink isn't served: "It's bad, let's remake it", and it's made again from its first step
@@ -340,8 +342,18 @@ namespace Courtyard.Core
             AudioManager.StopLoop(SfxId.Footsteps, 0.4f); // the walk ends with the scene, not after it
         }
 
+        private Transform _lastNudged;
+
         private void UpdateNudge()
         {
+            // Whatever is needed now gives a little wiggle as its turn comes (the spoon, then the kettle, then the cup…).
+            var wanted = _activeStep != null ? _activeStep.NudgeTarget : null;
+            if (wanted != _lastNudged)
+            {
+                _lastNudged = wanted;
+                if (wanted != null) fx.Wiggle(wanted);
+            }
+
             var pressing = Pointer.current != null && Pointer.current.press.isPressed;
             if (_activeStep == null || pressing)
             {
@@ -360,6 +372,7 @@ namespace Courtyard.Core
 
             if (_activeStep.NudgeTarget == null) return;
             fx.Punch(_activeStep.NudgeTarget, 0.8f);
+            fx.Wiggle(_activeStep.NudgeTarget);
             _idle = nudgeAfterSeconds - nudgeRepeatSeconds;
         }
 

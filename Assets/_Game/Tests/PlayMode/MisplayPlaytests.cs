@@ -83,6 +83,7 @@ namespace Courtyard.Tests
             yield return PlayPlaceV60();
             yield return AdvanceTo<GrindBeansStep>();
             var step = Object.FindAnyObjectByType<GrindBeansStep>();
+            yield return CarryGrinderToCup(step);
             float Grind() => GetField<float>(step, "_grind");
             var axle = Counter.GrinderArm.position;
             var knob = Counter.GrinderHandle.transform.position;

@@ -569,8 +569,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 16a3627f3e39045a6becdd571939e237, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -601,9 +601,9 @@ MonoBehaviour:
   typingEveryCharacters: 2
   typingMinGapSeconds: 0.06
   fadeDuration: 0.25
-  defaultBackground: {r: 0.1, g: 0.1, b: 0.12, a: 0.88}
-  defaultText: {r: 0.95, g: 0.93, b: 0.88, a: 1}
-  noteBackground: {r: 0.96, g: 0.93, b: 0.82, a: 0.97}
-  noteText: {r: 0.2, g: 0.17, b: 0.14, a: 1}
-  phoneBackground: {r: 0.3, g: 0.45, b: 0.75, a: 0.95}
+  defaultBackground: {r: 1, g: 1, b: 1, a: 0.95}
+  defaultText: {r: 0.98, g: 0.96, b: 0.92, a: 1}
+  noteBackground: {r: 1, g: 0.9, b: 0.74, a: 0.97}
+  noteText: {r: 1, g: 0.98, b: 0.93, a: 1}
+  phoneBackground: {r: 0.78, g: 0.88, b: 1, a: 0.95}
   phoneText: {r: 1, g: 1, b: 1, a: 1}

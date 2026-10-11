@@ -49,6 +49,15 @@ namespace Courtyard.Story
         {
             if (beats == null || beats.Count == 0) yield break;
 
+            // The box fades in already dressed for the first line and empty — never showing the last line again.
+            body.text = string.Empty;
+            body.maxVisibleCharacters = 0;
+            continueHint.SetActive(false);
+            var first = beats[0];
+            speakerRoot.SetActive(first.Style == BeatStyle.Dialogue && !string.IsNullOrEmpty(first.Speaker));
+            speakerLabel.text = speakerRoot.activeSelf ? first.Speaker : string.Empty;
+            ApplyStyleColours(first.Style);
+
             box.blocksRaycasts = true;
             yield return Tweens.Run(fadeDuration, t => box.alpha = t);
 

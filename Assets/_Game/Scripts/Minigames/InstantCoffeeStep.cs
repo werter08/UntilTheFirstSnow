@@ -50,6 +50,13 @@ namespace Courtyard.Minigames
         [SerializeField] private Color waterColor = new(0.75f, 0.85f, 0.95f);
         [SerializeField] private Color coffeeColor = new(0.35f, 0.2f, 0.1f);
 
+        [Header("Spoon counter beside the cup")]
+        [Tooltip("{0} = spoons in, {1} = spoons needed.")]
+        [SerializeField] private string spoonCountText = "Coffee: {0} / {1} spoons";
+        [SerializeField] private Color countColour = new(0.25f, 0.17f, 0.13f);
+        [SerializeField] private Color countDoneColour = new(0.25f, 0.5f, 0.2f);
+        [SerializeField] private Color countOverColour = new(0.72f, 0.24f, 0.14f);
+
         [Header("Why it went wrong")]
         [SerializeField] private string tooMuchCoffeeText = "Too much coffee — just two spoons.";
         [SerializeField] private string tooLittleCoffeeText = "Not enough coffee — two spoons.";
@@ -69,6 +76,7 @@ namespace Courtyard.Minigames
         private bool _streamOn;
         private float _splashTimer;
         private bool _kettleReady = true;
+        private TMPro.TMP_Text _spoonCount;
         private MinigameContext _ctx;
 
         public override void Begin(MinigameContext ctx)
@@ -100,7 +108,14 @@ namespace Courtyard.Minigames
             _counter.KettleTarget.Released += OnKettleReleased;
             _counter.SetMugDrink(useSpoon ? MugDrink.Instant : MugDrink.Black, coffeeColor);
             ShowLoad(false);
-            if (useSpoon) _counter.ShowSpoons(0);
+            if (useSpoon)
+            {
+                _counter.ShowSpoons(0);
+                // How many spoons: a counter beside the cup that ticks up (green when right, red when too many).
+                var mug = _counter.MugBody.bounds;
+                _spoonCount = _fx.Label(string.Empty, new Vector3(mug.max.x + 1.1f, mug.max.y + 0.25f, 0f), countColour);
+                UpdateSpoonCount();
+            }
             NudgeTarget = useSpoon ? spoon.transform : _counter.KettleTarget.transform;
 
             // Started with the kettle step: spoon now, pour once the water has boiled (OnPreviousDone).
@@ -142,6 +157,7 @@ namespace Courtyard.Minigames
             _counter.HideFillLine();
             _counter.KettleView.SetPouring(false);
             if (_ctx?.Gauge != null) _ctx.Gauge.Hide();
+            if (_spoonCount != null) Destroy(_spoonCount.gameObject);
             _counter.KettleStream.enabled = false;
             _counter.Kettle.position = _counter.KettleRest;
             AudioManager.StopTrack(SfxId.Pour);
@@ -176,6 +192,8 @@ namespace Courtyard.Minigames
                 ShowLoad(false);
                 _spoons++;
                 _counter.ShowSpoons(_spoons);
+                UpdateSpoonCount();
+                if (_spoonCount != null) _fx.Punch(_spoonCount.transform, 0.6f);
                 AudioManager.Play(SfxId.SpoonTink);
                 _fx.Punch(_counter.Mug.transform);
                 _fx.Burst(_counter.MugTop, coffeeColor, 8, 0.9f, 0.06f);
@@ -186,6 +204,13 @@ namespace Courtyard.Minigames
 
             var from = spoon.transform.position;
             _spoonReturn = StartCoroutine(Tweens.Run(spoonReturnSeconds, t => spoon.transform.position = Vector3.Lerp(from, _spoonRest, t)));
+        }
+
+        private void UpdateSpoonCount()
+        {
+            if (_spoonCount == null) return;
+            _spoonCount.text = string.Format(spoonCountText, _spoons, targetSpoons);
+            _spoonCount.color = _spoons == targetSpoons ? countDoneColour : _spoons > targetSpoons ? countOverColour : countColour;
         }
 
         /// <summary>Coffee on the spoon: the drawn full spoon when there is one, otherwise the Load overlay.</summary>
@@ -239,7 +264,8 @@ namespace Courtyard.Minigames
                 _fx.Burst(_counter.MugTop, waterColor, 2, 0.8f, 0.05f, 1.2f);
             }
 
-            if (_counter.MugLevel >= 1f) Finish(); // overflowing
+            // At the line (the middle of the green): that's the cup — it's accepted right away.
+            if (_counter.MugLevel >= targetFill || _counter.MugLevel >= 1f) Finish();
         }
 
         private void SetStream(bool on)

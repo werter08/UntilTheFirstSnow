@@ -131,6 +131,15 @@ namespace Courtyard.Editor
                     list.arraySize = spec.Steps.Length;
                     for (var i = 0; i < spec.Steps.Length; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = steps[spec.Steps[i]];
                     so.FindProperty("serveAtDoor").boolValue = spec.Day == 10;
+                    // Her drinks are made in her own mug (the maple leaf); the rack never shows a mug that's in use.
+                    if (spec.Day == 30)
+                    {
+                        var props = so.FindProperty("props");
+                        props.FindPropertyRelative("brewMug").enumValueIndex = (int)spec.Props.brewMug;
+                        var rack = props.FindPropertyRelative("rackMugs");
+                        rack.arraySize = spec.Rack.Length;
+                        for (var r = 0; r < spec.Rack.Length; r++) rack.GetArrayElementAtIndex(r).enumValueIndex = (int)spec.Rack[r];
+                    }
                 });
             }
 
@@ -364,8 +373,8 @@ namespace Courtyard.Editor
                 Day = 30, Clock = "17:00", Time = TimeOfDay.Evening, Weather = Weather.Snow, Tree = TreeStage.BareSnow,
                 Window = MiraWindowState.Dark, // she is in his kitchen
                 Palette = Palette(new Color(1f, 0.85f, 0.7f), 0.95f, new Color(1f, 0.72f, 0.42f), 1.1f),
-                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Green, mugsOnSill = true, herMug = true, scarf = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
-                Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers, MugStyle.Yellow },
+                Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Hers, mugsOnSill = true, herMug = true, scarf = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
+                Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Yellow, MugStyle.Green }, // hers is in use: her drink
                 Steps = new[] { P.KettleBoil, P.PourWater, P.SteamMilk, P.HerDrinkFromMemory },
                 Beats = new[]
                 {

@@ -1180,6 +1180,20 @@ namespace Courtyard.Editor
         private static void ApplyV60Pickup(Transform kitchen)
         {
             var counter = kitchen.GetComponentInChildren<CounterStation>(true);
+
+            // The grinder is picked up by its body (GrindBeans: carry it over the V60).
+            var grinderBody = Find(Find(kitchen, "Counter Tools"), "Grinder", false)?.Find("Body");
+            var bodyRenderer = grinderBody != null ? grinderBody.GetComponent<SpriteRenderer>() : null;
+            if (counter != null && bodyRenderer != null && bodyRenderer.sprite != null)
+            {
+                var bodyCollider = GetOrAdd<BoxCollider2D>(grinderBody);
+                bodyCollider.size = bodyRenderer.sprite.bounds.size * 0.85f; // not the crank on top
+                bodyCollider.offset = bodyRenderer.sprite.bounds.center + Vector3.down * bodyRenderer.sprite.bounds.extents.y * 0.12f;
+                var grab = GetOrAdd<DragTarget>(grinderBody);
+                WireEnum(grab, "handPose", HandPose.Grip);
+                Wire(counter, "grinderGrab", grab);
+            }
+
             var v60 = Find(kitchen, "V60", false);
             var renderer = v60 != null ? v60.GetComponent<SpriteRenderer>() : null;
             var sill = Find(kitchen, "WindowSill", false)?.GetComponent<SpriteRenderer>();
@@ -1813,9 +1827,24 @@ namespace Courtyard.Editor
             button.targetGraphic = image;
             var toggle = rect.gameObject.AddComponent<UI.HintsToggle>();
             Wire(toggle, "label", label);
+            // "Restart day" beside it.
+            var oldRestart = canvas.Find("RestartDay");
+            if (oldRestart != null) Object.DestroyImmediate(oldRestart.gameObject);
+            var restart = UiObject("RestartDay", canvas);
+            Place(restart, Vector2.one, Vector2.one, Vector2.one, new Vector2(-232f, -24f), new Vector2(210f, 52f));
+            var restartImage = Img(restart, new Color(0.15f, 0.11f, 0.09f, 0.45f), true);
+            var restartLabel = Label(restart, "Label", "Restart day", 28f, TMPro.TextAlignmentOptions.Center, new Color(1f, 0.96f, 0.88f));
+            if (font != null) restartLabel.font = font;
+            restart.gameObject.AddComponent<UnityEngine.UI.Button>().targetGraphic = restartImage;
+            restart.gameObject.AddComponent<UI.RestartDayButton>();
+
             // Below the note card and the screen fade.
             var card = canvas.GetComponentInChildren<UI.NoteCard>(true);
-            if (card != null) rect.SetSiblingIndex(card.transform.GetSiblingIndex());
+            if (card != null)
+            {
+                rect.SetSiblingIndex(card.transform.GetSiblingIndex());
+                restart.SetSiblingIndex(card.transform.GetSiblingIndex());
+            }
         }
 
         /// <summary>A silhouette drop shadow behind <paramref name="casterName"/> (child: it swings and swaps with it).</summary>

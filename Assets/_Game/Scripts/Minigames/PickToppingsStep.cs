@@ -29,7 +29,11 @@ namespace Courtyard.Minigames
         private readonly List<(ToppingJar jar, System.Action<Vector2> start, System.Action<Vector2> drag, System.Action<Vector2> end)> _subscriptions = new();
         private readonly Dictionary<ToppingJar, Vector3> _rest = new();
         private CounterStation _counter;
+        private UI.HintView _hint;
         private FeedbackFx _fx;
+        [Tooltip("Once the spices are in: what to do next.")]
+        [SerializeField] private string serveHintText = "Done? Click the cup to serve it.";
+
         [Header("Why it went wrong ({0} = the spice)")]
         [SerializeField] private string tooMuchOneText = "Too much {0} — one portion each.";
         [SerializeField] private string tooManyText = "Too many spices — just two.";
@@ -48,6 +52,7 @@ namespace Courtyard.Minigames
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
+            _hint = ctx.Hint;
             _fx = ctx.Fx;
             foreach (var jar in _counter.ToppingJars)
             {
@@ -141,6 +146,8 @@ namespace Courtyard.Minigames
 
             _counter.Mug.Interactable = TotalPortions > 0;
             NudgeTarget = TotalPortions == picksRequired ? _counter.Mug.transform : null; // never hint the answer
+            // Two spices in: say it plainly — the cup is clicked to serve (and it wiggles).
+            if (TotalPortions == picksRequired && _hint != null) _hint.Show(serveHintText);
         }
 
         private IEnumerator ReturnJar(ToppingJar jar)

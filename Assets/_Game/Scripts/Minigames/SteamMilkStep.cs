@@ -47,6 +47,7 @@ namespace Courtyard.Minigames
             _counter.MilkJug.Released += OnReleased;
             _counter.MilkJug.Interactable = true;
             NudgeTarget = _counter.MilkJug.transform;
+            ResultAt = _counter.MilkJugBody;
 
             _gauge = ctx.Gauge;
             var centre = Normalized((bandMin + bandMax) * 0.5f);

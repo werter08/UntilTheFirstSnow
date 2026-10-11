@@ -194,6 +194,48 @@ namespace Courtyard.Kitchen
             }
         }
 
+        private readonly Dictionary<Transform, Coroutine> _wiggles = new();
+
+        /// <summary>
+        /// "Use me": a quick side-to-side wiggle. Stops on its own if the game turns the object meanwhile (the player
+        /// picked it up), so it never fights a step's own movement.
+        /// </summary>
+        public void Wiggle(Transform target, float degrees = 7f, float seconds = 0.55f)
+        {
+            if (target == null || !target.gameObject.activeInHierarchy) return;
+            if (_wiggles.TryGetValue(target, out var running) && running != null) return; // already wiggling
+            _wiggles[target] = StartCoroutine(WiggleRoutine(target, degrees, seconds));
+        }
+
+        private IEnumerator WiggleRoutine(Transform target, float degrees, float seconds)
+        {
+            var rest = target.localRotation;
+            var last = rest;
+            for (var elapsed = 0f; elapsed < seconds && target != null; elapsed += Time.deltaTime)
+            {
+                if (target.localRotation != last) break; // someone else is turning it now
+                var k = elapsed / seconds;
+                last = rest * Quaternion.Euler(0f, 0f, Mathf.Sin(k * Mathf.PI * 6f) * degrees * (1f - k));
+                target.localRotation = last;
+                yield return null;
+            }
+
+            if (target != null && target.localRotation == last) target.localRotation = rest;
+            _wiggles.Remove(target);
+        }
+
+        /// <summary>A small text that stays above something until removed (e.g. "1 / 2 spoons").</summary>
+        public TMP_Text Label(string text, Vector3 worldPosition, Color colour, float scale = 0.55f)
+        {
+            var label = Instantiate(popupTemplate, popupTemplate.transform.parent);
+            label.gameObject.SetActive(true);
+            label.text = text;
+            label.color = colour;
+            label.fontSize *= scale;
+            label.transform.position = new Vector3(worldPosition.x, worldPosition.y, popupTemplate.transform.position.z);
+            return label;
+        }
+
         /// <summary>What went wrong, where it happened: a line that lingers above the tool, a grey puff and a wobble.</summary>
         public void Explain(string text, Vector3 worldPosition, Transform target = null)
         {

@@ -5,8 +5,9 @@ using UnityEngine;
 namespace Courtyard.Minigames
 {
     /// <summary>
-    /// Drag the counter grinder's handle in circles to fill the grind meter; let go inside the "medium" zone.
-    /// Quality depends on how close the final level is to the target. Owns only the meter.
+    /// Pick the grinder up and hold it over the V60 on the cup (it stays there, tilted, one hand holding it still); then
+    /// turn the handle in circles with the other hand to fill the grind meter and let go inside the "medium" zone — the
+    /// grounds fall straight into the V60. Then the grinder goes back. Quality = how close the grind is to the target.
     /// </summary>
     public sealed class GrindBeansStep : MinigameStep
     {
@@ -34,9 +35,20 @@ namespace Courtyard.Minigames
         [SerializeField] private string tooFineText = "Ground too fine — stop in the green.";
         [SerializeField] private string tooCoarseText = "Too coarse — grind a little more.";
 
+        [Header("Carrying it over the cup")]
+        [Tooltip("How far (world units) from the V60 the grinder may be let go and still settle over it.")]
+        [SerializeField, Min(0.2f)] private float settleReach = 1.6f;
+        [SerializeField, Min(0f)] private float settleSeconds = 0.25f;
+        [SerializeField, Min(0f)] private float returnSeconds = 0.4f;
+
         private CounterStation _counter;
         private FeedbackFx _fx;
         private UI.MinigameGauge _gauge;
+        private MinigameContext _ctx;
+        private GameObject _holdingHand;
+        private bool _overCup;
+        private Vector3 _grab;
+        private Coroutine _carry;
         private float _grind;
         private float _lastAngle;
         private float _dustDegrees;
@@ -45,20 +57,78 @@ namespace Courtyard.Minigames
 
         public override void Begin(MinigameContext ctx)
         {
+            _ctx = ctx;
             _counter = ctx.Counter;
             _fx = ctx.Fx;
             var handle = _counter.GrinderHandle;
             handle.DragStarted += OnDragStarted;
             handle.Dragged += OnDragged;
             handle.DragEnded += OnDragEnded;
-            handle.Interactable = true;
-            NudgeTarget = handle.transform;
+            ResultAt = _counter.GrinderRenderer;
             _counter.SetCoffeeBagOpen(true); // beans come out of the open bag
-
             _grind = 0f;
             _gauge = ctx.Gauge;
+
+            // First: carry the grinder over the V60 (no V60 on the cup, or no grab handle: grind where it stands).
+            var grab = _counter.GrinderGrab;
+            if (grab != null && _counter.DripperOnMug)
+            {
+                grab.DragStarted += OnGrinderGrabbed;
+                grab.Dragged += OnGrinderCarried;
+                grab.DragEnded += OnGrinderDropped;
+                grab.Interactable = true;
+                handle.Interactable = false;
+                NudgeTarget = grab.transform;
+            }
+            else StartCranking();
+        }
+
+        public bool OverCup => _overCup;
+
+        private void OnGrinderGrabbed(Vector2 world)
+        {
+            if (_overCup) return;
+            if (_carry != null) StopCoroutine(_carry);
+            _grab = _counter.Grinder.position - (Vector3)world;
+        }
+
+        private void OnGrinderCarried(Vector2 world)
+        {
+            if (_overCup) return;
+            var t = _counter.Grinder;
+            t.position = new Vector3(world.x + _grab.x, world.y + _grab.y, t.position.z);
+        }
+
+        private void OnGrinderDropped(Vector2 world)
+        {
+            if (_overCup) return;
+            var outlet = _counter.GrinderOutlet;
+            var top = _counter.DripperTop;
+            var near = Mathf.Abs(outlet.x - top.x) <= settleReach && outlet.y >= top.y - 0.6f;
+            _carry = StartCoroutine(near ? SettleOverCup() : _counter.ReturnGrinder(returnSeconds));
+        }
+
+        /// <summary>Over the V60, tilted; a hand holds it still while the other turns the crank.</summary>
+        private System.Collections.IEnumerator SettleOverCup()
+        {
+            _overCup = true;
+            _counter.GrinderGrab.Interactable = false;
+            yield return _counter.HoldGrinderOverCup(settleSeconds);
+            AudioManager.Play(SfxId.PutDown);
+            var body = _counter.GrinderRenderer.bounds;
+            if (_ctx.Hands != null)
+                _holdingHand = _ctx.Hands.HoldStill(_counter.Grinder, new Vector3(body.min.x + 0.15f, body.center.y - 0.2f, 0f), Core.HandPose.Grip);
+            StartCranking();
+        }
+
+        private void StartCranking()
+        {
+            _overCup = true;
+            var handle = _counter.GrinderHandle;
+            handle.Interactable = true;
+            NudgeTarget = handle.transform;
             if (_gauge != null)
-                _gauge.Show(_counter.GrinderRenderer, ctx.WorldCamera, new Vector2(targetLevel - zoneHalfWidth, targetLevel + zoneHalfWidth),
+                _gauge.Show(_counter.GrinderRenderer, _ctx.WorldCamera, new Vector2(targetLevel - zoneHalfWidth, targetLevel + zoneHalfWidth),
                     RedAbove(targetLevel, qualityFalloff), gaugeIcon);
         }
 
@@ -69,6 +139,16 @@ namespace Courtyard.Minigames
             handle.DragStarted -= OnDragStarted;
             handle.Dragged -= OnDragged;
             handle.DragEnded -= OnDragEnded;
+            var grab = _counter.GrinderGrab;
+            if (grab != null)
+            {
+                grab.DragStarted -= OnGrinderGrabbed;
+                grab.Dragged -= OnGrinderCarried;
+                grab.DragEnded -= OnGrinderDropped;
+                grab.Interactable = false;
+            }
+
+            if (_holdingHand != null) Destroy(_holdingHand);
             AudioManager.StopLoop(SfxId.Grind, 0.1f);
             _counter.SetCoffeeBagOpen(false);
             if (_gauge != null) _gauge.Hide();
@@ -110,7 +190,7 @@ namespace Courtyard.Minigames
             var delta = Mathf.Abs(Mathf.DeltaAngle(_lastAngle, angle));
             _lastAngle = angle;
 
-            _counter.GrinderArm.localRotation = Quaternion.Euler(0f, 0f, angle);
+            _counter.GrinderArm.rotation = Quaternion.Euler(0f, 0f, angle); // world angle: the grinder itself may be tilted
             if (delta > 0.5f)
             {
                 var instant = Mathf.Clamp01(delta / Mathf.Max(Time.deltaTime, 0.0001f) / fullSpeedDegrees);
@@ -129,9 +209,7 @@ namespace Courtyard.Minigames
                 {
                     // The grounds go somewhere: in an arc from the grinder into the V60 on the cup.
                     var grounds = new Color(0.4f, 0.26f, 0.16f);
-                    var grinder = _counter.GrinderRenderer.bounds;
-                    var outlet = new Vector3(grinder.max.x - 0.15f, grinder.center.y - grinder.extents.y * 0.35f, 0f);
-                    if (_counter.DripperOnMug) _fx.Throw(outlet, _counter.DripperTop, grounds, 3);
+                    if (_counter.DripperOnMug) _fx.Throw(_counter.GrinderOutlet, _counter.DripperTop, grounds, 3, 0.3f);
                     else _fx.Burst(_counter.GrinderArm.position + Vector3.down * 1.9f, grounds, 3, 0.6f, 0.05f);
                     _fx.Punch(_counter.GrinderArm.parent, 0.08f);
                 }
@@ -152,6 +230,9 @@ namespace Courtyard.Minigames
 
         private void Finish()
         {
+            // Done: the grinder goes back to its place (on the counter's coroutine — this step is destroyed soon).
+            if (_holdingHand != null) Destroy(_holdingHand);
+            _counter.StartCoroutine(_counter.ReturnGrinder(returnSeconds));
             _counter.GrinderHandle.Interactable = false;
             _counter.SetDripperGrounds(true);
             AudioManager.StopLoop(SfxId.Grind, 0.1f);

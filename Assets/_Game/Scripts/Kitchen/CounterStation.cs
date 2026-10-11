@@ -105,6 +105,69 @@ namespace Courtyard.Kitchen
         public SpriteRenderer KettleStream => kettleStream;
         public KettleView KettleView => kettleView;
         public Transform GrinderArm => grinderArm;
+        public Transform Grinder => grinder.transform;
+
+        [Header("Grinder carried over the cup")]
+        [Tooltip("Pick the grinder up by its body (GrindBeans: carry it over the V60).")]
+        [SerializeField] private DragTarget grinderGrab;
+        [Tooltip("Tilt (degrees) of the grinder held over the cup.")]
+        [SerializeField] private float grinderTilt = -12f;
+        [Tooltip("Gap between the grinder's bottom and the V60's top while grinding over it.")]
+        [SerializeField] private float grinderGap = 0.35f;
+
+        private Vector3 _grinderRest;
+        private Quaternion _grinderRestRotation;
+
+        public DragTarget GrinderGrab => grinderGrab;
+
+        /// <summary>The grinder's bottom centre (world), where the grounds come out.</summary>
+        public Vector3 GrinderOutlet
+        {
+            get
+            {
+                var b = GrinderRenderer.bounds;
+                return new Vector3(b.center.x, b.min.y + 0.15f, 0f);
+            }
+        }
+
+        /// <summary>The grinder held over the V60, tilted a little, its bottom just above the V60's top.</summary>
+        public System.Collections.IEnumerator HoldGrinderOverCup(float seconds)
+        {
+            var t = grinder.transform;
+            var fromPos = t.position;
+            var fromRot = t.rotation;
+            // Where the root must be so that the (untilted) bottom centre sits just above the V60.
+            var rot = t.rotation;
+            t.rotation = _grinderRestRotation;
+            var bottomOffset = t.position - new Vector3(GrinderRenderer.bounds.center.x, GrinderRenderer.bounds.min.y, t.position.z);
+            t.rotation = rot;
+            var top = DripperTop;
+            var toPos = new Vector3(top.x, top.y + grinderGap, fromPos.z) + bottomOffset;
+            var toRot = _grinderRestRotation * Quaternion.Euler(0f, 0f, grinderTilt);
+            yield return Tweens.Run(seconds, k =>
+            {
+                t.position = Vector3.Lerp(fromPos, toPos, k);
+                t.rotation = Quaternion.Slerp(fromRot, toRot, k);
+            });
+        }
+
+        /// <summary>Back to its place on the counter.</summary>
+        public System.Collections.IEnumerator ReturnGrinder(float seconds)
+        {
+            var t = grinder.transform;
+            var fromPos = t.position;
+            var fromRot = t.rotation;
+            yield return Tweens.Run(seconds, k =>
+            {
+                t.position = Vector3.Lerp(fromPos, _grinderRest, k);
+                t.rotation = Quaternion.Slerp(fromRot, _grinderRestRotation, k);
+            });
+        }
+
+        public void ResetGrinder()
+        {
+            grinder.transform.SetPositionAndRotation(_grinderRest, _grinderRestRotation);
+        }
         public DragTarget GrinderHandle => grinderHandle;
 
         /// <summary>The grinder's drawing (its body), for placing things above it.</summary>
@@ -223,6 +286,8 @@ namespace Courtyard.Kitchen
         private void Awake()
         {
             _dripperRest = dripper.transform.localPosition; // as placed in the scene: on the cup
+            _grinderRest = grinder.transform.position;
+            _grinderRestRotation = grinder.transform.rotation;
             _kettleRest = kettle.position;
             if (frother != null) _frotherRest = frother.localPosition;
             if (milkFoamBlob != null) _foamBase = milkFoamBlob.localPosition;
@@ -311,6 +376,7 @@ namespace Courtyard.Kitchen
 
             if (restingSpoon != null) restingSpoon.gameObject.SetActive(later.Any(s => s is Minigames.InstantCoffeeStep));
             SetCoffeeBagOpen(false);
+            ResetGrinder();
             kettle.position = _kettleRest;
             kettleStream.enabled = false;
             kettleView.SetPouring(false);
@@ -663,6 +729,7 @@ namespace Courtyard.Kitchen
             mug.Interactable = value;
             milkJug.Interactable = value;
             if (dripperDrag != null) dripperDrag.Interactable = value;
+            if (grinderGrab != null) grinderGrab.Interactable = value;
             foreach (var jar in toppingJars) jar.Target.Interactable = value;
         }
     }
