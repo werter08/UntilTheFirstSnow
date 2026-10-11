@@ -8,8 +8,9 @@ namespace Courtyard.Minigames
     public sealed class MinigameContext
     {
         public MinigameContext(LevelDefinition level, int stepIndex, Camera worldCamera, KitchenDirector kitchen, CounterStation counter, FeedbackFx fx, HandsView hands,
-            UI.ScreenFader fader = null)
+            UI.ScreenFader fader = null, UI.MinigameGauge gauge = null)
         {
+            Gauge = gauge;
             Fader = fader;
             Level = level;
             StepIndex = stepIndex;
@@ -30,5 +31,8 @@ namespace Courtyard.Minigames
 
         /// <summary>Full-screen fade for story moments (e.g. walking to the door on Day 10). May be null.</summary>
         public UI.ScreenFader Fader { get; }
+
+        /// <summary>The shared "stop in the green" gauge (grind, pour flow, milk). May be null.</summary>
+        public UI.MinigameGauge Gauge { get; }
     }
 }

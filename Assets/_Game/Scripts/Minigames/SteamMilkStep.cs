@@ -12,9 +12,8 @@ namespace Courtyard.Minigames
     public sealed class SteamMilkStep : MinigameStep
     {
         [Header("Own gauge")]
-        [SerializeField] private Transform needle;
-        [SerializeField] private SpriteRenderer greenBand;
-        [SerializeField, Min(0.1f)] private float scaleHeight = 2.4f;
+        [Tooltip("Icon on the milk gauge.")]
+        [SerializeField] private Sprite gaugeIcon;
 
         [Header("Tuning (°C)")]
         [SerializeField] private float startTemperature = 5f;
@@ -36,6 +35,7 @@ namespace Courtyard.Minigames
 
         private CounterStation _counter;
         private FeedbackFx _fx;
+        private UI.MinigameGauge _gauge;
         private float _temperature;
 
         public override void Begin(MinigameContext ctx)
@@ -48,10 +48,12 @@ namespace Courtyard.Minigames
             _counter.MilkJug.Interactable = true;
             NudgeTarget = _counter.MilkJug.transform;
 
-            var bottom = ToScaleY(bandMin);
-            var top = ToScaleY(bandMax);
-            greenBand.size = new Vector2(greenBand.size.x, top - bottom);
-            greenBand.transform.localPosition = new Vector3(0f, (bottom + top) * 0.5f, 0f);
+            _gauge = ctx.Gauge;
+            var centre = Normalized((bandMin + bandMax) * 0.5f);
+            var falloff = qualityFalloff / (maxTemperature - startTemperature);
+            if (_gauge != null)
+                _gauge.Show(_counter.MilkJugBody, ctx.WorldCamera, new Vector2(Normalized(bandMin), Normalized(bandMax)),
+                    RedAbove(centre, falloff), gaugeIcon);
             UpdateVisuals();
         }
 
@@ -62,6 +64,7 @@ namespace Courtyard.Minigames
             _counter.MilkJug.Released -= OnReleased;
             _counter.MilkJugBody.color = jugColor;
             StopSounds();
+            if (_gauge != null) _gauge.Hide();
         }
 
         private void Update()
@@ -101,18 +104,18 @@ namespace Courtyard.Minigames
             StopSounds();
             _fx.Punch(_counter.MilkJugBody.transform);
             _fx.Burst(_counter.Mug.transform.position + Vector3.up * 0.65f, new Color(0.98f, 0.95f, 0.88f), 10, 0.8f, 0.07f, 0.4f);
+            if (_gauge != null) _gauge.Release();
             var centre = (bandMin + bandMax) * 0.5f;
             var quality = 1f - Mathf.Abs(_temperature - centre) / qualityFalloff;
             if (ShouldExplain(quality)) Explain(_fx, _temperature < centre ? tooColdText : tooHotText, _counter.MilkJugBody);
             Complete(quality);
         }
 
-        private float ToScaleY(float temperature) =>
-            Mathf.InverseLerp(startTemperature, maxTemperature, temperature) * scaleHeight;
+        private float Normalized(float temperature) => Mathf.InverseLerp(startTemperature, maxTemperature, temperature);
 
         private void UpdateVisuals()
         {
-            needle.localPosition = new Vector3(0f, ToScaleY(_temperature), 0f);
+            if (_gauge != null) _gauge.SetValue(Normalized(_temperature));
             _counter.SetMilkFoam(Mathf.InverseLerp(startTemperature, maxTemperature, _temperature));
             var squealing = _temperature > bandMax;
             _counter.MilkJugBody.color = squealing ? squealColor : jugColor;

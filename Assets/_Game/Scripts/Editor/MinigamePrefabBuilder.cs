@@ -127,6 +127,7 @@ namespace Courtyard.Editor
             {
                 var meter = root.transform.Find("GrindMeter");
                 var back = root.transform.Find("GrindMeterBack");
+                if (meter == null || back == null) return; // replaced by the MinigameGauge
                 var x = CounterLayout.GrinderX + 1.95f;
                 meter.localPosition = new Vector3(x, meter.localPosition.y, 0f);
                 back.localPosition = new Vector3(x, back.localPosition.y, 0f);
@@ -141,7 +142,7 @@ namespace Courtyard.Editor
                     so.FindProperty("squealColor").colorValue = new Color(1f, 0.78f, 0.75f);
                 });
                 var thermometer = root.transform.Find("Thermometer");
-                thermometer.localPosition = new Vector3(CounterLayout.MilkX - 0.9f, thermometer.localPosition.y, 0f);
+                if (thermometer != null) thermometer.localPosition = new Vector3(CounterLayout.MilkX - 0.9f, thermometer.localPosition.y, 0f);
             });
 
             // Day 1: the drawn instant coffee jar the spoon scoops from.
@@ -257,13 +258,9 @@ namespace Courtyard.Editor
             var root = new GameObject(GrindBeans);
             var step = root.AddComponent<GrindBeansStep>();
 
-            var meter = Bar(root.transform, "GrindMeter", new Vector2(CounterLayout.GrinderX + 1.5f, CounterLayout.Top), 0.4f,
-                CounterLayout.GaugeHeight, new Color(0.45f, 0.3f, 0.2f), Gray(0.2f), 0);
-            var zone = Box(meter.transform, "TargetZone", Vector2.zero, new Vector2(0.55f, 0.2f), Green, 3);
+            // The meter is the shared MinigameGauge (screen space, above the grinder).
 
             Wire(step, "hintText", "Turn the grinder handle in circles. Let go when the meter is in the green.");
-            Wire(step, "meter", meter);
-            Wire(step, "targetZone", zone);
             return root;
         }
 
@@ -277,14 +274,9 @@ namespace Courtyard.Editor
             var pourZone = zone.gameObject.AddComponent<PointerTarget>();
             WireEnum(pourZone, "handPose", HandPose.Grip);
 
-            var flow = Bar(root.transform, "FlowMeter", new Vector2(CounterLayout.MugX + 1.3f, CounterLayout.Top), 0.4f,
-                CounterLayout.GaugeHeight, Water, Gray(0.2f), 0);
-            var band = Box(flow.transform, "FlowBand", Vector2.zero, new Vector2(0.55f, 0.2f), Green, 3);
 
             Wire(step, "hintText", PourOverHint);
             Wire(step, "pourZone", pourZone);
-            Wire(step, "flowMeter", flow);
-            Wire(step, "flowBand", band);
             return root;
         }
 
@@ -292,12 +284,8 @@ namespace Courtyard.Editor
         {
             var root = new GameObject(SteamMilk);
             var step = root.AddComponent<SteamMilkStep>();
-            var (band, needle) = Thermometer(root.transform, new Vector2(CounterLayout.MilkX + 0.9f, CounterLayout.Top));
 
             Wire(step, "hintText", "Hold the milk jug to steam it. Let go in the green.");
-            Wire(step, "needle", needle);
-            Wire(step, "greenBand", band);
-            Wire(step, "scaleHeight", CounterLayout.GaugeHeight);
             return root;
         }
 

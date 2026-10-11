@@ -56,6 +56,16 @@ namespace Courtyard.Minigames
         protected bool ShouldExplain(float quality) => quality < explainBelow;
 
         /// <summary>
+        /// The red part of a gauge: where quality = 1 − |v − centre| / falloff drops below the cold-drink line (0.4),
+        /// past the green on the high side. Null when that never happens inside 0..1.
+        /// </summary>
+        protected static Vector2? RedAbove(float centre, float falloff, float coldBelow = 0.4f)
+        {
+            var from = centre + (1f - coldBelow) * falloff;
+            return from < 1f ? new Vector2(from, 1f) : null;
+        }
+
+        /// <summary>
         /// Tells the player what went wrong, right where it happened: a short line above the tool, a puff and a wobble.
         /// Call before <see cref="Complete"/>.
         /// </summary>

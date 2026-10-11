@@ -16,8 +16,10 @@ namespace Courtyard.Minigames
     {
         [Header("Own parts")]
         [SerializeField] private PointerTarget pourZone;
-        [SerializeField] private SpriteBar flowMeter;
-        [SerializeField] private SpriteRenderer flowBand;
+        [Tooltip("Icon on the flow gauge.")]
+        [SerializeField] private Sprite gaugeIcon;
+        [Tooltip("Flow this fast reads as too fast (red on the gauge).")]
+        [SerializeField, Range(0f, 1f)] private float tooFastFlow = 0.8f;
 
         [Header("Tuning")]
         [SerializeField, Min(0.01f)] private float fillPerSecond = 0.12f;
@@ -43,6 +45,7 @@ namespace Courtyard.Minigames
 
         private CounterStation _counter;
         private FeedbackFx _fx;
+        private UI.MinigameGauge _gauge;
         private float _splashTimer;
         private Camera _camera;
         private Vector2 _lastPointer;
@@ -76,10 +79,9 @@ namespace Courtyard.Minigames
             _counter.SetMugGauge(true);
             _counter.ShowFillLine(targetFill);
 
-            flowMeter.SetValue(0f);
-            var height = flowMeter.MaxHeight;
-            flowBand.size = new Vector2(flowBand.size.x, (bandMax - bandMin) * height);
-            flowBand.transform.localPosition = new Vector3(0f, (bandMin + bandMax) * 0.5f * height, 0f);
+            _gauge = ctx.Gauge;
+            if (_gauge != null)
+                _gauge.Show(_counter.KettleBody, ctx.WorldCamera, new Vector2(bandMin, bandMax), new Vector2(tooFastFlow, 1f), gaugeIcon);
         }
 
         private void OnDestroy()
@@ -92,6 +94,7 @@ namespace Courtyard.Minigames
             _counter.SetMugGauge(false);
             _counter.KettleStream.color = _streamColour;
             AudioManager.StopTrack(SfxId.Pour);
+            if (_gauge != null) _gauge.Hide();
         }
 
         private bool _holding;
@@ -141,7 +144,7 @@ namespace Courtyard.Minigames
             // Nothing changes until the kettle is over the cup: the flow meter rests at zero, the cup doesn't fill.
             var target = overCup ? Mathf.Clamp01(speed / speedForFullFlow) : 0f;
             _flow = Mathf.Lerp(_flow, target, 1f - Mathf.Exp(-flowSmoothing * Time.deltaTime));
-            flowMeter.SetValue(_flow);
+            if (_gauge != null) _gauge.SetValue(_flow);
             if (!overCup) return;
 
             _pourTime += Time.deltaTime;
@@ -210,6 +213,7 @@ namespace Courtyard.Minigames
             ReturnKettle();
             _counter.StartCoroutine(_counter.LiftDripper()); // runs on the counter: this step is destroyed right after
 
+            if (_gauge != null) _gauge.Release();
             var bandScore = _pourTime > 0f ? _bandTime / _pourTime : 0f;
             var fillScore = Mathf.Clamp01(1f - Mathf.Abs(_counter.MugLevel - targetFill) / fillTolerance);
             var quality = bandWeight * bandScore + (1f - bandWeight) * fillScore;

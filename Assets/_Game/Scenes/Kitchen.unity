@@ -2125,7 +2125,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4292933119
   m_fontColor: {r: 1, g: 0.96, b: 0.88, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -2138,7 +2138,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -14239,6 +14239,119 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1001 &846603445
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1040335576}
+    m_Modifications:
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 360
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 56
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6835276211778145141, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+      propertyPath: m_Name
+      value: MinigameGauge
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+--- !u!224 &846603446 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 3516328553428962527, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+  m_PrefabInstance: {fileID: 846603445}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &846603447 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8570568859354052685, guid: 46f85a80621d945c18f29cdc003aa4b3, type: 3}
+  m_PrefabInstance: {fileID: 846603445}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c564a700a12564606a7f9d6b3ac1bd69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.UI.MinigameGauge
 --- !u!114 &860851265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15636,6 +15749,7 @@ RectTransform:
   - {fileID: 1934604927}
   - {fileID: 2143811052}
   - {fileID: 903699311}
+  - {fileID: 846603446}
   m_Father: {fileID: 402295876}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -15678,7 +15792,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -30066,6 +30180,7 @@ MonoBehaviour:
   nudgeRepeatSeconds: 4
   firstTimeHintSeconds: 4
   recipeCard: {fileID: 265065293}
+  gauge: {fileID: 846603447}
   finaleFocus: {fileID: 1694404736}
   finaleZoom: 2.6
   finaleSeconds: 4
@@ -44346,7 +44461,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0

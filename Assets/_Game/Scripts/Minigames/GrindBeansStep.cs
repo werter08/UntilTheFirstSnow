@@ -10,9 +10,8 @@ namespace Courtyard.Minigames
     /// </summary>
     public sealed class GrindBeansStep : MinigameStep
     {
-        [Header("Own gauge")]
-        [SerializeField] private SpriteBar meter;
-        [SerializeField] private SpriteRenderer targetZone;
+        [Header("Gauge")]
+        [SerializeField] private Sprite gaugeIcon;
 
         [Header("Tuning")]
         [SerializeField, Range(0f, 1f)] private float targetLevel = 0.55f;
@@ -37,6 +36,8 @@ namespace Courtyard.Minigames
 
         private CounterStation _counter;
         private FeedbackFx _fx;
+        private UI.MinigameGauge _gauge;
+        private float _grind;
         private float _lastAngle;
         private float _dustDegrees;
         private float _speed;
@@ -54,10 +55,11 @@ namespace Courtyard.Minigames
             NudgeTarget = handle.transform;
             _counter.SetCoffeeBagOpen(true); // beans come out of the open bag
 
-            meter.SetValue(0f);
-            var height = meter.MaxHeight;
-            targetZone.size = new Vector2(targetZone.size.x, zoneHalfWidth * 2f * height);
-            targetZone.transform.localPosition = new Vector3(targetZone.transform.localPosition.x, targetLevel * height, 0f);
+            _grind = 0f;
+            _gauge = ctx.Gauge;
+            if (_gauge != null)
+                _gauge.Show(_counter.GrinderRenderer, ctx.WorldCamera, new Vector2(targetLevel - zoneHalfWidth, targetLevel + zoneHalfWidth),
+                    RedAbove(targetLevel, qualityFalloff), gaugeIcon);
         }
 
         private void OnDestroy()
@@ -69,6 +71,7 @@ namespace Courtyard.Minigames
             handle.DragEnded -= OnDragEnded;
             AudioManager.StopLoop(SfxId.Grind, 0.1f);
             _counter.SetCoffeeBagOpen(false);
+            if (_gauge != null) _gauge.Hide();
         }
 
         private void Update()
@@ -114,7 +117,8 @@ namespace Courtyard.Minigames
                 _speed = Mathf.Lerp(_speed, instant, 1f - Mathf.Exp(-speedSmoothing * Time.deltaTime));
                 _sinceMoved = 0f;
             }
-            meter.SetValue(meter.Value + delta / 360f * fillPerTurn);
+            _grind = Mathf.Clamp01(_grind + delta / 360f * fillPerTurn);
+            if (_gauge != null) _gauge.SetValue(_grind);
 
             // Coffee dust and a little shake every so often while grinding.
             _dustDegrees += delta;
@@ -127,7 +131,7 @@ namespace Courtyard.Minigames
                     _fx.Punch(_counter.GrinderArm.parent, 0.08f);
                 }
             }
-            if (meter.Value >= 1f) Finish();
+            if (_grind >= 1f) Finish();
         }
 
         private void OnDragEnded(Vector2 world)
@@ -135,7 +139,7 @@ namespace Courtyard.Minigames
             _sinceMoved = float.MaxValue;
             AudioManager.StopLoop(SfxId.Grind, 0.1f);
             // Let go before the green zone and you simply keep grinding; inside or past it, that's the grind.
-            if (!IsComplete && meter.Value >= Mathf.Max(minLevelToFinish, targetLevel - zoneHalfWidth)) Finish();
+            if (!IsComplete && _grind >= Mathf.Max(minLevelToFinish, targetLevel - zoneHalfWidth)) Finish();
         }
 
         private void Finish()
@@ -143,9 +147,9 @@ namespace Courtyard.Minigames
             _counter.GrinderHandle.Interactable = false;
             _counter.SetDripperGrounds(true);
             AudioManager.StopLoop(SfxId.Grind, 0.1f);
-            var quality = 1f - Mathf.Abs(meter.Value - targetLevel) / qualityFalloff;
-            if (ShouldExplain(quality))
-                Explain(_fx, meter.Value > targetLevel ? tooFineText : tooCoarseText, _counter.GrinderArm.parent.GetComponentInChildren<SpriteRenderer>());
+            if (_gauge != null) _gauge.Release();
+            var quality = 1f - Mathf.Abs(_grind - targetLevel) / qualityFalloff;
+            if (ShouldExplain(quality)) Explain(_fx, _grind > targetLevel ? tooFineText : tooCoarseText, _counter.GrinderRenderer);
             Complete(quality);
         }
     }

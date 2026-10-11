@@ -103,6 +103,17 @@ namespace Courtyard.Kitchen
         public KettleView KettleView => kettleView;
         public Transform GrinderArm => grinderArm;
         public DragTarget GrinderHandle => grinderHandle;
+
+        /// <summary>The grinder's drawing (its body), for placing things above it.</summary>
+        public Renderer GrinderRenderer
+        {
+            get
+            {
+                // Explicit checks: Unity's "missing component" isn't null for ??.
+                var own = grinder.GetComponent<SpriteRenderer>();
+                return own != null ? own : grinder.GetComponentInChildren<SpriteRenderer>();
+            }
+        }
         public PointerTarget Mug => mug;
         public SpriteRenderer MugBody => mugBody;
         /// <summary>Centre of the mug's rim (world), where pouring and spices go.</summary>

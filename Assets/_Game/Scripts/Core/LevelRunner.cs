@@ -53,6 +53,8 @@ namespace Courtyard.Core
         [SerializeField, Min(0.5f)] private float firstTimeHintSeconds = 4f;
         [Tooltip("The recipe on the wall (click to read); pulses at the start of some days and on the first idle.")]
         [SerializeField] private RecipeCard recipeCard;
+        [Tooltip("The shared \"stop in the green\" gauge the minigames use.")]
+        [SerializeField] private MinigameGauge gauge;
 
 
         private WarmthGroup _warmth;
@@ -134,7 +136,7 @@ namespace Courtyard.Core
                 _activeStep.Completed += q => quality = q;
                 ShowHint(_level.Steps[i]);
                 counter.SetAllInteractable(false);
-                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader));
+                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader, gauge));
                 StartCoroutine(FadeStepParts(_activeStep.transform, 0f, 1f)); // its own tools fade in
 
                 _draining = true;

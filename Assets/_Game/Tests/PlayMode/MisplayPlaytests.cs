@@ -78,13 +78,13 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();
             yield return AdvanceTo<GrindBeansStep>();
             var step = Object.FindAnyObjectByType<GrindBeansStep>();
-            var meter = GetField<SpriteBar>(step, "meter");
+            float Grind() => GetField<float>(step, "_grind");
             var axle = Counter.GrinderArm.position;
             var knob = Counter.GrinderHandle.transform.position;
             var radius = Vector2.Distance(axle, knob);
             var angle = Mathf.Atan2(knob.y - axle.y, knob.x - axle.x);
             yield return Press(knob);
-            while (meter.Value < 0.25f)
+            while (Grind() < 0.25f)
             {
                 angle += 0.25f;
                 Move(Mouse.position, ToScreen(axle + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle)) * radius));

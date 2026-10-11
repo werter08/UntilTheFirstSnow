@@ -85,7 +85,7 @@ namespace Courtyard.Tests
         {
             yield return AdvanceTo<GrindBeansStep>();
             var step = Object.FindAnyObjectByType<GrindBeansStep>();
-            var meter = GetField<SpriteBar>(step, "meter");
+            float Grind() => GetField<float>(step, "_grind");
             var axle = Counter.GrinderArm.position;
             var knob = Counter.GrinderHandle.transform.position;
             var radius = Vector2.Distance(axle, knob);
@@ -93,7 +93,7 @@ namespace Courtyard.Tests
 
             yield return Press(knob);
             var deadline = Time.realtimeSinceStartup + 25f;
-            while (meter.Value < 0.55f && Time.realtimeSinceStartup < deadline)
+            while (Grind() < 0.55f && Time.realtimeSinceStartup < deadline)
             {
                 angle += 0.25f;
                 Move(Mouse.position, ToScreen(axle + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle)) * radius));
