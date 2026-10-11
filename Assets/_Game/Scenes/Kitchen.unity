@@ -2770,6 +2770,7 @@ GameObject:
   - component: {fileID: 265065291}
   - component: {fileID: 265065290}
   - component: {fileID: 265065293}
+  - component: {fileID: 265065294}
   m_Layer: 0
   m_Name: RecipeCard
   m_TagString: Untagged
@@ -2785,13 +2786,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 265065288}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.02617695, w: 0.99965733}
-  m_LocalPosition: {x: -4, y: 2.4, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: -0.026176924, w: 0.99965733}
+  m_LocalPosition: {x: 4.21, y: -0.14, z: 0}
   m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1524385089}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -3}
 --- !u!114 &265065290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2899,7 +2900,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1283594053
   m_SortingLayer: 7
-  m_SortingOrder: 4
+  m_SortingOrder: 118
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: a9d0eff1db02d431f94ecfc15cbb7d84, type: 3}
   m_Color: {r: 1, g: 0.97, b: 0.88, a: 1}
@@ -2926,6 +2927,18 @@ MonoBehaviour:
   pulseScale: 1.15
   pulseSeconds: 0.9
   glow: {r: 1, g: 0.93, b: 0.7, a: 1}
+--- !u!114 &265065294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 265065288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &270535027
 GameObject:
   m_ObjectHideFlags: 0
@@ -2937,6 +2950,7 @@ GameObject:
   - component: {fileID: 270535028}
   - component: {fileID: 270535029}
   - component: {fileID: 270535030}
+  - component: {fileID: 270535031}
   m_Layer: 0
   m_Name: Scarf
   m_TagString: Untagged
@@ -2953,7 +2967,7 @@ Transform:
   m_GameObject: {fileID: 270535027}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.2, y: 0.2, z: 0}
+  m_LocalPosition: {x: 7.2, y: -0.028, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3035,6 +3049,18 @@ MonoBehaviour:
   stretch: 0
   speed: 2.0943952
   windResponse: 0
+--- !u!114 &270535031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270535027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &277123648
 GameObject:
   m_ObjectHideFlags: 0
@@ -21525,6 +21551,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1054329031}
   - component: {fileID: 1054329032}
+  - component: {fileID: 1054329033}
   m_Layer: 0
   m_Name: CalendarCircle
   m_TagString: Untagged
@@ -21541,9 +21568,9 @@ Transform:
   m_GameObject: {fileID: 1054329030}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.1700001, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0.004, y: -1.039, z: 0}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1684386546}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -21606,6 +21633,18 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1054329033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054329030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &1054362064
 GameObject:
   m_ObjectHideFlags: 0
@@ -29247,6 +29286,7 @@ GameObject:
   - component: {fileID: 1320751986}
   - component: {fileID: 1320751985}
   - component: {fileID: 1320751988}
+  - component: {fileID: 1320751989}
   m_Layer: 0
   m_Name: Calendar
   m_TagString: Untagged
@@ -29264,7 +29304,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -1.02, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1153703695}
@@ -29319,7 +29359,7 @@ SpriteRenderer:
   m_SortingLayer: 7
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 255a8c72b14ba463686a3e8a61ef2e1a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5eba8bfba6ce64abaa2aef8360f85fcb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -29401,7 +29441,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.44, y: 2.04}
+    oldSize: {x: 3.2, y: 4.02}
     newSize: {x: 1.4, y: 1.7}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -29422,6 +29462,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Kitchen.CalendarPage
   director: {fileID: 1524385090}
+--- !u!114 &1320751989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1320751982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &1325105126
 GameObject:
   m_ObjectHideFlags: 0
@@ -63899,6 +63951,7 @@ GameObject:
   - component: {fileID: 2097813311}
   - component: {fileID: 2097813313}
   - component: {fileID: 2097813312}
+  - component: {fileID: 2097813314}
   m_Layer: 0
   m_Name: CalendarDay
   m_TagString: Untagged
@@ -63922,7 +63975,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -1.1700001}
+  m_AnchoredPosition: {x: 0, y: -1.035}
   m_SizeDelta: {x: 4, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2097813312
@@ -64069,6 +64122,18 @@ MeshRenderer:
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2097813314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2097813310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c23937f6a6a44e4da922a5af4f5ad83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Core.HandPlaced
 --- !u!1 &2101760891
 GameObject:
   m_ObjectHideFlags: 0

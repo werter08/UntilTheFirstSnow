@@ -53,9 +53,9 @@ namespace Courtyard.Minigames
         [Header("Spoon counter beside the cup")]
         [Tooltip("{0} = spoons in, {1} = spoons needed.")]
         [SerializeField] private string spoonCountText = "Coffee: {0} / {1} spoons";
-        [SerializeField] private Color countColour = new(0.25f, 0.17f, 0.13f);
-        [SerializeField] private Color countDoneColour = new(0.25f, 0.5f, 0.2f);
-        [SerializeField] private Color countOverColour = new(0.72f, 0.24f, 0.14f);
+        [SerializeField] private Color countColour = new(1f, 0.96f, 0.88f);
+        [SerializeField] private Color countDoneColour = new(0.72f, 0.95f, 0.6f);
+        [SerializeField] private Color countOverColour = new(1f, 0.55f, 0.45f);
 
         [Header("Why it went wrong")]
         [SerializeField] private string tooMuchCoffeeText = "Too much coffee — just two spoons.";
@@ -111,9 +111,9 @@ namespace Courtyard.Minigames
             if (useSpoon)
             {
                 _counter.ShowSpoons(0);
-                // How many spoons: a counter beside the cup that ticks up (green when right, red when too many).
+                // How many spoons: a counter centred under the cup that ticks up (green when right, red when too many).
                 var mug = _counter.MugBody.bounds;
-                _spoonCount = _fx.Label(string.Empty, new Vector3(mug.max.x + 1.1f, mug.max.y + 0.25f, 0f), countColour);
+                _spoonCount = _fx.Label(string.Empty, new Vector3(mug.center.x, mug.min.y - 0.4f, 0f), countColour);
                 UpdateSpoonCount();
             }
             NudgeTarget = useSpoon ? spoon.transform : _counter.KettleTarget.transform;

@@ -774,6 +774,7 @@ namespace Courtyard.Editor
             Sprite Load(string n) => AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + n + ".png");
             var sheet = Load("calendar");
             if (sheet == null) return;
+            if (IsHandPlaced(Find(kitchen, "Calendar", false))) return; // the team's own calendar (drawing, size, number, ring)
 
             // World positions: these may sit under the CalendarGroup hanger (ApplyLife).
             var centre = KitchenArtLayout.ToWorld(_layout.calendarCentre);
@@ -1728,8 +1729,10 @@ namespace Courtyard.Editor
         {
             var card = Find(kitchen, "RecipeCard", false) ?? Empty(kitchen, "RecipeCard", Vector2.zero);
             var renderer = GetOrAdd<SpriteRenderer>(card);
+            var placedByHand = IsHandPlaced(card) && renderer.sprite != null; // keep the team's look and order too
             var art = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "recipe_card.png");
-            if (art != null)
+            if (placedByHand) { }
+            else if (art != null)
             {
                 renderer.sprite = art;
                 renderer.color = Color.white;
@@ -1741,9 +1744,13 @@ namespace Courtyard.Editor
                 renderer.color = new Color(1f, 0.97f, 0.88f);
             }
 
-            renderer.drawMode = SpriteDrawMode.Simple;
-            renderer.sortingLayerName = "WallProps";
-            renderer.sortingOrder = 4;
+            if (!placedByHand)
+            {
+                renderer.drawMode = SpriteDrawMode.Simple;
+                renderer.sortingLayerName = "WallProps";
+                renderer.sortingOrder = 4;
+            }
+
             if (!IsHandPlaced(card))
             {
                 card.localPosition = Px(560f, 300f);

@@ -13,6 +13,7 @@ namespace Courtyard.Editor
     {
         private const string ArtPath = "Assets/_Game/Art/UI/talking_bg.png";
         private const string PrefabPath = "Assets/_Game/Prefabs/UI/StoryBox.prefab";
+        private const string BubblePath = "Assets/_Game/Art/UI/speaker_bubble.png";
 
         [MenuItem("Courtyard/Setup/Apply Story Box Art")]
         public static void Apply()
@@ -34,6 +35,17 @@ namespace Courtyard.Editor
                 importer.SaveAndReimport();
             }
 
+            if (AssetImporter.GetAtPath(BubblePath) is TextureImporter bubbleImporter &&
+                (bubbleImporter.textureType != TextureImporterType.Sprite || bubbleImporter.spriteBorder != new Vector4(16f, 16f, 16f, 16f)))
+            {
+                bubbleImporter.textureType = TextureImporterType.Sprite;
+                bubbleImporter.spriteImportMode = SpriteImportMode.Single;
+                bubbleImporter.spriteBorder = new Vector4(16f, 16f, 16f, 16f);
+                bubbleImporter.mipmapEnabled = false;
+                bubbleImporter.alphaIsTransparency = true;
+                bubbleImporter.SaveAndReimport();
+            }
+
             var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(ArtPath);
             var root = PrefabUtility.LoadPrefabContents(PrefabPath);
             try
@@ -53,6 +65,20 @@ namespace Courtyard.Editor
                     so.FindProperty("phoneBackground").colorValue = new Color(0.78f, 0.88f, 1f, 0.95f);
                     so.FindProperty("phoneText").colorValue = Color.white;
                 });
+                // The speaker's name on the team's bubble (white with an ink outline), dark name text.
+                var bubble = AssetDatabase.LoadAssetAtPath<Sprite>(BubblePath);
+                var speaker = root.transform.Find("Speaker");
+                if (bubble != null && speaker != null)
+                {
+                    var tag = speaker.GetComponent<Image>();
+                    tag.sprite = bubble;
+                    tag.type = Image.Type.Sliced;
+                    tag.color = Color.white;
+                    tag.pixelsPerUnitMultiplier = 1f;
+                    var name = speaker.GetComponentInChildren<TMPro.TMP_Text>(true);
+                    if (name != null) name.color = new Color(0.2f, 0.15f, 0.12f);
+                }
+
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }
             finally
