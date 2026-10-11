@@ -55,7 +55,7 @@ namespace Courtyard.Editor
         {
             (P.KettleBoil, "Turn the kettle on. Turn it off when it boils.", false),
             (P.InstantCoffee, "Two spoons of coffee. Then pour water up to the line.", false),
-            (P.GrindBeans, "Turn the handle in circles. Stop in the green.", false),
+            (P.GrindBeans, "Hold the handle and stir in circles. Stop in the green.", false),
             (P.PourOver, "Pour slowly, in circles. Keep it in the green. Fill to the line.", false),
             (P.WaveBack, "She's waving. Click your mug to wave back.", true),
             (P.MiraVisit, "", false),

@@ -594,6 +594,9 @@ namespace Courtyard.Kitchen
             if (coffeeBag != null) coffeeBag.gameObject.SetActive(visible);
         }
 
+        /// <summary>Where the bag of beans stands (null without it or while it's put away).</summary>
+        public Bounds? CoffeeBagBounds => coffeeBag != null && coffeeBag.gameObject.activeInHierarchy ? coffeeBag.bounds : null;
+
         /// <summary>The bag of beans is open while grinding (no-op without the drawn bag).</summary>
         public void SetCoffeeBagOpen(bool open)
         {

@@ -266,12 +266,10 @@ namespace Courtyard.Editor
             var start = NoteButton(buttons, "StartButton", "Make coffee", "note_open_yellow", new Vector2(0f, 0f), -2f);
             var quit = NoteButton(buttons, "QuitButton", "Quit", "note_open_pink", new Vector2(40f, -190f), 3f, 0.7f);
 
-            // Browser only: the first click starts the sound.
-            var wake = Label(root, "WakePrompt", "click to start", 38f, TextAlignmentOptions.Bottom, Ink);
-            wake.fontStyle = FontStyles.Italic;
-            wake.rectTransform.offsetMin = new Vector2(110f, 70f);
-            wake.rectTransform.offsetMax = new Vector2(-1300f, 0f);
-            wake.alignment = TextAlignmentOptions.BottomLeft;
+            // The first click starts the sound (browsers block it until then); it sits where the buttons will appear.
+            var wake = Label(root, "WakePrompt", "click to start", 56f, TextAlignmentOptions.TopLeft, Ink);
+            wake.fontStyle = FontStyles.Italic | FontStyles.Bold;
+            Place(wake.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 1f), new Vector2(130f, -120f), new Vector2(620f, 90f));
             var wakeGroup = wake.gameObject.AddComponent<CanvasGroup>();
 
             var fade = UiObject("Fade", root);

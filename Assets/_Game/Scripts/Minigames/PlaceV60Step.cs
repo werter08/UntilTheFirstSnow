@@ -8,7 +8,7 @@ namespace Courtyard.Minigames
 {
     /// <summary>
     /// Pour-over days: the V60 waits on the window sill. Pick it up and set it on the cup — it snaps on (the cup's
-    /// opening closes under it). Dropped anywhere else, it goes back to the sill. Unscored.
+    /// opening closes under it) as soon as it gets near, without having to aim and let go. Dropped anywhere else, it goes back to the sill. Unscored.
     /// </summary>
     public sealed class PlaceV60Step : MinigameStep
     {
@@ -22,6 +22,7 @@ namespace Courtyard.Minigames
         private DragTarget _drag;
         private Vector3 _grab;
         private Coroutine _move;
+        private bool _placing;
 
         public override void Begin(MinigameContext ctx)
         {
@@ -53,29 +54,35 @@ namespace Courtyard.Minigames
 
         private void OnDragStarted(Vector2 world)
         {
-            if (IsComplete) return;
+            if (IsComplete || _placing) return;
             if (_move != null) StopCoroutine(_move);
             _grab = _drag.transform.position - (Vector3)world;
         }
 
         private void OnDragged(Vector2 world)
         {
-            if (IsComplete) return;
+            if (IsComplete || _placing) return;
             var t = _drag.transform;
             t.position = new Vector3(world.x + _grab.x, world.y + _grab.y, t.position.z);
+            if (NearCup()) _move = StartCoroutine(Snap()); // close enough: it settles on by itself
         }
 
         private void OnDragEnded(Vector2 world)
         {
-            if (IsComplete) return;
+            if (IsComplete || _placing) return;
+            _move = StartCoroutine(NearCup() ? Snap() : Back());
+        }
+
+        private bool NearCup()
+        {
             var top = _counter.MugTop;
-            var bottom = _counter.DripperTop; // its top, but the V60 is short: compare its centre line to the cup's rim
-            var near = Mathf.Abs(bottom.x - top.x) <= snapReach && bottom.y >= top.y - 0.3f && bottom.y <= top.y + 2.5f;
-            _move = StartCoroutine(near ? Snap() : Back());
+            var v60 = _counter.DripperTop; // its top, but the V60 is short: compare its centre line to the cup's rim
+            return Mathf.Abs(v60.x - top.x) <= snapReach && v60.y >= top.y - 0.3f && v60.y <= top.y + 2.5f;
         }
 
         private IEnumerator Snap()
         {
+            _placing = true;
             _drag.Interactable = false;
             yield return MoveTo(_counter.DripperOnMugLocal, snapSeconds);
             AudioManager.Play(SfxId.PutDown);

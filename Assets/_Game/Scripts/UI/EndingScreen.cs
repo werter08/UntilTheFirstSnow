@@ -55,7 +55,7 @@ namespace Courtyard.UI
 
             Fill();
             foreach (var group in new[] { titleGroup, dim, thanksGroup, prompt }) group.alpha = 0f;
-            credits.rectTransform.anchoredPosition = new Vector2(0f, -creditsViewport.rect.height);
+            credits.rectTransform.anchoredPosition = Vector2.zero; // its top edge just under the viewport
 
             StartCoroutine(Drift(60f));
             yield return fader.FadeIn(fadeDuration * 1.6f);
@@ -70,13 +70,18 @@ namespace Courtyard.UI
             yield return Tweens.Run(0.8f, t => dim.alpha = t);
             Canvas.ForceUpdateCanvases();
             var rect = credits.rectTransform;
-            var end = credits.preferredHeight + 40f;
+            // The text hangs from its top edge, anchored to the viewport's bottom: it has left the viewport once its top
+            // is a viewport and a text height above.
+            var end = creditsViewport.rect.height + credits.preferredHeight + 20f;
             while (rect.anchoredPosition.y < end)
             {
                 var speed = creditsSpeed * (Pointer.current != null && Pointer.current.press.isPressed ? fastForward : 1f);
                 rect.anchoredPosition += Vector2.up * (speed * Time.deltaTime);
                 yield return null;
             }
+
+            credits.gameObject.SetActive(false);
+            yield return new WaitForSeconds(0.6f);
 
             // Thanks, then back to the title on a click.
             yield return Tweens.Run(1.2f, t => thanksGroup.alpha = t);

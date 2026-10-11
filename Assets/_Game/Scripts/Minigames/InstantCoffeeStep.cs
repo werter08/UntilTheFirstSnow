@@ -53,9 +53,13 @@ namespace Courtyard.Minigames
         [Header("Spoon counter beside the cup")]
         [Tooltip("{0} = spoons in, {1} = spoons needed.")]
         [SerializeField] private string spoonCountText = "Coffee: {0} / {1} spoons";
-        [SerializeField] private Color countColour = new(1f, 0.96f, 0.88f);
-        [SerializeField] private Color countDoneColour = new(0.72f, 0.95f, 0.6f);
-        [SerializeField] private Color countOverColour = new(1f, 0.55f, 0.45f);
+        [Tooltip("Dark ink: the label sits on the light counter.")]
+        [SerializeField] private Color countColour = new(0.24f, 0.16f, 0.12f);
+        [SerializeField] private Color countDoneColour = new(0.16f, 0.45f, 0.14f);
+        [SerializeField] private Color countOverColour = new(0.7f, 0.16f, 0.1f);
+        [SerializeField, Min(0.1f)] private float countScale = 0.7f;
+        [Tooltip("How far (sideways) from the cup a loaded spoon tips its coffee in — as soon as it gets there.")]
+        [SerializeField, Min(0.1f)] private float spoonReach = 0.9f;
 
         [Header("Why it went wrong")]
         [SerializeField] private string tooMuchCoffeeText = "Too much coffee — just two spoons.";
@@ -83,7 +87,11 @@ namespace Courtyard.Minigames
         {
             _ctx = ctx;
             _counter = ctx.Counter;
-            if (hideCoffeeBag) _counter.SetCoffeeBagVisible(false);
+            if (hideCoffeeBag)
+            {
+                if (useSpoon) StandJarWhereTheBagIs();
+                _counter.SetCoffeeBagVisible(false);
+            }
             _fx = ctx.Fx;
             _camera = ctx.WorldCamera;
             if (!useSpoon)
@@ -113,7 +121,7 @@ namespace Courtyard.Minigames
                 _counter.ShowSpoons(0);
                 // How many spoons: a counter centred under the cup that ticks up (green when right, red when too many).
                 var mug = _counter.MugBody.bounds;
-                _spoonCount = _fx.Label(string.Empty, new Vector3(mug.center.x, mug.min.y - 0.4f, 0f), countColour);
+                _spoonCount = _fx.Label(string.Empty, new Vector3(mug.center.x, mug.min.y - 0.4f, 0f), countColour, countScale);
                 UpdateSpoonCount();
             }
             NudgeTarget = useSpoon ? spoon.transform : _counter.KettleTarget.transform;
@@ -121,6 +129,16 @@ namespace Courtyard.Minigames
             // Started with the kettle step: spoon now, pour once the water has boiled (OnPreviousDone).
             _kettleReady = !StartsWithPrevious;
             if (_kettleReady) ReadyToPour();
+        }
+
+        /// <summary>Her jar takes the bag of beans' spot on the counter (wherever the team put the bag), standing on its base.</summary>
+        private void StandJarWhereTheBagIs()
+        {
+            var bag = _counter.CoffeeBagBounds;
+            if (!bag.HasValue) return;
+            var art = jar.GetComponentInChildren<SpriteRenderer>();
+            var own = art != null ? art.bounds : jar.bounds;
+            jar.transform.position += new Vector3(bag.Value.center.x - own.center.x, bag.Value.min.y - own.min.y, 0f);
         }
 
         public override void OnPreviousDone()
@@ -175,7 +193,14 @@ namespace Courtyard.Minigames
         private void OnSpoonDragged(Vector2 world)
         {
             spoon.transform.position = world + _grabOffset;
-            if (_spoonLoaded || !jar.OverlapPoint(world)) return;
+            if (_spoonLoaded)
+            {
+                // The coffee goes in as soon as the spoon reaches the cup — no need to aim and let go.
+                if (OverCup(world)) TipSpoonful();
+                return;
+            }
+
+            if (!jar.OverlapPoint(world) && !jar.OverlapPoint(spoon.transform.position)) return;
 
             _spoonLoaded = true;
             ShowLoad(true);
@@ -186,24 +211,29 @@ namespace Courtyard.Minigames
 
         private void OnSpoonDragEnded(Vector2 world)
         {
-            if (_spoonLoaded && (_counter.IsOverMug(world) || _counter.IsAboveMug(world, 0.7f)))
-            {
-                _spoonLoaded = false;
-                ShowLoad(false);
-                _spoons++;
-                _counter.ShowSpoons(_spoons);
-                UpdateSpoonCount();
-                if (_spoonCount != null) _fx.Punch(_spoonCount.transform, 0.6f);
-                AudioManager.Play(SfxId.SpoonTink);
-                _fx.Punch(_counter.Mug.transform);
-                _fx.Burst(_counter.MugTop, coffeeColor, 8, 0.9f, 0.06f);
-
-                // Too many spoons spoil it (judged when the water is poured); the player carries on either way.
-                if (_spoons >= targetSpoons && _kettleReady) NudgeTarget = _counter.KettleTarget.transform;
-            }
+            if (_spoonLoaded && OverCup(world)) TipSpoonful();
 
             var from = spoon.transform.position;
             _spoonReturn = StartCoroutine(Tweens.Run(spoonReturnSeconds, t => spoon.transform.position = Vector3.Lerp(from, _spoonRest, t)));
+        }
+
+        private bool OverCup(Vector2 world) =>
+            _counter.IsOverMug(world) || _counter.IsAboveMug(world, spoonReach) || _counter.IsOverMug(spoon.transform.position);
+
+        private void TipSpoonful()
+        {
+            _spoonLoaded = false;
+            ShowLoad(false);
+            _spoons++;
+            _counter.ShowSpoons(_spoons);
+            UpdateSpoonCount();
+            if (_spoonCount != null) _fx.Punch(_spoonCount.transform, 0.6f);
+            AudioManager.Play(SfxId.SpoonTink);
+            _fx.Punch(_counter.Mug.transform);
+            _fx.Burst(_counter.MugTop, coffeeColor, 8, 0.9f, 0.06f);
+
+            // Too many spoons spoil it (judged when the water is poured); the player carries on either way.
+            if (_spoons >= targetSpoons && _kettleReady) NudgeTarget = _counter.KettleTarget.transform;
         }
 
         private void UpdateSpoonCount()

@@ -35,7 +35,7 @@ _Assets/_Game/Data/Levels/Day_05.asset_
 
 0. KettleBoil — Turn the kettle on. Turn it off when it boils.
 1. PlaceV60 — Put the V60 on the cup.
-2. GrindBeans — Turn the handle in circles. Stop in the green.
+2. GrindBeans — Hold the handle and stir in circles. Stop in the green.
 3. PourOver — Pour slowly, in circles. Keep it in the green. Fill to the line.
 4. WaveBack — She's waving. Click your mug to wave back.
 
@@ -59,7 +59,7 @@ _Assets/_Game/Data/Levels/Day_10.asset_
 
 0. KettleBoil — Turn the kettle on. Turn it off when it boils.
 1. PlaceV60 — Put the V60 on the cup.
-2. GrindBeans — Turn the handle in circles. Stop in the green.
+2. GrindBeans — Hold the handle and stir in circles. Stop in the green.
 3. PourOver — Pour slowly, in circles. Keep it in the green. Fill to the line.
 4. MiraVisit — _(empty)_
 5. TakeHerCup — Take the jar.
@@ -93,7 +93,7 @@ _Assets/_Game/Data/Levels/Day_20.asset_
 1. KettleBoil — Turn the kettle on. Turn it off when it boils.
 2. ChooseMug — Her mug first. Which one is hers?
 3. PlaceV60 — Put the V60 on the cup.
-4. GrindBeans — Turn the handle in circles. Stop in the green.
+4. GrindBeans — Hold the handle and stir in circles. Stop in the green.
 5. PourOver — Pour slowly, in circles. Keep it in the green. Fill to the line.
 6. SteamMilk — Hold to steam the milk. Let go in the green.
 7. AutoFillHisMug — _(empty)_
@@ -174,13 +174,13 @@ Title screen prompt, HUD labels, hints set on components, the ending's credits, 
 - `PopupTemplate`: Perfect!
 - `FeedbackFx.perfectText`: Perfect!
 - `FeedbackFx.chillText`: Brr... cold.
-- `Caption`: You
-- `Caption`: Mira
 - `ContinueHint`: click to continue
-- `Label`: Hints: on
-- `Label`: Restart day
+- `Tooltip`: Hints: on
+- `Tooltip`: Restart day
 - `CloseHint`: click to close
 - `Label`: DAY
+- `Question`: Start this day over?
+- `Label`: [ yes ]
 - `HintsToggle.onText`: Hints: on
 - `HintsToggle.offText`: Hints: off
 - `LevelRunner.newNoteHint`: New note on the fridge. Click it to read.
@@ -188,4 +188,7 @@ Title screen prompt, HUD labels, hints set on components, the ending's credits, 
 ### Ending
 
 - `ContinueHint`: click to continue
+- `Title`: Until the First Snow
+- `Thanks`: Thanks for playing. Stay warm.
+- `Prompt`: click to return to the title
 

@@ -9,13 +9,14 @@ namespace Courtyard.UI
 {
     /// <summary>
     /// The title screen: an autumn evening through the kitchen window, the title and two sticky-note buttons.
-    /// In the browser, sound can only start after a click, so there the buttons wait behind "click anywhere to begin".
+    /// Browsers only allow sound after a click, so the buttons wait behind a pulsing "click to start" (everywhere, so the
+    /// editor shows what players see).
     /// </summary>
     public sealed class MainMenu : MonoBehaviour
     {
         [SerializeField] private CanvasGroup title;
         [SerializeField] private CanvasGroup buttons;
-        [Tooltip("\"click anywhere to begin\" — only used where audio needs a first click (WebGL).")]
+        [Tooltip("\"click to start\": the first click wakes the sound (browsers block audio until then).")]
         [SerializeField] private CanvasGroup wakePrompt;
         [Tooltip("Black overlay that fades in when the game starts.")]
         [SerializeField] private CanvasGroup fade;
@@ -28,8 +29,6 @@ namespace Courtyard.UI
         private bool _awake;
         private bool _leaving;
         private int _wakeFrame = -1;
-
-        private static bool NeedsWakeClick => Application.platform == RuntimePlatform.WebGLPlayer;
 
         private void Start()
         {
@@ -48,33 +47,33 @@ namespace Courtyard.UI
         private IEnumerator Reveal()
         {
             yield return Tweens.Run(revealSeconds, k => title.alpha = k);
-            if (NeedsWakeClick) yield return Tweens.Run(0.5f, k => wakePrompt.alpha = k);
+            if (wakePrompt != null) yield return Tweens.Run(0.5f, k => wakePrompt.alpha = k);
             else Wake();
         }
 
         private void Update()
         {
-            if (_awake || !NeedsWakeClick || wakePrompt.alpha <= 0f) return;
-            wakePrompt.alpha = 0.55f + 0.45f * Mathf.Sin(Time.time * pulseSpeed);
+            if (_awake || wakePrompt == null || wakePrompt.alpha <= 0f) return;
+            wakePrompt.alpha = 0.75f + 0.25f * Mathf.Sin(Time.time * pulseSpeed);
             if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame) Wake();
         }
 
-        /// <summary>First click (browser): sound starts, the prompt fades and the buttons come in.</summary>
+        /// <summary>First click: sound starts, the prompt fades and the buttons come in.</summary>
         private void Wake()
         {
             if (_awake) return;
             _awake = true;
             _wakeFrame = Time.frameCount;
-            if (NeedsWakeClick) AudioManager.Play(SfxId.UiClick);
+            AudioManager.Play(SfxId.UiClick);
             StartCoroutine(ShowButtons());
         }
 
         private IEnumerator ShowButtons()
         {
-            var from = wakePrompt.alpha;
+            var from = wakePrompt != null ? wakePrompt.alpha : 0f;
             yield return Tweens.Run(0.6f, k =>
             {
-                wakePrompt.alpha = from * (1f - k);
+                if (wakePrompt != null) wakePrompt.alpha = from * (1f - k);
                 buttons.alpha = k;
             });
             SetGroup(buttons, 1f, true);

@@ -376,6 +376,15 @@ namespace Courtyard.Editor
             });
             // Day 1: spoon the coffee in while the kettle heats.
             Patch(Folder + InstantCoffee + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "startsWithPrevious", true));
+
+            // The spoon counter sits on the light counter: dark ink, a touch bigger.
+            foreach (var name in new[] { InstantCoffee, PourWater })
+                Patch(Folder + name + ".prefab", root => Edit(root.GetComponent<InstantCoffeeStep>(), so =>
+                {
+                    Property(so, "countColour").colorValue = new Color(0.24f, 0.16f, 0.12f);
+                    Property(so, "countDoneColour").colorValue = new Color(0.16f, 0.45f, 0.14f);
+                    Property(so, "countOverColour").colorValue = new Color(0.7f, 0.16f, 0.1f);
+                }));
         }
 
         /// <summary>Pour-over days: carry the V60 from the sill onto the cup (unscored).</summary>

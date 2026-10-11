@@ -158,7 +158,7 @@ namespace Courtyard.Editor
 
             // Credits roll up through a window in the middle.
             var viewport = UiObject("EndingCredits", root);
-            Place(viewport, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1200f, 760f));
+            Place(viewport, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1640f, 820f));
             viewport.gameObject.AddComponent<RectMask2D>();
             var credits = Label(viewport, "Credits", "", 40f, TextAlignmentOptions.Top, Cream);
             var creditsRect = credits.rectTransform;
@@ -167,6 +167,9 @@ namespace Courtyard.Editor
             creditsRect.pivot = new Vector2(0.5f, 1f);
             creditsRect.sizeDelta = new Vector2(0f, 1400f);
             credits.lineSpacing = 10f;
+            credits.textWrappingMode = TextWrappingModes.Normal;
+            creditsRect.offsetMin = new Vector2(40f, creditsRect.offsetMin.y); // side margins so no line touches the mask
+            creditsRect.offsetMax = new Vector2(-40f, creditsRect.offsetMax.y);
 
             var thanksRect = UiObject("EndingThanks", root);
             Stretch(thanksRect);
