@@ -56,7 +56,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Sunday. The light is different today.
+    text: Sunday. Even the light looks softer.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
@@ -64,7 +64,8 @@ MonoBehaviour:
     condition: 0
     style: 2
     speaker: Mira
-    text: "Hi\u2026 I'm Mira, from across. I ran out of coffee. Could I borrow some?"
+    text: "Hi\u2026 I'm Mira, from across the yard. I ran out of coffee. Could I
+      borrow some?"
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
@@ -72,7 +73,7 @@ MonoBehaviour:
     condition: 0
     style: 2
     speaker: Mira
-    text: "Something sweet\u2026 with cinnamon? Surprise me."
+    text: "Something sweet, please. Cinnamon\u2026 and maybe honey?"
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -80,7 +81,7 @@ MonoBehaviour:
     condition: 1
     style: 2
     speaker: Mira
-    text: Okay. That's the best cup I've had this month.
+    text: Wow. Best cup I've had all month.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -88,7 +89,7 @@ MonoBehaviour:
     condition: 2
     style: 2
     speaker: Mira
-    text: "It's\u2026 nice. Thank you."
+    text: "It's\u2026 nice. Thank you, really."
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -96,7 +97,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: I think I'm smiling. Weird feeling.
+    text: I think I'm smiling. Strange feeling.
     setsMiraWindow: 0
     miraWindowAfter: 0
   twoMeters: 0
@@ -111,9 +112,15 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 8
   badDrinkChill: 20
-  calendarLine: Sunday. Make the coffee slowly.
-  coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
-  failText: "Too cold\u2026 let's try again."
+  calendarLine: Sunday. No rush today.
+  tutorialHints: 0
+  pulseRecipeCard: 0
+  recipeCardText: "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour
+    to the line\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind
+    to the green\n3) slow circles, keep the flow green, fill to the line\n\n<b>Milk</b>
+    \u2014 hold to steam, let go in the green"
+  coldDrinkText: "Cold and bitter\u2026 that didn't help at all."
+  failText: "Too cold\u2026 let's try that again."
   drinkResults:
   - icon: {fileID: 21300000, guid: 722a94e002662491386aea713d5f2d88, type: 3}
     condition: 0

@@ -8,7 +8,7 @@ namespace Courtyard.Tests
     /// <summary>
     /// Simulates a player through every level using the same warmth rules as LevelRunner
     /// (drain only while a step runs; scored steps warm or — when badly made — chill their target; the served drink
-    /// warms or chills both).
+    /// warms or chills whoever it is for — on Day 20 her drink warms her, his auto-filled cup warms him).
     /// </summary>
     public sealed class BalanceTests
     {
@@ -32,11 +32,11 @@ namespace Courtyard.Tests
                 group.Tick(step.Scored ? secondsPerStep : UnscoredStepSeconds);
                 lowest = group.Meters.Min(m => m.Value) is var v && v < lowest ? v : lowest;
                 if (group.IsDepleted) return -1f;
-                if (step.Scored) group.Apply(step.WarmthTarget, level.StepWarmthDelta(quality));
+                if (step.Scored) group.Apply(level.TargetFor(step), level.StepWarmthDelta(step.FixedQuality ?? quality));
                 if (group.IsDepleted) return -1f;
             }
 
-            group.Apply(WarmthTarget.Both, level.DrinkWarmthDelta(quality));
+            group.Apply(level.DrinkTarget, level.DrinkWarmthDelta(quality));
             if (group.IsDepleted) return -1f;
             return lowest;
         }

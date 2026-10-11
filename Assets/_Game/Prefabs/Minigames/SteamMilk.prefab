@@ -136,10 +136,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33dec6ed1f2f14b7a85755655682eb0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.SteamMilkStep
-  hintText: Hold the milk jug to steam it. Let go in the green.
+  hintText: Hold to steam the milk. Let go in the green.
   scored: 1
   warmthTarget: 0
   zone: 4
+  alwaysShowHint: 0
+  explainBelow: 0.6
   needle: {fileID: 6346820200461904142}
   greenBand: {fileID: 1487750248518914806}
   scaleHeight: 2.4
@@ -150,6 +152,8 @@ MonoBehaviour:
   heatPerSecond: 13
   qualityFalloff: 18
   minHeatingToFinish: 35
+  tooColdText: "Still cold \u2014 hold it a little longer."
+  tooHotText: "Too hot \u2014 the milk scorched."
   jugColor: {r: 1, g: 1, b: 1, a: 1}
   squealColor: {r: 1, g: 0.78, b: 0.75, a: 1}
 --- !u!1 &6907516859651134100

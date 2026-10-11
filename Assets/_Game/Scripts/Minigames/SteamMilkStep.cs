@@ -27,6 +27,10 @@ namespace Courtyard.Minigames
         [SerializeField, Min(0f)] private float minHeatingToFinish = 35f;
 
         [Header("Look")]
+        [Header("Why it went wrong")]
+        [SerializeField] private string tooColdText = "Still cold — hold it a little longer.";
+        [SerializeField] private string tooHotText = "Too hot — the milk scorched.";
+
         [SerializeField] private Color jugColor = new(0.8f, 0.82f, 0.85f);
         [SerializeField] private Color squealColor = new(1f, 0.55f, 0.5f);
 
@@ -98,7 +102,9 @@ namespace Courtyard.Minigames
             _fx.Punch(_counter.MilkJugBody.transform);
             _fx.Burst(_counter.Mug.transform.position + Vector3.up * 0.65f, new Color(0.98f, 0.95f, 0.88f), 10, 0.8f, 0.07f, 0.4f);
             var centre = (bandMin + bandMax) * 0.5f;
-            Complete(1f - Mathf.Abs(_temperature - centre) / qualityFalloff);
+            var quality = 1f - Mathf.Abs(_temperature - centre) / qualityFalloff;
+            if (ShouldExplain(quality)) Explain(_fx, _temperature < centre ? tooColdText : tooHotText, _counter.MilkJugBody);
+            Complete(quality);
         }
 
         private float ToScaleY(float temperature) =>

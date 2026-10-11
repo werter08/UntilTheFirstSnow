@@ -44,9 +44,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 738ab40f2fa94493495e97477c7a1957, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.WaveBackStep
-  hintText: She's waving! Click your mug to wave back.
+  hintText: She's waving. Click your mug to wave back.
   scored: 0
   warmthTarget: 0
+  zone: 0
+  alwaysShowHint: 1
+  explainBelow: 0.6
   raiseHeight: 1.2
   raiseSeconds: 0.4
   holdSeconds: 1.2
+  waveSeconds: 2.5
+  pauseSeconds: 2

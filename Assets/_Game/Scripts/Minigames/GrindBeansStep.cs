@@ -31,6 +31,10 @@ namespace Courtyard.Minigames
         [SerializeField, Min(0f)] private float stillSeconds = 0.12f;
         [SerializeField, Min(0.1f)] private float speedSmoothing = 10f;
 
+        [Header("Why it went wrong")]
+        [SerializeField] private string tooFineText = "Ground too fine — stop in the green.";
+        [SerializeField] private string tooCoarseText = "Too coarse — grind a little more.";
+
         private CounterStation _counter;
         private FeedbackFx _fx;
         private float _lastAngle;
@@ -139,7 +143,10 @@ namespace Courtyard.Minigames
             _counter.GrinderHandle.Interactable = false;
             _counter.SetDripperGrounds(true);
             AudioManager.StopLoop(SfxId.Grind, 0.1f);
-            Complete(1f - Mathf.Abs(meter.Value - targetLevel) / qualityFalloff);
+            var quality = 1f - Mathf.Abs(meter.Value - targetLevel) / qualityFalloff;
+            if (ShouldExplain(quality))
+                Explain(_fx, meter.Value > targetLevel ? tooFineText : tooCoarseText, _counter.GrinderArm.parent.GetComponentInChildren<SpriteRenderer>());
+            Complete(quality);
         }
     }
 }

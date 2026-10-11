@@ -45,13 +45,18 @@ namespace Courtyard.Tests
         [UnityTest, Timeout(300000)]
         public IEnumerator Day20_TwoMetersAndHerMug()
         {
+            // Her mug first (it goes to the brewing spot), her drink, then his cup fills by itself beside it.
             yield return LoadDay(20);
             yield return PlayKettleBoil();
+            yield return PlayChooseMug();
+            Assert.That(LastQuality, Is.EqualTo(1f), "Her mug is the right one.");
+            Assert.That(Counter.MugPresent, Is.True, "Her mug should now stand at the brewing spot.");
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlaySteamMilk();
-            yield return PlayChooseMug();
-            Assert.That(LastQuality, Is.EqualTo(1f), "Her mug is the right one.");
+            yield return AdvanceTo<AutoFillHisMugStep>();
+            yield return WaitForCompletion();
+            Assert.That(Counter.HasHisCup, Is.True, "His cup should stand beside hers.");
             yield return FinishDay();
         }
 

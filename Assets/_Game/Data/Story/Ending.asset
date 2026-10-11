@@ -19,12 +19,16 @@ MonoBehaviour:
     style: 1
     speaker: 
     text: Until the First Snow
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
-    text: A small story about coffee, an autumn, and the window across the courtyard.
+    text: A cozy lofi story about coffee and love.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
@@ -34,17 +38,39 @@ MonoBehaviour:
 
       Limitation: Staying
       Warm.'
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 1
     speaker: 
-    text: 'Art: drawn by the team.
+    text: 'Design, code & art: Begench
 
-      Decor: ODDBLOT (Basic Coffee Shop pack).'
+      Music: Purrple Cat (CC BY-SA 4.0)
+
+      Rain
+      & wind: Helton Yan (CC BY 4.0)'
+    setsMiraWindow: 0
+    miraWindowAfter: 0
+  - trigger: 2
+    stepIndex: 0
+    condition: 0
+    style: 1
+    speaker: 
+    text: 'Sound effects: Polarsound Productions, MorphCore, Kenney (CC0)
+
+      Decor:
+      ODDBLOT
+
+      Fonts: Amaranth, Playpen Sans (OFL)'
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 2
     stepIndex: 0
     condition: 0
     style: 0
     speaker: 
     text: Thank you for playing. Stay warm.
+    setsMiraWindow: 0
+    miraWindowAfter: 0

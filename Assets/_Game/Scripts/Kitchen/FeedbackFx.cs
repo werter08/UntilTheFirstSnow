@@ -42,6 +42,13 @@ namespace Courtyard.Kitchen
         [SerializeField, Min(0f)] private float shakeAmount = 0.07f;
         [SerializeField, Min(0f)] private float chillHoldSeconds = 0.6f;
 
+        [Header("Why it went wrong")]
+        [SerializeField] private Color mistakeTextColour = new(0.72f, 0.24f, 0.14f);
+        [SerializeField, Min(0.1f)] private float mistakeSeconds = 2.8f;
+        [SerializeField] private float mistakeRise = 0.3f;
+        [SerializeField, Range(0.2f, 2f)] private float mistakeScale = 0.6f;
+        [SerializeField] private Color mistakeDust = new(0.55f, 0.55f, 0.6f, 0.6f);
+
         [Header("Served drink")]
         [SerializeField, Min(0f)] private float serveHoldSeconds = 1.4f;
 
@@ -161,7 +168,15 @@ namespace Courtyard.Kitchen
             }
         }
 
-        public void Popup(string text, Vector3 worldPosition, Color? colour = null, float scale = 1f)
+        /// <summary>What went wrong, where it happened: a line that lingers above the tool, a grey puff and a wobble.</summary>
+        public void Explain(string text, Vector3 worldPosition, Transform target = null)
+        {
+            Popup(text, worldPosition, mistakeTextColour, mistakeScale, mistakeSeconds, mistakeRise);
+            Puff(worldPosition + Vector3.down * 0.35f, mistakeDust, 5, 0.4f, 0.3f, -0.05f);
+            if (target != null) Punch(target, 0.7f);
+        }
+
+        public void Popup(string text, Vector3 worldPosition, Color? colour = null, float scale = 1f, float seconds = -1f, float rise = -1f)
         {
             var popup = Instantiate(popupTemplate, popupTemplate.transform.parent);
             popup.gameObject.SetActive(true);
@@ -169,7 +184,7 @@ namespace Courtyard.Kitchen
             if (colour.HasValue) popup.color = colour.Value;
             popup.fontSize *= scale;
             popup.transform.position = new Vector3(worldPosition.x, worldPosition.y, popupTemplate.transform.position.z);
-            StartCoroutine(PopupRoutine(popup));
+            StartCoroutine(PopupRoutine(popup, seconds > 0f ? seconds : popupSeconds, rise >= 0f ? rise : popupRise));
         }
 
         private IEnumerator PunchRoutine(Transform target, Vector3 baseScale, float strength)
@@ -186,13 +201,13 @@ namespace Courtyard.Kitchen
             _punches.Remove(target);
         }
 
-        private IEnumerator PopupRoutine(TMP_Text popup)
+        private IEnumerator PopupRoutine(TMP_Text popup, float seconds, float rise)
         {
             var start = popup.transform.position;
             var colour = popup.color;
-            yield return Tweens.RunLinear(popupSeconds, t =>
+            yield return Tweens.RunLinear(seconds, t =>
             {
-                popup.transform.position = start + Vector3.up * (popupRise * Mathf.Sin(t * Mathf.PI * 0.5f));
+                popup.transform.position = start + Vector3.up * (rise * Mathf.Sin(t * Mathf.PI * 0.5f));
                 popup.transform.localScale = Vector3.one * (t < 0.15f ? Mathf.Lerp(0.6f, 1.1f, t / 0.15f) : Mathf.Lerp(1.1f, 1f, (t - 0.15f) / 0.85f));
                 popup.color = new Color(colour.r, colour.g, colour.b, colour.a * (1f - Mathf.InverseLerp(0.6f, 1f, t)));
             });

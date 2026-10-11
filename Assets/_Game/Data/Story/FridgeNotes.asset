@@ -15,28 +15,16 @@ MonoBehaviour:
   notes:
   - afterDay: 1
     from: 
-    text: 'Buy real coffee.
-
-      Instant tastes like Monday.'
+    text: Buy real coffee. Seriously.
   - afterDay: 5
     from: 
-    text: 'She waved first.
-
-      Next time, wave back sooner.'
+    text: The girl across the yard waved. I waved back. With a mug.
   - afterDay: 10
     from: Mira
-    text: 'Thank you for the coffee!
-
-      My usual: cinnamon and honey.'
+    text: "Thank you for the coffee! My usual: cinnamon + honey \u2665"
   - afterDay: 20
     from: Mira
-    text: 'The heating''s fixed.
-
-      Thank you for staying up with me.'
+    text: Heating's fixed. Thanks for the coffee at midnight.
   - afterDay: 30
     from: 
-    text: 'First snow.
-
-      Two mugs on the sill.
-
-      Warm.'
+    text: First snow. Two mugs on the sill.

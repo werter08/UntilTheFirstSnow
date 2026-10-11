@@ -30,6 +30,13 @@ namespace Courtyard.Minigames
         private readonly Dictionary<ToppingJar, Vector3> _rest = new();
         private CounterStation _counter;
         private FeedbackFx _fx;
+        [Header("Why it went wrong ({0} = the spice)")]
+        [SerializeField] private string tooMuchOneText = "Too much {0} — one portion each.";
+        [SerializeField] private string tooManyText = "Too many spices — just two.";
+        [SerializeField] private string tooFewText = "Not enough — it needs two spices.";
+        [SerializeField] private string wrongTasteText = "Not quite her taste…";
+        private Topping? _overdone;
+
         [Tooltip("Tilt (degrees) of a jar while it is carried.")]
         [SerializeField] private float carryTilt = -12f;
         private Vector2 _grabOffset;
@@ -129,6 +136,7 @@ namespace Courtyard.Minigames
             _busy = false;
 
             // Too much (two portions of one spice, or more than two spices) spoils it — judged when served.
+            if (_portions[jar.Topping] > maxPortionsPerSpice) _overdone ??= jar.Topping;
             if (_portions[jar.Topping] > maxPortionsPerSpice || TotalPortions > picksRequired) _spoiled = true;
 
             _counter.Mug.Interactable = TotalPortions > 0;
@@ -157,12 +165,18 @@ namespace Courtyard.Minigames
 
             if (_spoiled || TotalPortions < picksRequired)
             {
+                var why = _overdone.HasValue ? string.Format(tooMuchOneText, _overdone.Value.ToString().ToLowerInvariant())
+                    : TotalPortions > picksRequired ? tooManyText
+                    : tooFewText;
+                Explain(_fx, why, _counter.MugBody);
                 Ruin(); // too much or too little: a cold drink, the day goes on
                 return;
             }
 
             AudioManager.Play(SfxId.MugClink);
-            Complete(recipe.Score(_portions.Keys.ToList()));
+            var quality = recipe.Score(_portions.Keys.ToList());
+            if (ShouldExplain(quality)) Explain(_fx, wrongTasteText, _counter.MugBody);
+            Complete(quality);
         }
     }
 }

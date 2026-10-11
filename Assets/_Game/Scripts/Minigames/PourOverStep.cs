@@ -49,6 +49,13 @@ namespace Courtyard.Minigames
         private float _flow;
         private float _pourTime;
         private float _bandTime;
+        private float _fastTime;
+
+        [Header("Why it went wrong")]
+        [SerializeField] private string tooFastText = "Poured too fast — slow, gentle circles.";
+        [SerializeField] private string tooSlowText = "Too slow — keep the flow in the green.";
+        [SerializeField] private string tooMuchWaterText = "Too much water — stop at the line.";
+        [SerializeField] private string tooLittleWaterText = "Not enough water — fill to the line.";
         private float _pouredSeconds;
         private bool _runningDry;
         private Color _streamColour;
@@ -147,6 +154,7 @@ namespace Courtyard.Minigames
             }
 
             if (_flow >= bandMin && _flow <= bandMax) _bandTime += Time.deltaTime;
+            else if (_flow > bandMax) _fastTime += Time.deltaTime;
 
             _counter.SetMugLevel(_counter.MugLevel + fillPerSecond * Time.deltaTime);
             _splashTimer -= Time.deltaTime;
@@ -204,7 +212,16 @@ namespace Courtyard.Minigames
 
             var bandScore = _pourTime > 0f ? _bandTime / _pourTime : 0f;
             var fillScore = Mathf.Clamp01(1f - Mathf.Abs(_counter.MugLevel - targetFill) / fillTolerance);
-            Complete(bandWeight * bandScore + (1f - bandWeight) * fillScore);
+            var quality = bandWeight * bandScore + (1f - bandWeight) * fillScore;
+            if (ShouldExplain(quality))
+            {
+                // Name the bigger of the two mistakes: the flow, or how full the cup is.
+                var flowMistake = _fastTime > (_pourTime - _bandTime) * 0.5f ? tooFastText : tooSlowText;
+                var fillMistake = _counter.MugLevel > targetFill ? tooMuchWaterText : tooLittleWaterText;
+                Explain(_fx, bandScore <= fillScore ? flowMistake : fillMistake, _counter.MugBody);
+            }
+
+            Complete(quality);
         }
     }
 }

@@ -48,6 +48,12 @@ namespace Courtyard.Core
         [SerializeField, Min(1f)] private float nudgeAfterSeconds = 7f;
         [SerializeField, Min(0.5f)] private float nudgeRepeatSeconds = 4f;
 
+        [Header("Hints")]
+        [Tooltip("After the tutorial day, a minigame's hint shows only the first time it appears, for this long.")]
+        [SerializeField, Min(0.5f)] private float firstTimeHintSeconds = 4f;
+        [Tooltip("The recipe on the wall (click to read); pulses at the start of some days and on the first idle.")]
+        [SerializeField] private RecipeCard recipeCard;
+
 
         private WarmthGroup _warmth;
         private LevelDefinition _level;
@@ -57,6 +63,8 @@ namespace Courtyard.Core
         private float _idle;
         private bool _failed;
         private bool _chilledByDrink;
+        private bool _pulsedOnIdle;
+        private Coroutine _hintTimer;
 
         private void Start()
         {
@@ -78,6 +86,8 @@ namespace Courtyard.Core
             hands.SetSweater(_level.Props.sweater);
             CreateMeters();
             story.BeatRead += OnBeatRead;
+            HintSettings.Changed += OnHintSettingChanged;
+            if (recipeCard != null) recipeCard.Set(_level.RecipeCardText, kitchen.NoteCard);
             _run = StartCoroutine(Run());
         }
 
@@ -92,6 +102,7 @@ namespace Courtyard.Core
         {
             if (_warmth != null) _warmth.Depleted -= OnMeterDepleted;
             if (story != null) story.BeatRead -= OnBeatRead;
+            HintSettings.Changed -= OnHintSettingChanged;
         }
 
         private void CreateMeters()
@@ -111,6 +122,7 @@ namespace Courtyard.Core
             AudioManager.SetAmbience(_level.Ambience, _level.AmbienceVolume);
             yield return dayCard.Show(_level);
             yield return fader.FadeIn(fadeDuration);
+            if (_level.PulseRecipeCard && recipeCard != null) recipeCard.Pulse();
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelStart));
 
             var qualities = new List<float>(_level.Steps.Count);
@@ -120,7 +132,7 @@ namespace Courtyard.Core
                 _activeStep = Instantiate(_level.Steps[i], stepRoot);
                 _activeStep.transform.position += (Vector3)counter.ZoneShift(_activeStep.Zone);
                 _activeStep.Completed += q => quality = q;
-                hint.Show(_activeStep.HintText);
+                ShowHint(_level.Steps[i]);
                 counter.SetAllInteractable(false);
                 _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader));
                 StartCoroutine(FadeStepParts(_activeStep.transform, 0f, 1f)); // its own tools fade in
@@ -130,7 +142,7 @@ namespace Courtyard.Core
                 _draining = false;
 
                 // Let the result land (the last pour, the meter, the punch) before the step's tools fade away.
-                hint.Hide();
+                HideHint();
                 counter.SetAllInteractable(false);
                 var step = _activeStep;
                 _activeStep = null;
@@ -141,11 +153,11 @@ namespace Courtyard.Core
 
                 if (step.Scored)
                 {
-                    qualities.Add(quality);
+                    if (step.CountsTowardDrink) qualities.Add(quality);
                     var delta = _level.StepWarmthDelta(quality);
                     if (delta < 0f) yield return Chill(); // frost first, then the meter drops (and may run out)
                     _chilledByDrink = delta < 0f;
-                    _warmth.Apply(step.WarmthTarget, delta);
+                    _warmth.Apply(_level.TargetFor(step), delta); // two-meter days: her drink warms her, his cup him
                     _chilledByDrink = false; // Depleted fires inside Apply; later drain-outs are plain cold
                     if (_failed) yield break;
                     fx.Punch(counter.Mug.transform);
@@ -162,7 +174,7 @@ namespace Courtyard.Core
             var drinkDelta = _level.DrinkWarmthDelta(finalQuality);
             if (drinkDelta < 0f) yield return Chill();
             _chilledByDrink = drinkDelta < 0f;
-            _warmth.Apply(WarmthTarget.Both, drinkDelta);
+            _warmth.Apply(_level.DrinkTarget, drinkDelta);
             _chilledByDrink = false; // Depleted fires inside Apply; later drain-outs are plain cold
             if (_failed) yield break;
             var lastGood = qualities.Count == 0 || IsGood(qualities[qualities.Count - 1]);
@@ -218,11 +230,16 @@ namespace Courtyard.Core
             if (_level.OutroHoldSeconds <= 0f) yield break;
 
             if (_level.OutroClip != null) AudioSource.PlayClipAtPoint(_level.OutroClip, worldCamera.transform.position);
-            else AudioManager.Play(SfxId.Footsteps);
-            if (_level.OutroWalkers != null && _level.OutroWalkers.Length > 0)
-                yield return fader.Walk(_level.OutroWalkers, _level.OutroHoldSeconds);
+            else AudioManager.ResumeTrack(SfxId.Footsteps);
+            // Day 20: exactly the two mugs on the counter — his, and the one chosen for her.
+            var walkers = counter.HasHisCup && counter.HisCupSprite != null
+                ? new[] { counter.HisCupSprite, counter.MugBody.sprite }
+                : _level.OutroWalkers;
+            if (walkers != null && walkers.Length > 0)
+                yield return fader.Walk(walkers, _level.OutroHoldSeconds);
             else
                 yield return new WaitForSeconds(_level.OutroHoldSeconds);
+            AudioManager.StopLoop(SfxId.Footsteps, 0.4f); // the walk ends with the scene, not after it
         }
 
         private void UpdateNudge()
@@ -235,7 +252,15 @@ namespace Courtyard.Core
             }
 
             _idle += Time.deltaTime;
-            if (_idle < nudgeAfterSeconds || _activeStep.NudgeTarget == null) return;
+            if (_idle < nudgeAfterSeconds) return;
+            // The first time the player is stuck today, the recipe on the wall pulses too.
+            if (!_pulsedOnIdle && recipeCard != null)
+            {
+                _pulsedOnIdle = true;
+                recipeCard.Pulse();
+            }
+
+            if (_activeStep.NudgeTarget == null) return;
             fx.Punch(_activeStep.NudgeTarget, 0.8f);
             _idle = nudgeAfterSeconds - nudgeRepeatSeconds;
         }
@@ -305,6 +330,61 @@ namespace Courtyard.Core
             while (card.IsOpen) yield return null;
             card.Opened -= OnOpened;
             hint.Hide();
+        }
+
+        // ---------------------------------------------------------------- hints
+
+        /// <summary>
+        /// Story prompts always show. Other hints: the whole step on the tutorial day, else only the first time that
+        /// minigame appears in the game, for a few seconds — and never when the player switched hints off.
+        /// </summary>
+        private void ShowHint(MinigameStep prefab)
+        {
+            HideHint();
+            if (string.IsNullOrWhiteSpace(prefab.HintText)) return;
+            if (prefab.AlwaysShowHint || (HintSettings.Enabled && _level.TutorialHints))
+            {
+                hint.Show(prefab.HintText);
+                return;
+            }
+
+            if (!HintSettings.Enabled || !IsFirstAppearance(prefab)) return;
+            hint.Show(prefab.HintText);
+            _hintTimer = StartCoroutine(HideHintAfter(firstTimeHintSeconds));
+        }
+
+        private IEnumerator HideHintAfter(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            _hintTimer = null;
+            hint.Hide();
+        }
+
+        private void HideHint()
+        {
+            if (_hintTimer != null) StopCoroutine(_hintTimer);
+            _hintTimer = null;
+            hint.Hide();
+        }
+
+        /// <summary>No earlier day (in day order) uses this minigame.</summary>
+        private bool IsFirstAppearance(MinigameStep prefab)
+        {
+            if (allLevels == null) return true;
+            foreach (var level in allLevels)
+            {
+                if (level == null || level.DayNumber >= _level.DayNumber) continue;
+                foreach (var step in level.Steps)
+                    if (step == prefab) return false;
+            }
+
+            return true;
+        }
+
+        private void OnHintSettingChanged()
+        {
+            if (HintSettings.Enabled || _activeStep == null || _activeStep.AlwaysShowHint) return;
+            HideHint();
         }
 
         private void OnBeatRead(Story.StoryBeat beat)

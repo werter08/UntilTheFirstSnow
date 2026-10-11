@@ -88,6 +88,7 @@ namespace Courtyard.Editor
             ApplyNoteArt(slots);
             var card = EnsureNoteCard(scene);
             ApplyOpenNoteArt(card);
+            ApplyCardSurroundings(card);
             var director = kitchen.GetComponent<KitchenDirector>();
             WireArray(director, "fridgeNotes", slots.Cast<Object>().ToArray());
             Wire(director, "notesBook", book);
@@ -192,12 +193,21 @@ namespace Courtyard.Editor
                 }
             });
 
-            // Signature sits left of the curled corner.
+            // Signature well left of the curled corner (the folded triangle bottom-right), a bit higher.
             var signature = card.transform.Find("Paper/Signature") as RectTransform;
             if (signature != null)
             {
-                signature.offsetMin = new Vector2(60f, 50f);
-                signature.offsetMax = new Vector2(-150f, -330f);
+                signature.offsetMin = new Vector2(60f, 70f);
+                signature.offsetMax = new Vector2(-300f, -330f);
+            }
+
+            // Long pages (the recipe card) shrink their writing to fit the paper.
+            var body = card.transform.Find("Paper/Body")?.GetComponent<TextMeshProUGUI>();
+            if (body != null)
+            {
+                body.enableAutoSizing = true;
+                body.fontSizeMin = 22f;
+                body.fontSizeMax = 46f;
             }
 
             var paper = card.transform.Find("Paper")?.GetComponent<Image>();
@@ -208,6 +218,34 @@ namespace Courtyard.Editor
                 paper.preserveAspect = true;
                 ((RectTransform)paper.transform).sizeDelta = looks[0].size;
             }
+        }
+
+        /// <summary>
+        /// "click to close" right under the paper, and the HUD hint and story box hidden while a note is read (their
+        /// own canvases switch off), so no other text lands on the note.
+        /// </summary>
+        private static void ApplyCardSurroundings(NoteCard card)
+        {
+            var hint = card.transform.Find("CloseHint") as RectTransform;
+            if (hint != null)
+            {
+                hint.anchorMin = hint.anchorMax = new Vector2(0.5f, 0.5f);
+                hint.pivot = new Vector2(0.5f, 1f);
+                hint.sizeDelta = new Vector2(900f, 60f);
+                hint.anchoredPosition = new Vector2(0f, -300f);
+                var text = hint.GetComponent<TextMeshProUGUI>();
+                if (text != null) text.alignment = TextAlignmentOptions.Top;
+                Wire(card, "closeHint", hint);
+            }
+
+            var canvas = card.GetComponentInParent<Canvas>(true).transform;
+            var hidden = new[] { "HUD", "StoryBox" }.Select(canvas.Find).Where(t => t != null).Select(t =>
+            {
+                var own = t.GetComponent<Canvas>() ?? t.gameObject.AddComponent<Canvas>();
+                if (t.GetComponent<GraphicRaycaster>() == null) t.gameObject.AddComponent<GraphicRaycaster>();
+                return (Object)own;
+            }).ToArray();
+            WireArray(card, "hideWhileOpen", hidden);
         }
 
         /// <summary>The reading card: a dimmed screen with the paper note in the middle (above the story box).</summary>

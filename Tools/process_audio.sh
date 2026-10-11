@@ -33,16 +33,16 @@ convert() { # src dst
 
 # Seamless loop of [start, end): the first D seconds are crossfaded with the D seconds that follow `end` in the source,
 # so the end of the file flows straight back into its start (equal-power quarter-sine fades).
-loop() { # src dst start end crossfade
+loop() { # src dst start end crossfade [extra filters, e.g. softening EQ]
   need "$1" || return 0
-  local s=$3 e=$4 d=$5
+  local s=$3 e=$4 d=$5 extra=${6:-anull}
   encode -i "$SRC/$1" -filter_complex "\
 [0:a]asplit=3[a][b][c];\
 [a]atrim=$s:$(calc "$s + $d"),asetpts=PTS-STARTPTS,afade=t=in:d=$d:curve=qsin[head];\
 [b]atrim=$e:$(calc "$e + $d"),asetpts=PTS-STARTPTS,afade=t=out:d=$d:curve=qsin[tail];\
 [head][tail]amix=inputs=2:normalize=0[seam];\
 [c]atrim=$(calc "$s + $d"):$e,asetpts=PTS-STARTPTS[body];\
-[seam][body]concat=n=2:v=0:a=1[out]" -map "[out]" "$OUT/$2"
+[seam][body]concat=n=2:v=0:a=1[joined];[joined]$extra[out]" -map "[out]" "$OUT/$2"
 }
 
 # One-shot cut of [start, end) with fades.
@@ -54,7 +54,8 @@ cut() { # src dst start end fadeIn fadeOut
 
 # ---------------------------------------------------------------- edited files
 # Kettle: boil 0.06–14.69 s (the "done" click's transient starts at 14.712 s); the loop seam is a 50 ms crossfade.
-loop sfx_kettle_boil_loop.mp3 SFX/sfx_kettle_boil_loop.ogg 0.06 14.64 0.05
+# Softened (relaxed, not "dirty"): rumble and hiss rolled off, a touch quieter.
+loop sfx_kettle_boil_loop.mp3 SFX/sfx_kettle_boil_loop.ogg 0.06 14.64 0.05 "highpass=f=140,lowpass=f=2600,volume=0.8"
 # The click alone: from 20 ms before the transient to the end of the source (only 0.356 s is left; the boil continues under it).
 cut  sfx_kettle_boil_loop.mp3 SFX/sfx_kettle_done.ogg 14.692 15.048 0.01 0.03
 # Pour: a 9 s one-shot; sound runs 0.33–8.40 s, the rest is silence.
@@ -74,7 +75,8 @@ convert amb_wind.mp3                Ambience/amb_wind.ogg
 convert amb_snow.mp3                Ambience/amb_snow.ogg
 convert amb_room_fridge.flac        Ambience/amb_room_fridge.ogg
 convert amb_room_clock_ticking.wav  SFX/sfx_clock_tick.ogg
-convert sfx_kettle_switch.mp3       SFX/sfx_kettle_switch.ogg
+# The click is at 0.86 s: cut the silence before it, or the switch sounds late.
+cut  sfx_kettle_switch.mp3 SFX/sfx_kettle_switch.ogg 0.84 1.30 0.005 0.08
 convert sfx_spoon_tink.mp3          SFX/sfx_spoon_tink.ogg
 convert sfx_frother_loop.wav        SFX/sfx_frother_loop.ogg
 convert sfx_froth_squeal.mp3        SFX/sfx_froth_squeal.ogg

@@ -59,7 +59,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Instant coffee. It tastes like Monday.
+    text: Instant coffee. Tastes like Monday.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -82,11 +82,15 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
-  calendarLine: 'Small things count too.
+  calendarLine: Day 1. Same as yesterday.
+  tutorialHints: 1
+  pulseRecipeCard: 1
+  recipeCardText: '<b>Instant coffee</b>
 
-    One warm cup is a start.'
-  coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
-  failText: "Too cold\u2026 let's try again."
+    1) boil water   2) two spoons   3)
+    pour to the line'
+  coldDrinkText: "Cold and bitter\u2026 that didn't help at all."
+  failText: "Too cold\u2026 let's try that again."
   drinkResults:
   - icon: {fileID: 21300000, guid: aa6fe5bccbf8c4a9f87bbebfdd118db9, type: 3}
     condition: 0

@@ -60,7 +60,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: I don't need the recipe anymore.
+    text: I don't need a recipe for this one.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -76,7 +76,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: "For the first time in a long while \u2014 I'm warm."
+    text: "And for the first time in a long while\u2026 I'm warm."
     setsMiraWindow: 0
     miraWindowAfter: 0
   twoMeters: 0
@@ -91,9 +91,15 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
-  calendarLine: First snow. Nobody is cold anymore.
-  coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
-  failText: "Too cold\u2026 let's try again."
+  calendarLine: First snow.
+  tutorialHints: 0
+  pulseRecipeCard: 0
+  recipeCardText: "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour
+    to the line\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind
+    to the green\n3) slow circles, keep the flow green, fill to the line\n\n<b>Milk</b>
+    \u2014 hold to steam, let go in the green\n\nTwo mugs tonight. Hers first."
+  coldDrinkText: Hmm. Not quite her usual.
+  failText: 
   drinkResults:
   - icon: {fileID: 21300000, guid: e54871b99760f43c2b2e9c5182360ee0, type: 3}
     condition: 0

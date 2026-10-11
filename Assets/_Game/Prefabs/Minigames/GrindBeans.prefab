@@ -46,10 +46,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc4eb4e412e144af896de6a920c4ebb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.GrindBeansStep
-  hintText: Turn the grinder handle in circles. Let go when the meter is in the green.
+  hintText: Turn the handle in circles. Stop in the green.
   scored: 1
   warmthTarget: 0
   zone: 2
+  alwaysShowHint: 0
+  explainBelow: 0.6
   meter: {fileID: 8334105456750431061}
   targetZone: {fileID: 4786261690177519870}
   targetLevel: 0.55
@@ -60,6 +62,8 @@ MonoBehaviour:
   fullSpeedDegrees: 720
   stillSeconds: 0.12
   speedSmoothing: 10
+  tooFineText: "Ground too fine \u2014 stop in the green."
+  tooCoarseText: "Too coarse \u2014 grind a little more."
 --- !u!1 &1695648775326594813
 GameObject:
   m_ObjectHideFlags: 0

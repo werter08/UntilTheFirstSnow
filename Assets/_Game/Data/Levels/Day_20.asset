@@ -44,17 +44,18 @@ MonoBehaviour:
     fridgeNotes: 2
   steps:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
+  - {fileID: 6987173642302428769, guid: dba18201d2f5e422891f48785c2142cd, type: 3}
   - {fileID: 104158219434757867, guid: dccb5e1aee3234a4484f894ced79da0d, type: 3}
   - {fileID: 6738547792549017874, guid: 61b9f335f46924425b3f7ffe28e6e34a, type: 3}
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
-  - {fileID: 6987173642302428769, guid: dba18201d2f5e422891f48785c2142cd, type: 3}
+  - {fileID: 6688862761830470276, guid: e5e35f9004e644912b1b1562f5b20015, type: 3}
   storyBeats:
   - trigger: 0
     stepIndex: 0
     condition: 0
     style: 1
     speaker: 
-    text: Heating broke.
+    text: My heating broke :(
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
@@ -62,15 +63,15 @@ MonoBehaviour:
     condition: 0
     style: 1
     speaker: 
-    text: Hold on.
-    setsMiraWindow: 1
-    miraWindowAfter: 1
+    text: Hold on. Coffee's coming.
+    setsMiraWindow: 0
+    miraWindowAfter: 0
   - trigger: 1
-    stepIndex: 3
+    stepIndex: 5
     condition: 0
     style: 0
     speaker: 
-    text: Two cups. Hers first.
+    text: Two cups tonight. Hers first.
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
@@ -78,7 +79,7 @@ MonoBehaviour:
     condition: 0
     style: 0
     speaker: 
-    text: Funny. A month ago I couldn't keep myself warm.
+    text: Funny. A few weeks ago I couldn't even keep myself warm.
     setsMiraWindow: 0
     miraWindowAfter: 0
   twoMeters: 1
@@ -93,11 +94,15 @@ MonoBehaviour:
   badResultThreshold: 0.4
   badStepChill: 20
   badDrinkChill: 35
-  calendarLine: 'Someone is cold tonight.
-
-    You know how to help.'
-  coldDrinkText: "Cold, bitter coffee\u2026 the cold got in. Let's try again."
-  failText: "Too cold\u2026 let's try again."
+  calendarLine: Freezing tonight. Her window is still lit.
+  tutorialHints: 0
+  pulseRecipeCard: 0
+  recipeCardText: "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour
+    to the line\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind
+    to the green\n3) slow circles, keep the flow green, fill to the line\n\n<b>Milk</b>
+    \u2014 hold to steam, let go in the green\n\nTwo mugs tonight. Hers first."
+  coldDrinkText: "Cold and bitter\u2026 that won't warm anyone."
+  failText: "Too cold\u2026 let's try that again."
   drinkResults:
   - icon: {fileID: 21300000, guid: 722a94e002662491386aea713d5f2d88, type: 3}
     condition: 0

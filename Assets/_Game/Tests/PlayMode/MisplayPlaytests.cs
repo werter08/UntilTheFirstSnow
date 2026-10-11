@@ -219,11 +219,11 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(20);
             yield return PlayKettleBoil();
+            yield return PlayChooseMug(hers: false);
+            Assert.That(LastQuality, Is.EqualTo(0.6f).Within(0.001f));
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlaySteamMilk();
-            yield return PlayChooseMug(hers: false);
-            Assert.That(LastQuality, Is.EqualTo(0.6f).Within(0.001f));
             yield return FinishDay();
         }
     }

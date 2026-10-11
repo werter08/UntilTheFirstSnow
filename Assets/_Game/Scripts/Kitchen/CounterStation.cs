@@ -1,3 +1,4 @@
+using System.Linq;
 using Courtyard.Core;
 using UnityEngine;
 
@@ -103,6 +104,7 @@ namespace Courtyard.Kitchen
         public Transform GrinderArm => grinderArm;
         public DragTarget GrinderHandle => grinderHandle;
         public PointerTarget Mug => mug;
+        public SpriteRenderer MugBody => mugBody;
         /// <summary>Centre of the mug's rim (world), where pouring and spices go.</summary>
         public Vector3 MugTop => new(mugBody.bounds.center.x - mugBody.bounds.extents.x * 0.29f, mugBody.bounds.max.y, 0f);
 
@@ -213,10 +215,171 @@ namespace Courtyard.Kitchen
             foreach (var marker in spoonMarkers) marker.enabled = false;
             foreach (var jar in toppingJars) jar.SetPicked(false);
 
+            // Day 20: her mug is chosen from the rack first — until then the brewing spot (and the V60) is empty.
+            SetMugPresent(!MugChosenFirst(level));
+
             SetAllInteractable(false);
         }
 
         public ParticleSystem MugSteam => mugSteam;
+        public bool MugPresent => mug.gameObject.activeSelf;
+
+        /// <summary>The brewing mug (and the V60 over it) on the counter, or an empty spot.</summary>
+        public void SetMugPresent(bool present)
+        {
+            mug.gameObject.SetActive(present);
+            if (!present) dripper.SetActive(false);
+        }
+
+        /// <summary>
+        /// The mug picked from the rack arrives at the brewing spot (with its own drawing), empty, under the V60 if this
+        /// day pours over.
+        /// </summary>
+        public void PlaceMug(Sprite body, bool pourOverNext)
+        {
+            if (body != null) mugBody.sprite = body;
+            if (mugContents != null) mugContents.SetChipped(false);
+            mugLeafPrint.SetActive(false);
+            mug.gameObject.SetActive(true);
+            SetMugLevel(0f);
+            mugFoam.SetActive(false);
+            if (!pourOverNext) return;
+            dripper.SetActive(true);
+            if (_dripperRest.HasValue) dripper.transform.localPosition = _dripperRest.Value;
+            SetDripperAlpha(1f);
+        }
+
+        private static bool MugChosenFirst(LevelDefinition level)
+        {
+            var choose = level.Steps.ToList().FindIndex(s => s is Minigames.ChooseMugStep);
+            var pour = level.Steps.ToList().FindIndex(s => s is Minigames.PourOverStep);
+            return choose >= 0 && (pour < 0 || choose < pour);
+        }
+
+        // ---------------------------------------------------------------- Day 20: his cup, filled from the V60
+
+        [Header("Day 20: his cup fills beside hers")]
+        [SerializeField] private Sprite hisMugSprite;
+        [Tooltip("Where his cup slides in from (offset from its final spot, world units).")]
+        [SerializeField] private Vector2 hisCupSlideFrom = new(-1.2f, 0f);
+        [SerializeField, Range(0f, 1f)] private float hisCupLevel = 0.85f;
+
+        public bool HasHisCup => _hisCup != null;
+        public Sprite HisCupSprite => _hisCupBody != null ? _hisCupBody.sprite : null;
+
+        private SpriteRenderer _hisCupBody;
+
+        /// <summary>
+        /// His mug comes down from the rack (<paramref name="fromRack"/>, hidden there — never two of the same mug) or
+        /// slides in, lands next to hers and fills with black coffee through the V60: drips, steam, no input.
+        /// <paramref name="drip"/> is called with the V60's spout position while it drips (for particles).
+        /// </summary>
+        public System.Collections.IEnumerator FillHisMug(float seconds, Sprite blackCoffee, System.Action<Vector3> drip,
+            SpriteRenderer fromRack = null)
+        {
+            if (_hisCup != null) Destroy(_hisCup);
+            var spot = mug.transform.position + (Vector3)hisCupOffset;
+            _hisCup = Instantiate(mug.gameObject, spot + (Vector3)hisCupSlideFrom, mug.transform.rotation, mug.transform.parent);
+            _hisCup.name = "HisMug";
+            foreach (var behaviour in _hisCup.GetComponentsInChildren<MonoBehaviour>(true))
+                if (behaviour is not MugContents) Destroy(behaviour);
+            foreach (var collider in _hisCup.GetComponentsInChildren<Collider2D>(true)) Destroy(collider);
+            _hisCupBody = Twin(_hisCup.transform, mugBody.transform)?.GetComponent<SpriteRenderer>();
+            if (_hisCupBody != null && hisMugSprite != null) _hisCupBody.sprite = hisMugSprite;
+            var foam = Twin(_hisCup.transform, mugFoam.transform);
+            if (foam != null) foam.gameObject.SetActive(false);
+            var contents = _hisCup.GetComponentInChildren<MugContents>(true);
+            if (contents != null)
+            {
+                contents.SetChipped(false);
+                contents.ClearSpice();
+                if (blackCoffee != null) contents.SetSprite(blackCoffee);
+                contents.SetLevel(0f);
+            }
+
+            var steam = Twin(_hisCup.transform, mugSteam.transform)?.GetComponent<ParticleSystem>();
+            if (steam != null)
+            {
+                var emission = steam.emission;
+                emission.enabled = false;
+            }
+
+            var shadow = mugBody.transform.parent.Find(mugBody.name + "Shadow");
+            if (shadow != null)
+            {
+                // Placed relative to the cup's start, so it rides along as the cup slides in.
+                var shadowCopy = StillCopy(shadow.gameObject, shadow.position + (Vector3)(hisCupOffset + hisCupSlideFrom));
+                shadowCopy.transform.SetParent(_hisCup.transform, true);
+            }
+
+            // Down from the rack (small → full size, in an arc), or a short slide in.
+            var cup = _hisCup.transform;
+            var scale = cup.localScale;
+            var from = cup.position;
+            var startScale = scale;
+            var arc = 0f;
+            if (fromRack != null && _hisCupBody != null)
+            {
+                var offset = cup.position - _hisCupBody.bounds.center; // keep the cup's body on the rack mug
+                var shrink = fromRack.bounds.size.y / Mathf.Max(0.01f, _hisCupBody.bounds.size.y);
+                startScale = scale * shrink;
+                from = fromRack.bounds.center + offset * shrink;
+                fromRack.gameObject.SetActive(false);
+                arc = 0.8f;
+            }
+
+            cup.position = from;
+            cup.localScale = startScale;
+            yield return Tweens.Run(seconds * 0.3f, k =>
+            {
+                cup.position = Vector3.Lerp(from, spot, k) + Vector3.up * (Mathf.Sin(k * Mathf.PI) * arc);
+                cup.localScale = Vector3.Lerp(startScale, scale, k);
+            });
+
+            // The V60 sits on his cup and drips it full.
+            var v60 = dripper.transform;
+            var v60Rest = v60.localPosition;
+            v60.position = new Vector3(spot.x + (v60.position.x - mug.transform.position.x), v60.position.y, v60.position.z);
+            var v60Over = v60.localPosition;
+            dripper.SetActive(true);
+            SetDripperGrounds(true);
+            yield return Tweens.Run(0.2f, SetDripperAlpha);
+            var dripTimer = 0f;
+            yield return Tweens.RunLinear(seconds * 0.55f, k =>
+            {
+                if (contents != null) contents.SetLevel(hisCupLevel * k);
+                dripTimer -= Time.deltaTime;
+                if (dripTimer > 0f) return;
+                dripTimer = 0.12f;
+                drip?.Invoke(new Vector3(spot.x, mugBody.bounds.max.y + 0.15f, 0f));
+            });
+
+            if (steam != null)
+            {
+                var emission = steam.emission;
+                emission.enabled = true;
+                emission.rateOverTime = steamRateColdHot.y * 0.7f;
+                steam.Emit(10);
+            }
+
+            yield return Tweens.Run(0.3f, k =>
+            {
+                v60.localPosition = v60Over + Vector3.up * (0.6f * k);
+                SetDripperAlpha(1f - k);
+            });
+            dripper.SetActive(false);
+            v60.localPosition = v60Rest;
+            SetDripperAlpha(1f);
+        }
+
+        /// <summary>The object in <paramref name="copyRoot"/> at the same place as <paramref name="original"/> under the mug.</summary>
+        private Transform Twin(Transform copyRoot, Transform original)
+        {
+            if (original == mug.transform) return copyRoot;
+            var path = new System.Collections.Generic.List<string>();
+            for (var t = original; t != null && t != mug.transform; t = t.parent) path.Insert(0, t.name);
+            return copyRoot.Find(string.Join("/", path));
+        }
         public Transform RestingSpoon => restingSpoon;
 
         [Header("Day 10: her cup joins his on the counter")]

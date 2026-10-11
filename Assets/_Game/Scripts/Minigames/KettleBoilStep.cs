@@ -24,6 +24,10 @@ namespace Courtyard.Minigames
         [Tooltip("Degrees outside the band at which quality reaches 0. Past the band, 'degrees' keep counting as water boils away.")]
         [SerializeField, Min(0.1f)] private float qualityFalloff = 25f;
 
+        [Header("Why it went wrong")]
+        [SerializeField] private string tooEarlyText = "Too early — it wasn't boiling yet.";
+        [SerializeField] private string tooLateText = "Too late — it boiled too long.";
+
         private CounterStation _counter;
         private FeedbackFx _fx;
         private State _state = State.Idle;
@@ -35,7 +39,7 @@ namespace Courtyard.Minigames
             _counter = ctx.Counter;
             _fx = ctx.Fx;
             _heat = startTemperature;
-            _counter.KettleSwitch.Clicked += OnSwitchClicked;
+            _counter.KettleSwitch.Pressed += OnSwitchClicked; // on press: the click sounds the moment the finger goes down
             _counter.KettleSwitch.Interactable = true;
             _counter.KettleView.SetHeating(false);
             NudgeTarget = _counter.SwitchLight.transform;
@@ -44,7 +48,7 @@ namespace Courtyard.Minigames
         private void OnDestroy()
         {
             if (_counter == null) return;
-            _counter.KettleSwitch.Clicked -= OnSwitchClicked;
+            _counter.KettleSwitch.Pressed -= OnSwitchClicked;
             _counter.KettleView.SetHeating(false);
             _counter.KettleView.SetBoil(0f);
             StopSounds();
@@ -94,7 +98,9 @@ namespace Courtyard.Minigames
             _fx.Punch(_counter.KettleBody.transform);
 
             var distance = _heat < bandMin ? bandMin - _heat : _heat > bandMax ? _heat - bandMax : 0f;
-            Complete(1f - distance / qualityFalloff);
+            var quality = 1f - distance / qualityFalloff;
+            if (ShouldExplain(quality)) Explain(_fx, _heat < bandMin ? tooEarlyText : tooLateText, _counter.KettleBody);
+            Complete(quality);
         }
 
         private static void StopSounds() => AudioManager.StopLoop(SfxId.KettleBoil, 0.1f);

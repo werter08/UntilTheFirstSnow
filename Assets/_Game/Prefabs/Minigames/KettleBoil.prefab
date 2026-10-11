@@ -44,13 +44,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2163e42ddba05428791e799d6994438f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.KettleBoilStep
-  hintText: Switch the kettle on. Switch it off when it boils.
+  hintText: Turn the kettle on. Turn it off when it boils.
   scored: 1
   warmthTarget: 0
   zone: 1
+  alwaysShowHint: 0
+  explainBelow: 0.6
   startTemperature: 20
   trembleFrom: 75
   bandMin: 90
   bandMax: 108
   heatPerSecond: 12
   qualityFalloff: 30
+  tooEarlyText: "Too early \u2014 it wasn't boiling yet."
+  tooLateText: "Too late \u2014 it boiled too long."

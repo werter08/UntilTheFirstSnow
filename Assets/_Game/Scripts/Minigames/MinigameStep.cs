@@ -17,6 +17,11 @@ namespace Courtyard.Minigames
         [SerializeField] private WarmthTarget warmthTarget = WarmthTarget.Both;
         [Tooltip("Counter zone this step's own parts belong to; the step is shifted with the zone.")]
         [SerializeField] private Kitchen.CounterZone zone;
+        [Tooltip("Story prompts (wave back, which mug, her drink) are new every time: their hint always shows. Other hints " +
+                 "show on the tutorial day and the first time a minigame appears.")]
+        [SerializeField] private bool alwaysShowHint;
+        [Tooltip("Results below this explain what went wrong, above the tool (\"Too much water\"…).")]
+        [SerializeField, Range(0f, 1f)] private float explainBelow = 0.6f;
 
         /// <summary>Raised once with the result quality in [0, 1].</summary>
         public event Action<float> Completed;
@@ -25,6 +30,16 @@ namespace Courtyard.Minigames
         public bool Scored => scored;
         public WarmthTarget WarmthTarget => warmthTarget;
         public Kitchen.CounterZone Zone => zone;
+        public bool AlwaysShowHint => alwaysShowHint;
+
+        /// <summary>Whether the result counts toward the served drink (false for his auto-filled cup on Day 20).</summary>
+        public virtual bool CountsTowardDrink => scored;
+
+        /// <summary>A step whose result is always the same (no input), e.g. his auto-filled cup; null = played.</summary>
+        public virtual float? FixedQuality => null;
+
+        /// <summary>Why the last result was poor (empty when it went fine).</summary>
+        public string Mistake { get; private set; } = string.Empty;
         public bool IsComplete { get; private set; }
 
         /// <summary>The tool to nudge when the player idles (null = no nudge, e.g. when it would give the answer away).</summary>
@@ -37,6 +52,21 @@ namespace Courtyard.Minigames
         /// meters drop — but the day goes on. Only warmth running out ends a day.
         /// </summary>
         protected void Ruin() => Complete(0f);
+
+        protected bool ShouldExplain(float quality) => quality < explainBelow;
+
+        /// <summary>
+        /// Tells the player what went wrong, right where it happened: a short line above the tool, a puff and a wobble.
+        /// Call before <see cref="Complete"/>.
+        /// </summary>
+        protected void Explain(Kitchen.FeedbackFx fx, string text, Renderer at)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+            Mistake = text;
+            if (fx == null) return;
+            var top = at != null ? new Vector3(at.bounds.center.x, at.bounds.max.y + 0.45f, 0f) : Vector3.zero;
+            fx.Explain(text, top, at != null ? at.transform : null);
+        }
 
         protected void Complete(float quality)
         {

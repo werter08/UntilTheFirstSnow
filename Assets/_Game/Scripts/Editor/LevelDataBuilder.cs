@@ -115,6 +115,21 @@ namespace Courtyard.Editor
         /// Applies the art manifest's per-day mapping (mug, sill mugs, sleeve, served drinks) to existing level assets
         /// without touching tuning or story.
         /// </summary>
+        /// <summary>Day 20's step order (her mug first, his cup auto-filled at the end) on the existing asset.</summary>
+        public static void PatchDay20Steps(IReadOnlyDictionary<string, MinigameStep> steps)
+        {
+            var spec = Specs().First(s => s.Day == 20);
+            var level = AssetDatabase.LoadAssetAtPath<LevelDefinition>($"{LevelsFolder}Day_20.asset");
+            if (level == null || spec.Steps.Any(n => !steps.ContainsKey(n))) return;
+            Edit(level, so =>
+            {
+                var list = so.FindProperty("steps");
+                list.arraySize = spec.Steps.Length;
+                for (var i = 0; i < spec.Steps.Length; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = steps[spec.Steps[i]];
+            });
+            AssetDatabase.SaveAssets();
+        }
+
         public static void PatchArtManifest()
         {
             foreach (var spec in Specs())
@@ -321,13 +336,14 @@ namespace Courtyard.Editor
                 Palette = Palette(new Color(0.45f, 0.5f, 0.75f), 0.7f, new Color(1f, 0.75f, 0.45f), 1f),
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, brewMug = MugStyle.Yellow, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers }, // ChooseMug picks hers from here
-                Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.SteamMilk, P.ChooseMug },
+                // Her mug first (to the brewing spot), her drink, then his cup fills by itself beside it.
+                Steps = new[] { P.KettleBoil, P.ChooseMug, P.GrindBeans, P.PourOver, P.SteamMilk, P.AutoFillHisMug },
                 Beats = new[]
                 {
                     // The brief's 🥶 emoji isn't in the default font; add a hand-drawn TMP sprite in M3.
                     Start(note, "Heating broke."),
                     After(0, note, "Hold on."),
-                    After(3, thought, "Two cups. Hers first."),
+                    After(5, thought, "Two cups tonight. Hers first."),
                     End(thought, "Funny. A month ago I couldn't keep myself warm."),
                 },
                 TwoMeters = true,

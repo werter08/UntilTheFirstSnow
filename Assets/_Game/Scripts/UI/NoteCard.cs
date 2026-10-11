@@ -20,6 +20,10 @@ namespace Courtyard.UI
         [SerializeField, Min(0f)] private float popSeconds = 0.25f;
         [Tooltip("The paper drawings (yellow / pink sticky note, calendar page). Missing ones keep the current paper.")]
         [SerializeField] private PaperLook[] papers = Array.Empty<PaperLook>();
+        [Tooltip("\"click to close\", placed just under the paper.")]
+        [SerializeField] private RectTransform closeHint;
+        [Tooltip("HUD parts hidden while a note is read, so no other text sits on top of it (hint, story box).")]
+        [SerializeField] private Canvas[] hideWhileOpen = Array.Empty<Canvas>();
 
         private Coroutine _anim;
         private int _openedFrame;
@@ -45,6 +49,7 @@ namespace Courtyard.UI
             signature.text = string.IsNullOrEmpty(from) ? string.Empty : "— " + from;
             IsOpen = true;
             _openedFrame = Time.frameCount;
+            SetHudHidden(true);
             AudioManager.Play(SfxId.PaperNote);
             Animate(true);
             Opened?.Invoke();
@@ -54,6 +59,7 @@ namespace Courtyard.UI
         {
             if (!IsOpen) return;
             IsOpen = false;
+            SetHudHidden(false);
             AudioManager.Play(SfxId.PaperNote);
             Animate(false);
         }
@@ -102,6 +108,13 @@ namespace Courtyard.UI
             body.rectTransform.offsetMin = new Vector2(look.padding.x, look.padding.y);
             body.rectTransform.offsetMax = new Vector2(-look.padding.z, -look.padding.w);
             body.color = look.ink;
+            if (closeHint != null) closeHint.anchoredPosition = new Vector2(0f, -look.size.y * 0.5f - 45f);
+        }
+
+        private void SetHudHidden(bool hidden)
+        {
+            foreach (var canvas in hideWhileOpen)
+                if (canvas != null) canvas.enabled = !hidden;
         }
 
         private void SetVisible(float alpha, bool blocks)

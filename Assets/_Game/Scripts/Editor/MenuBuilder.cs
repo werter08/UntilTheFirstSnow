@@ -257,7 +257,7 @@ namespace Courtyard.Editor
             var quit = NoteButton(buttons, "QuitButton", "Quit", "note_open_pink", new Vector2(40f, -190f), 3f, 0.7f);
 
             // Browser only: the first click starts the sound.
-            var wake = Label(root, "WakePrompt", "click anywhere to begin", 38f, TextAlignmentOptions.Bottom, Ink);
+            var wake = Label(root, "WakePrompt", "click to start", 38f, TextAlignmentOptions.Bottom, Ink);
             wake.fontStyle = FontStyles.Italic;
             wake.rectTransform.offsetMin = new Vector2(110f, 70f);
             wake.rectTransform.offsetMax = new Vector2(-1300f, 0f);

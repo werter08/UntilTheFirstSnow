@@ -56,6 +56,13 @@ namespace Courtyard.Core
         [SerializeField, Min(0f)] private float badDrinkChill = 35f;
         [Tooltip("The calendar page's hopeful line for this day (click the calendar).")]
         [SerializeField, TextArea] private string calendarLine;
+        [Header("Hints and the recipe card")]
+        [Tooltip("Tutorial day: every step's hint stays on screen for the whole step.")]
+        [SerializeField] private bool tutorialHints;
+        [Tooltip("The recipe card on the wall pulses once when the day starts.")]
+        [SerializeField] private bool pulseRecipeCard;
+        [Tooltip("What the recipe card says today (it grows over the autumn). Never Mira's recipe.")]
+        [SerializeField, TextArea(3, 12)] private string recipeCardText;
         [SerializeField, TextArea] private string coldDrinkText = "Cold, bitter coffee… the cold got in. Let's try again.";
         [SerializeField, TextArea] private string failText = "Too cold… let's try again.";
 
@@ -104,6 +111,19 @@ namespace Courtyard.Core
         public float BadResultThreshold => badResultThreshold;
         public string ColdDrinkText => coldDrinkText;
         public string CalendarLine => calendarLine;
+        public bool TutorialHints => tutorialHints;
+        public bool PulseRecipeCard => pulseRecipeCard;
+        public string RecipeCardText => recipeCardText;
+
+        /// <summary>
+        /// Whose meter a step warms: on two-meter days the drink being made is hers, so steps for "both" warm Mira; a
+        /// step aimed at him (his auto-filled cup) warms him.
+        /// </summary>
+        public WarmthTarget TargetFor(Minigames.MinigameStep step) =>
+            twoMeters && step.WarmthTarget == WarmthTarget.Both ? WarmthTarget.Mira : step.WarmthTarget;
+
+        /// <summary>The served drink warms whoever it is for (hers on two-meter days).</summary>
+        public WarmthTarget DrinkTarget => twoMeters ? WarmthTarget.Mira : WarmthTarget.Both;
 
         /// <summary>Warmth change after a scored step: a good step warms, a bad one (below the threshold) chills.</summary>
         public float StepWarmthDelta(float quality)

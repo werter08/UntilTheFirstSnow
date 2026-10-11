@@ -27,13 +27,14 @@ namespace Courtyard.Editor
         public const string WaveBack = "WaveBack";
         public const string MiraVisit = "MiraVisit";
         public const string TakeHerCup = "TakeHerCup";
+        public const string AutoFillHisMug = "AutoFillHisMug";
 
         private static readonly Color Coffee = new(0.35f, 0.2f, 0.1f);
         private static readonly Color Water = new(0.75f, 0.85f, 0.95f);
         private static readonly Color Green = new(0.4f, 0.8f, 0.4f, 0.55f);
 
         // No gauge: the player reads the boil from the kettle itself (rattling lid, sound).
-        public const string KettleBoilHint = "Switch the kettle on. Switch it off when it boils.";
+        public const string KettleBoilHint = "Turn the kettle on. Turn it off when it boils."; // final copy lives in GameTexts
 
         private static Recipe _miraUsual;
 
@@ -92,10 +93,10 @@ namespace Courtyard.Editor
             });
         }
 
-        public const string InstantCoffeeHint = "Spoon two scoops of coffee into the cup. Then pick up the kettle and pour to the line.";
-        public const string GuessHerDrinkHint = "Carry two spices into her cup, one at a time. Then click the cup.";
-        public const string HerUsualHint = "Make her usual: two spices, one at a time. Then click the cup.";
-        public const string PourOverHint = "Grab the kettle and pour over the cup in slow circles. Keep the flow in the green. Fill to the line.";
+        public const string InstantCoffeeHint = "Two spoons of coffee into the cup. Then pour water to the line.";
+        public const string GuessHerDrinkHint = "Add two spices to her cup, one at a time. Then click the cup.";
+        public const string HerUsualHint = "Make her usual. You know it by now.";
+        public const string PourOverHint = "Pour in slow circles. Keep the flow in the green. Fill to the line.";
 
         private static void PatchHints()
         {
@@ -216,6 +217,7 @@ namespace Courtyard.Editor
                 (WaveBack, BuildWaveBack),
                 (MiraVisit, BuildMiraVisit),
                 (TakeHerCup, BuildTakeHerCup),
+                (AutoFillHisMug, BuildAutoFillHisMug),
             };
 
             return builders.ToDictionary(
@@ -347,6 +349,20 @@ namespace Courtyard.Editor
             Wire(step, "scored", false);
             return root;
         }
+
+        /// <summary>Day 20: his cup fills by itself beside hers (no input, no hint); warms him only.</summary>
+        private static GameObject BuildAutoFillHisMug()
+        {
+            var root = new GameObject(AutoFillHisMug);
+            var step = root.AddComponent<AutoFillHisMugStep>();
+            Wire(step, "hintText", "");
+            WireEnum(step, "warmthTarget", WarmthTarget.Him);
+            Wire(step, "blackCoffee", UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/Drinks/drink_black.png"));
+            return root;
+        }
+
+        /// <summary>All step prefabs by name (missing ones are created; existing ones are kept as they are).</summary>
+        public static Dictionary<string, MinigameStep> EnsureAll() => BuildAll(LevelDataBuilder.EnsureMiraUsual(), false);
 
         private static GameObject BuildMiraVisit()
         {

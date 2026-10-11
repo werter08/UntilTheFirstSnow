@@ -26,9 +26,10 @@ namespace Courtyard.Minigames
             ctx.Kitchen.SetMiraWindow(MiraWindowState.Dark);
 
             if (ctx.Fader != null) yield return ctx.Fader.FadeOut(Color.black, fadeOutSeconds);
-            AudioManager.Play(SfxId.Footsteps);
+            AudioManager.ResumeTrack(SfxId.Footsteps);
             yield return new WaitForSeconds(walkSeconds);
             ctx.Kitchen.ShowDoor(ctx.WorldCamera, true);
+            AudioManager.StopLoop(SfxId.Footsteps, 0.4f); // the steps stop as the eyes open at the door
             if (ctx.Fader != null) yield return ctx.Fader.FadeIn(eyesOpenSeconds);
             Complete(1f);
         }

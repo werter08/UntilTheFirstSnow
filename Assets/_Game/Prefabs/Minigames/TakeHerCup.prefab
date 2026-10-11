@@ -44,10 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a82a1c879f37440c90f0752bd75bb3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.TakeHerCupStep
-  hintText: Take her cup.
+  hintText: Take the jar from her.
   scored: 0
   warmthTarget: 0
   zone: 0
+  alwaysShowHint: 1
+  explainBelow: 0.6
   liftSeconds: 0.3
   fadeOutSeconds: 0.7
   walkSeconds: 1.2

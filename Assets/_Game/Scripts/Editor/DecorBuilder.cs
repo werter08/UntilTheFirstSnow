@@ -198,6 +198,10 @@ namespace Courtyard.Editor
             ApplyRackShelf(kitchen);
             ApplyClickables(kitchen);
             ApplyInteractionFeedback(scene);
+            ApplyRecipeCard(scene, kitchen);
+            ApplyHintsToggle(scene);
+            var counterStation = kitchen.GetComponentInChildren<CounterStation>(true);
+            if (counterStation != null) Wire(counterStation, "hisMugSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "mug_his.png"));
             ApplyShadows(kitchen); // last: props are in their final places
         }
 
@@ -456,7 +460,7 @@ namespace Courtyard.Editor
             // the rim up as the cup fills and at the end covers it completely. Sorting: empty -3 < drink -2 < spice -1
             // < mug body 1. The cup is stretched (CupStretch); the tiles are not, so Contents undoes the stretch.
             var rimLocal = chipped.bounds.max.y - 0.02f;                  // mug top edge (2 px padding), mug-local units
-            const float tuck = 0.08f;                                    // cap bottom hidden behind the rim
+            const float tuck = 0.18f;                                    // cap bottom hidden behind the rim (the inside sits low)
             const float capHalf = 0.33f;                                  // 66 px of tile, 2 px padding top and bottom
             var region = capHalf * 2f - tuck;                             // visible inside: rim → top of the cap
             var bodyCentreX = chipped.bounds.min.x + 0.02f + 0.55f;       // body is 110 px wide from its left edge
@@ -1547,13 +1551,122 @@ namespace Courtyard.Editor
             var scaleX = width / shadow.bounds.size.x;
             var scaleY = Mathf.Clamp(scaleX, 0.6f, 1.1f); // small props get a thinner shadow
             transform.localScale = new Vector3(scaleX / parentScale.x, scaleY / parentScale.y, 1f);
-            transform.position = new Vector3(bounds.center.x + xNudge, bounds.min.y - 0.02f, caster.position.z); // peeks out below
+            // Centred on where the drawing really ends (its PNG has transparent padding below), so the prop stands in it.
+            transform.position = new Vector3(bounds.center.x + xNudge, VisibleBottom(renderer) + 0.01f, caster.position.z);
             transform.localRotation = Quaternion.identity;
             Edit(GetOrAdd<ContactShadow>(transform), so =>
             {
                 so.FindProperty("caster").objectReferenceValue = caster;
                 so.FindProperty("casterRenderer").objectReferenceValue = renderer;
             });
+        }
+
+        private static readonly System.Collections.Generic.Dictionary<Sprite, float> BottomPadding = new();
+
+        /// <summary>World y of the lowest visible pixel of a sprite (not its transparent padding).</summary>
+        private static float VisibleBottom(SpriteRenderer renderer)
+        {
+            var sprite = renderer.sprite;
+            if (!BottomPadding.TryGetValue(sprite, out var padPx))
+            {
+                padPx = 0f;
+                var path = AssetDatabase.GetAssetPath(sprite.texture);
+                if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                {
+                    var texture = new Texture2D(2, 2);
+                    if (texture.LoadImage(File.ReadAllBytes(path)))
+                    {
+                        var rect = sprite.rect;
+                        var scale = texture.width / (float)sprite.texture.width; // imported size may be capped
+                        var x0 = Mathf.FloorToInt(rect.x * scale);
+                        var y0 = Mathf.FloorToInt(rect.y * scale);
+                        var w = Mathf.Max(1, Mathf.FloorToInt(rect.width * scale));
+                        var h = Mathf.Max(1, Mathf.FloorToInt(rect.height * scale));
+                        var pixels = texture.GetPixels(x0, y0, w, h);
+                        var row = 0;
+                        for (; row < h; row++)
+                        {
+                            var any = false;
+                            for (var col = 0; col < w && !any; col++) any = pixels[row * w + col].a > 0.15f;
+                            if (any) break;
+                        }
+
+                        padPx = row < h ? row / scale : 0f;
+                    }
+
+                    Object.DestroyImmediate(texture);
+                }
+
+                BottomPadding[sprite] = padPx;
+            }
+
+            return renderer.bounds.min.y + padPx / sprite.pixelsPerUnit * Mathf.Abs(renderer.transform.lossyScale.y);
+        }
+
+        /// <summary>
+        /// The recipe pinned on the wall near the shelf (the team's recipe_card.png; until it exists, a cream paper
+        /// stand-in). Click to read; it grows over the days (LevelDefinition.recipeCardText).
+        /// </summary>
+        private static void ApplyRecipeCard(Scene scene, Transform kitchen)
+        {
+            var card = Find(kitchen, "RecipeCard", false) ?? Empty(kitchen, "RecipeCard", Vector2.zero);
+            var renderer = GetOrAdd<SpriteRenderer>(card);
+            var art = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "recipe_card.png");
+            if (art != null)
+            {
+                renderer.sprite = art;
+                renderer.color = Color.white;
+            }
+            else
+            {
+                Debug.LogWarning("DecorBuilder: recipe_card.png missing in Art/Props — the recipe card is a paper stand-in.");
+                renderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "note_yellow_3.png");
+                renderer.color = new Color(1f, 0.97f, 0.88f);
+            }
+
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.sortingLayerName = "WallProps";
+            renderer.sortingOrder = 4;
+            if (!IsHandPlaced(card))
+            {
+                card.localPosition = Px(560f, 300f);
+                card.localRotation = Quaternion.Euler(0f, 0f, 3f);
+                card.localScale = art != null ? Vector3.one : Vector3.one * 0.9f;
+            }
+
+            if (renderer.sprite != null)
+            {
+                var collider = GetOrAdd<BoxCollider2D>(card);
+                collider.size = renderer.sprite.bounds.size;
+                collider.offset = renderer.sprite.bounds.center;
+            }
+
+            WireEnum(GetOrAdd<PointerTarget>(card), "handPose", HandPose.Point);
+            GetOrAdd<RecipeCard>(card);
+            var runner = scene.GetRootGameObjects().Select(g => g.GetComponent<LevelRunner>()).FirstOrDefault(r => r != null);
+            if (runner != null) Wire(runner, "recipeCard", card.GetComponent<RecipeCard>());
+        }
+
+        /// <summary>"Hints: on/off" in the top-right corner (remembered between sessions).</summary>
+        private static void ApplyHintsToggle(Scene scene)
+        {
+            var canvas = scene.GetRootGameObjects().First(g => g.name == "Canvas").transform;
+            var old = canvas.Find("HintsToggle");
+            if (old != null) Object.DestroyImmediate(old.gameObject);
+            var font = canvas.GetComponentsInChildren<TMPro.TMP_Text>(true).Select(t => t.font).FirstOrDefault(f => f != null);
+
+            var rect = UiObject("HintsToggle", canvas);
+            Place(rect, Vector2.one, Vector2.one, Vector2.one, new Vector2(-28f, -24f), new Vector2(190f, 52f));
+            var image = Img(rect, new Color(0.15f, 0.11f, 0.09f, 0.45f), true);
+            var label = Label(rect, "Label", "Hints: on", 28f, TMPro.TextAlignmentOptions.Center, new Color(1f, 0.96f, 0.88f));
+            if (font != null) label.font = font;
+            var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
+            button.targetGraphic = image;
+            var toggle = rect.gameObject.AddComponent<UI.HintsToggle>();
+            Wire(toggle, "label", label);
+            // Below the note card and the screen fade.
+            var card = canvas.GetComponentInChildren<UI.NoteCard>(true);
+            if (card != null) rect.SetSiblingIndex(card.transform.GetSiblingIndex());
         }
 
         /// <summary>A silhouette drop shadow behind <paramref name="casterName"/> (child: it swings and swaps with it).</summary>

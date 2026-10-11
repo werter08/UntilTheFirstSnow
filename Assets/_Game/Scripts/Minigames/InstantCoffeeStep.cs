@@ -41,6 +41,12 @@ namespace Courtyard.Minigames
         [SerializeField] private Color waterColor = new(0.75f, 0.85f, 0.95f);
         [SerializeField] private Color coffeeColor = new(0.35f, 0.2f, 0.1f);
 
+        [Header("Why it went wrong")]
+        [SerializeField] private string tooMuchCoffeeText = "Too much coffee — just two spoons.";
+        [SerializeField] private string tooLittleCoffeeText = "Not enough coffee — two spoons.";
+        [SerializeField] private string tooMuchWaterText = "Too much water — stop at the line.";
+        [SerializeField] private string tooLittleWaterText = "Not enough water — fill to the line.";
+
         private CounterStation _counter;
         private FeedbackFx _fx;
         private Camera _camera;
@@ -231,13 +237,17 @@ namespace Courtyard.Minigames
             _counter.KettleTarget.Interactable = false;
             spoon.Interactable = false;
 
+            var mug = _counter.MugBody;
             if (_spoons != targetSpoons)
             {
+                Explain(_fx, _spoons > targetSpoons ? tooMuchCoffeeText : tooLittleCoffeeText, mug);
                 Ruin(); // too strong or too weak: a cold, bitter cup
                 return;
             }
 
-            Complete(1f - Mathf.Abs(_counter.MugLevel - targetFill) / fillTolerance);
+            var quality = 1f - Mathf.Abs(_counter.MugLevel - targetFill) / fillTolerance;
+            if (ShouldExplain(quality)) Explain(_fx, _counter.MugLevel > targetFill ? tooMuchWaterText : tooLittleWaterText, mug);
+            Complete(quality);
         }
     }
 }

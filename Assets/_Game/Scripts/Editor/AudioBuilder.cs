@@ -28,7 +28,7 @@ namespace Courtyard.Editor
         {
             (SfxId.UiClick, "sfx_ui_click", 0.5f, 0.95f, 1.05f),
             (SfxId.KettleSwitch, "sfx_kettle_switch", 0.8f, 0.95f, 1.05f),
-            (SfxId.KettleBoil, "sfx_kettle_boil_loop", 0.55f, 1f, 1f),
+            (SfxId.KettleBoil, "sfx_kettle_boil_loop", 0.4f, 1f, 1f), // softened file, kept low: a calm background bubble
             (SfxId.KettleDone, "sfx_kettle_done", 0.9f, 0.95f, 1.05f),
             (SfxId.Pour, "sfx_pour", 0.8f, 1f, 1f),
             (SfxId.Spoon, "sfx_spoon_scoop", 1f, 0.95f, 1.05f),
