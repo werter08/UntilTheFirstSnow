@@ -200,6 +200,7 @@ namespace Courtyard.Editor
             ApplyInteractionFeedback(scene);
             ApplyRecipeCard(scene, kitchen);
             ApplyHintsToggle(scene);
+            ApplyDayCard(scene);
             var counterStation = kitchen.GetComponentInChildren<CounterStation>(true);
             if (counterStation != null) Wire(counterStation, "hisMugSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "mug_his.png"));
             ApplyShadows(kitchen); // last: props are in their final places
@@ -533,9 +534,14 @@ namespace Courtyard.Editor
 
             // While the V60 sits on the cup, the team's cover tile closes the cup's opening completely (in front of the
             // drink tiles, behind the mug body and its rim); it lifts off with the V60.
-            var coverArt = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "v60_cup_cover.png");
+            // The team's own placement (v60_cup_caver, size, flip, order) wins once they've set it by hand.
+            var placedCover = contents.Find("CupCover");
+            var coverArt = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "v60_cup_caver.png")
+                           ?? AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "v60_cup_cover.png");
             var emptyCap = Find(contents, "EmptyCap").GetComponent<SpriteRenderer>();
-            if (coverArt != null && emptyCap.sprite != null)
+            if (IsHandPlaced(placedCover))
+                Wire(counter, "cupCover", placedCover.GetComponent<SpriteRenderer>());
+            else if (coverArt != null && emptyCap.sprite != null)
             {
                 var cover = SpriteChild(contents, "CupCover");
                 cover.localPosition = emptyCap.transform.localPosition;
@@ -1699,6 +1705,52 @@ namespace Courtyard.Editor
             GetOrAdd<RecipeCard>(card);
             var runner = scene.GetRootGameObjects().Select(g => g.GetComponent<LevelRunner>()).FirstOrDefault(r => r != null);
             if (runner != null) Wire(runner, "recipeCard", card.GetComponent<RecipeCard>());
+        }
+
+        /// <summary>
+        /// The calendar between days drawn like the team's torn calendar page (red binding with two holes, torn
+        /// bottom): the page art, the day number in the white part, the time above the torn edge.
+        /// </summary>
+        private static void ApplyDayCard(Scene scene)
+        {
+            var card = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<UI.DayCard>(true)).FirstOrDefault(c => c != null);
+            var art = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "calendar_page.png");
+            if (card == null || art == null) return;
+            var page = card.transform.Find("Page") as RectTransform;
+            if (page == null) return;
+            card.transform.SetAsLastSibling(); // over the black screen fade: the calendar shows between days
+
+            const float scale = 1.35f;
+            var size = art.rect.size * scale;
+            page.sizeDelta = size;
+            var image = page.GetComponent<UnityEngine.UI.Image>();
+            image.sprite = art;
+            image.color = Color.white;
+            image.preserveAspect = true;
+
+            var bindingHeight = 62f * scale; // the red strip at the top of the drawing
+            var tornHeight = 75f * scale;    // the torn edge at the bottom
+            var header = page.Find("Header") as RectTransform;
+            if (header != null)
+            {
+                header.sizeDelta = new Vector2(0f, bindingHeight);
+                var headerImage = header.GetComponent<UnityEngine.UI.Image>();
+                if (headerImage != null) headerImage.color = Color.clear; // the drawing has its own red binding
+                var label = header.GetComponentInChildren<TMPro.TMP_Text>(true);
+                if (label != null) label.fontSize = 40f;
+            }
+
+            var number = page.Find("Number") as RectTransform;
+            if (number != null)
+            {
+                number.offsetMax = new Vector2(0f, -bindingHeight - 10f);
+                number.offsetMin = new Vector2(0f, tornHeight + 50f);
+                var text = number.GetComponent<TMPro.TMP_Text>();
+                text.color = new Color(0.75f, 0.22f, 0.17f);
+            }
+
+            var clock = page.Find("Clock") as RectTransform;
+            if (clock != null) clock.offsetMin = new Vector2(0f, tornHeight + 5f);
         }
 
         /// <summary>"Hints: on/off" in the top-right corner (remembered between sessions).</summary>

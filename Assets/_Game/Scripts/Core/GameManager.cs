@@ -10,6 +10,17 @@ namespace Courtyard.Core
         [SerializeField] private LevelDefinition[] levels;
 
         private int _currentIndex = -1;
+        private bool _restarting;
+
+        /// <summary>
+        /// The day the calendar shows before tearing to <paramref name="level"/>: the last day played, or the same day
+        /// on the first day and after a restart.
+        /// </summary>
+        public int CalendarFromDay(LevelDefinition level)
+        {
+            if (_restarting || _currentIndex <= 0 || levels == null || _currentIndex > levels.Length - 1) return level.DayNumber;
+            return levels[_currentIndex - 1].DayNumber;
+        }
 
         public static GameManager Instance { get; private set; }
 
@@ -54,12 +65,14 @@ namespace Courtyard.Core
             }
 
             _currentIndex = 0;
+            _restarting = false;
             SceneManager.LoadScene(SceneNames.Kitchen);
         }
 
         public void CompleteLevel()
         {
             _currentIndex++;
+            _restarting = false;
             if (CurrentLevel != null)
             {
                 SceneManager.LoadScene(SceneNames.Kitchen);
@@ -70,7 +83,11 @@ namespace Courtyard.Core
             SceneManager.LoadScene(SceneNames.Ending);
         }
 
-        public void RestartLevel() => SceneManager.LoadScene(SceneNames.Kitchen);
+        public void RestartLevel()
+        {
+            _restarting = true; // same day again: no pages to tear
+            SceneManager.LoadScene(SceneNames.Kitchen);
+        }
 
         public void ReturnToTitle()
         {

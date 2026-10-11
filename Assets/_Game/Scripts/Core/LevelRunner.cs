@@ -122,7 +122,8 @@ namespace Courtyard.Core
             hint.Hide();
             AudioManager.SetMusic(_level.Music);
             AudioManager.SetAmbience(_level.Ambience, _level.AmbienceVolume);
-            yield return dayCard.Show(_level);
+            // The calendar tears from the last day played to today, page by page.
+            yield return dayCard.Show(_level, GameManager.Instance != null ? GameManager.Instance.CalendarFromDay(_level) : _level.DayNumber);
             yield return fader.FadeIn(fadeDuration);
             if (_level.PulseRecipeCard && recipeCard != null) recipeCard.Pulse();
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelStart));
