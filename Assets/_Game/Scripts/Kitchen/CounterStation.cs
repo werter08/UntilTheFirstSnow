@@ -229,6 +229,8 @@ namespace Courtyard.Kitchen
         }
         public PointerTarget MilkJug => milkJug;
         public SpriteRenderer MilkJugBody => milkJugBody;
+        /// <summary>The steamed foam drawn at the jug's opening (null without the art).</summary>
+        public Transform MilkFoamBlob => milkFoamBlob;
         public SpriteBar MilkFoam => milkFoam;
         public ToppingJar[] ToppingJars => toppingJars;
 
@@ -656,6 +658,28 @@ namespace Courtyard.Kitchen
             if (mugContents != null && mugDrinkSprites != null && index < mugDrinkSprites.Length)
                 mugContents.SetSprite(mugDrinkSprites[index]);
             mugFill.Fill.color = placeholderColour;
+        }
+
+        /// <summary>Milk poured into the coffee: the drink turns toward a latte (0..1) and the foam cap rises with it.</summary>
+        public void SetMilkInMug(float share)
+        {
+            var latteIndex = (int)MugDrink.Latte;
+            var latte = mugDrinkSprites != null && latteIndex < mugDrinkSprites.Length ? mugDrinkSprites[latteIndex] : null;
+            if (mugContents != null) mugContents.SetMilk(share, latte);
+            SetFoamCap(share);
+        }
+
+        private Vector3? _foamCapScale;
+
+        /// <summary>The foam cap on the drink: hidden at 0, full size at 1, growing up from the drink in between.</summary>
+        public void SetFoamCap(float amount)
+        {
+            if (mugFoam == null) return;
+            _foamCapScale ??= mugFoam.transform.localScale;
+            var full = _foamCapScale.Value;
+            amount = Mathf.Clamp01(amount);
+            mugFoam.SetActive(amount > 0.02f);
+            mugFoam.transform.localScale = new Vector3(full.x, full.y * Mathf.Lerp(0.3f, 1f, amount), full.z);
         }
 
         /// <summary>A portion of spice settles on top of the drink.</summary>

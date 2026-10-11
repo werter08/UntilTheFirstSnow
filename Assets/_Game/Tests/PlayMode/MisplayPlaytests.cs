@@ -102,6 +102,19 @@ namespace Courtyard.Tests
             Assert.That(step.IsComplete, Is.False, "Releasing the handle at 25% ended the grind (target is ~55%).");
         }
 
+        /// <summary>Pouring the milk past the rim spills it: a poor, cold cup — but no remake, the spices come next.</summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator Milk_Overflow_SpillsButTheDrinkGoesOn()
+        {
+            yield return LoadDay(30);
+            yield return PlayKettleBoil();
+            yield return PlayPourWater();
+            yield return PlaySteamMilk();
+            yield return PlayPourMilk(stopAt: 1.1f, minQuality: 0f);
+            Assert.That(LastQuality, Is.EqualTo(0.3f).Within(0.01f), "Overflowing the cup should score 0.3.");
+            yield return AdvanceTo<PickToppingsStep>();
+        }
+
         /// <summary>A short tap on the milk jug should not end SteamMilk with cold milk.</summary>
         [UnityTest, Timeout(240000)]
         public IEnumerator SteamMilk_ShortTap_DoesNotEndTheStep()
@@ -170,12 +183,14 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();
             yield return PlayPourWater();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return PlayPickToppings<PickToppingsStep>(Topping.Salt, Topping.Cocoa);
             Assert.That(LastQuality, Is.EqualTo(0f));
             yield return ExpectRemake();
             yield return PlayKettleBoil();
             yield return PlayPourWater();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return PlayPickToppings<PickToppingsStep>(Topping.Cinnamon, Topping.Honey);
             yield return FinishDay();
         }
@@ -188,6 +203,7 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();
             yield return PlayPourWater();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return AdvanceTo<PickToppingsStep>();
             yield return AddSpice(Topping.Cinnamon);
             yield return AddSpice(Topping.Cinnamon);
@@ -207,6 +223,7 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();
             yield return PlayPourWater();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return AdvanceTo<PickToppingsStep>();
             yield return AddSpice(Topping.Honey);
             yield return Click(Counter.Mug.transform);
@@ -224,6 +241,7 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();
             yield return PlayPourWater();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return AdvanceTo<PickToppingsStep>();
             var jar = Counter.ToppingJars.First(j => j.Topping == Topping.Cocoa);
             var rest = jar.transform.position;
@@ -246,6 +264,7 @@ namespace Courtyard.Tests
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return FinishDay();
         }
     }

@@ -22,6 +22,7 @@ namespace Courtyard.Editor
         public static void Apply()
         {
             PatchLevels();
+            ApplyCursor();
             EditScene(BuildScript.Scenes[1], scene =>
             {
                 var kitchen = scene.GetRootGameObjects().First(g => g.name == "Kitchen").transform;
@@ -29,6 +30,7 @@ namespace Courtyard.Editor
                 Fog(kitchen, director);
                 Star(kitchen, director);
                 SillContents(kitchen, director);
+                MorningNoteOrder(kitchen);
 
                 var runner = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<LevelRunner>(true)).First(r => r != null);
                 var canvas = scene.GetRootGameObjects().First(g => g.name == "Canvas").transform;
@@ -37,6 +39,31 @@ namespace Courtyard.Editor
                 WireArray(runner, "hiddenInEpilogue", hidden);
             });
         }
+
+        /// <summary>The team's hand-drawn cursor (Art/UI/cursor.png), clicking at the top-left of the shape.</summary>
+        private static void ApplyCursor()
+        {
+            const string path = "Assets/_Game/Art/UI/cursor.png";
+            if (AssetImporter.GetAtPath(path) is not TextureImporter importer)
+            {
+                Debug.LogWarning("ExtrasBuilder: " + path + " missing — the system cursor stays.");
+                return;
+            }
+
+            if (importer.textureType != TextureImporterType.Cursor)
+            {
+                importer.textureType = TextureImporterType.Cursor;
+                importer.mipmapEnabled = false;
+                importer.alphaIsTransparency = true;
+                importer.SaveAndReimport();
+            }
+
+            PlayerSettings.defaultCursor = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            PlayerSettings.cursorHotspot = CursorHotspot;
+        }
+
+        /// <summary>Pixel of the cursor drawing that clicks (from its top-left).</summary>
+        private static readonly Vector2 CursorHotspot = new(6f, 3f);
 
         private static void PatchLevels()
         {
@@ -116,6 +143,17 @@ namespace Courtyard.Editor
             renderer.sortingOrder = page.sortingOrder + 10;
             star.gameObject.SetActive(false);
             Wire(director, "calendarStar", renderer);
+        }
+
+        /// <summary>The morning-after note (sixth slot) and its magnet sit one step above the other notes (the team's choice).</summary>
+        private static void MorningNoteOrder(Transform kitchen)
+        {
+            var note = kitchen.Find("FridgeNote5");
+            if (note == null) return;
+            var renderer = note.GetComponent<SpriteRenderer>();
+            if (renderer != null) renderer.sortingOrder = 22;
+            var magnet = note.Find("Magnet")?.GetComponent<SpriteRenderer>();
+            if (magnet != null) magnet.sortingOrder = 23;
         }
 
         /// <summary>The drink and steam in the two sill mugs: hidden when the mugs stand empty, the morning after.</summary>

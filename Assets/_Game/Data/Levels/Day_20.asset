@@ -48,8 +48,9 @@ MonoBehaviour:
   - {fileID: 6987173642302428769, guid: dba18201d2f5e422891f48785c2142cd, type: 3}
   - {fileID: 6597141609809672998, guid: 30fd308ca45df4ce59694189acc7d57a, type: 3}
   - {fileID: 104158219434757867, guid: dccb5e1aee3234a4484f894ced79da0d, type: 3}
-  - {fileID: 6738547792549017874, guid: 61b9f335f46924425b3f7ffe28e6e34a, type: 3}
+  - {fileID: 6738547792549017874, guid: 7bf817397dd394b0987245f749a078a1, type: 3}
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
+  - {fileID: 5476417905725845940, guid: 9c773f568bc96461a83fd4c979c7f06e, type: 3}
   - {fileID: 6688862761830470276, guid: e5e35f9004e644912b1b1562f5b20015, type: 3}
   storyBeats:
   - trigger: 1
@@ -61,7 +62,7 @@ MonoBehaviour:
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
-    stepIndex: 7
+    stepIndex: 8
     condition: 0
     style: 0
     speaker: 
@@ -94,7 +95,8 @@ MonoBehaviour:
   recipeCardText: "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour
     to the line\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind
     to the green\n3) slow circles, keep the flow green, fill to the line\n\n<b>Milk</b>
-    \u2014 hold to steam, let go in the green\n\nTwo mugs tonight. Hers first."
+    \u2014 steam it, then pour it in. Stop in the green.\n\nTwo mugs tonight. Hers
+    first."
   coldDrinkText: Ugh. That won't warm anyone up.
   failText: Too cold. Let's try that again.
   drinkResults:

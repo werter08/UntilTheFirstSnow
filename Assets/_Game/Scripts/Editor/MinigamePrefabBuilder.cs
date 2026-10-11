@@ -31,6 +31,8 @@ namespace Courtyard.Editor
         public const string PourWater = "PourWater";
         public const string ReadHerWindow = "ReadHerWindow";
         public const string PlaceV60 = "PlaceV60";
+        public const string PourMilk = "PourMilk";
+        public const string PourOverLatte = "PourOverLatte";
 
         private static readonly Color Coffee = new(0.35f, 0.2f, 0.1f);
         private static readonly Color Water = new(0.75f, 0.85f, 0.95f);
@@ -209,6 +211,7 @@ namespace Courtyard.Editor
         {
             _miraUsual = miraUsual;
             EnsurePourWater();
+            EnsurePourOverLatte();
             var builders = new (string name, System.Func<GameObject> build)[]
             {
                 (KettleBoil, BuildKettleBoil),
@@ -226,11 +229,17 @@ namespace Courtyard.Editor
                 (PourWater, () => throw new System.InvalidOperationException("PourWater is copied from InstantCoffee")),
                 (ReadHerWindow, BuildReadHerWindow),
                 (PlaceV60, BuildPlaceV60),
+                (PourMilk, BuildPourMilk),
+                (PourOverLatte, () => throw new System.InvalidOperationException("PourOverLatte is copied from PourOver")),
             };
 
-            return builders.ToDictionary(
+            var steps = builders.ToDictionary(
                 b => b.name,
                 b => LoadOrCreatePrefab(Folder + b.name + ".prefab", b.build, overwrite).GetComponent<MinigameStep>());
+            // Milk drops: soft white rounds, not the kettle's drawn water streaks.
+            Patch(Folder + PourMilk + ".prefab", root =>
+                Wire(root.GetComponent<PourMilkStep>(), "dropSprite", UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/FX/glow_radial.png")));
+            return steps;
         }
 
         private static GameObject BuildKettleBoil()
@@ -367,6 +376,7 @@ namespace Courtyard.Editor
                 Wire(step, "tooMuchCoffeeText", "Too much coffee — she takes just one spoon.");
                 Wire(step, "tooLittleCoffeeText", "No coffee in it — one spoon.");
                 Wire(step, "hideCoffeeBag", true);
+                Wire(step, "targetFill", MilkDayCoffeeFill); // half a cup: the steamed milk is poured on top
 
                 // Days 10 and 30 have the grinder where Day 1's jar stands: her jar goes in the gap between the
                 // grinder and the coffee bag (always measured from the Day 1 jar, so re-running doesn't drift).
@@ -387,6 +397,41 @@ namespace Courtyard.Editor
                     Property(so, "spoonCountText").stringValue = "{0}/{1}"; // just the count: 0/2
                     Property(so, "countScale").floatValue = 0.45f;
                 }));
+        }
+
+        /// <summary>On milk days the coffee fills only part of the cup; the player pours the steamed milk on top.</summary>
+        private const float MilkDayCoffeeFill = 0.5f;
+
+        /// <summary>
+        /// Day 20's pour-over into her cup: the same step as Day 5/10's, filled to the half line so the milk fits on top.
+        /// Copied once from PourOver; its icons are kept in sync here.
+        /// </summary>
+        private static void EnsurePourOverLatte()
+        {
+            var path = Folder + PourOverLatte + ".prefab";
+            if (UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(path) == null)
+                UnityEditor.AssetDatabase.CopyAsset(Folder + PourOver + ".prefab", path);
+            var source = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(Folder + PourOver + ".prefab").GetComponent<PourOverStep>();
+            var sourceSo = new UnityEditor.SerializedObject(source);
+            Patch(path, root =>
+            {
+                root.name = PourOverLatte;
+                var step = root.GetComponent<PourOverStep>();
+                Wire(step, "targetFill", MilkDayCoffeeFill);
+                Wire(step, "gaugeIcon", sourceSo.FindProperty("gaugeIcon").objectReferenceValue);
+                Wire(step, "waterIcon", sourceSo.FindProperty("waterIcon").objectReferenceValue);
+            });
+        }
+
+        /// <summary>After steaming: carry the milk jug over the cup and pour the milk in, stopping in the green.</summary>
+        private static GameObject BuildPourMilk()
+        {
+            var root = new GameObject(PourMilk);
+            var step = root.AddComponent<PourMilkStep>();
+            Wire(step, "hintText", "Pour the milk in. Stop in the green.");
+            Wire(step, "gaugeIcon", UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/UI/icon_milk.png"));
+            WireEnum(step, "zone", Kitchen.CounterZone.Milk);
+            return root;
         }
 
         /// <summary>Pour-over days: carry the V60 from the sill onto the cup (unscored).</summary>

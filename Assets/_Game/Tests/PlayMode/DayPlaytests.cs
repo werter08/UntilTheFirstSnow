@@ -41,6 +41,7 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();   // her cup: boil, pour, milk, spices — then it's handed to her at the door
             yield return PlayPourWater();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return PlayPickToppings<PickToppingsStep>(Topping.Cinnamon, Topping.Honey);
             Assert.That(LastQuality, Is.EqualTo(1f), "Cinnamon + honey is Mira's usual.");
             yield return FinishDay();
@@ -60,6 +61,7 @@ namespace Courtyard.Tests
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return AdvanceTo<AutoFillHisMugStep>();
             yield return WaitForCompletion();
             Assert.That(Counter.HasHisCup, Is.True, "His cup should stand beside hers.");
@@ -73,6 +75,7 @@ namespace Courtyard.Tests
             yield return PlayKettleBoil();
             yield return PlayPourWater();
             yield return PlaySteamMilk();
+            yield return PlayPourMilk();
             yield return PlayPickToppings<PickToppingsStep>(Topping.Honey, Topping.Cinnamon);
             yield return FinishDay();
         }

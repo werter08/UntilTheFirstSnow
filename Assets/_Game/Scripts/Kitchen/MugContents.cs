@@ -115,8 +115,42 @@ namespace Courtyard.Kitchen
             _stir = null;
         }
 
+        private SpriteRenderer _milk;
+
+        /// <summary>
+        /// Milk being poured in: the latte tile fades in over the coffee (<paramref name="share"/> 0 = all coffee,
+        /// 1 = latte), clipped to the same fill.
+        /// </summary>
+        public void SetMilk(float share, Sprite latte)
+        {
+            if (_milk == null)
+            {
+                if (share <= 0f || latte == null || liquid == null) return;
+                _milk = Instantiate(liquid.gameObject, liquid.transform.parent).GetComponent<SpriteRenderer>();
+                _milk.name = "Milk";
+                _milk.transform.SetPositionAndRotation(liquid.transform.position, liquid.transform.rotation);
+                _milk.transform.localScale = liquid.transform.localScale;
+                _milk.sortingOrder = liquid.sortingOrder + 1;
+                // The fill mask clips only its own sorting range: let it reach the milk layer too.
+                if (mask != null && mask.isCustomRangeActive && mask.frontSortingOrder < _milk.sortingOrder)
+                    mask.frontSortingOrder = _milk.sortingOrder;
+            }
+
+            if (latte != null) _milk.sprite = ForMug(latte);
+            _milk.enabled = share > 0.001f && liquid.enabled;
+            _milk.color = new Color(1f, 1f, 1f, Mathf.Clamp01(share));
+        }
+
         public void ClearSpice()
         {
+            // A copy of this mug (his cup on Day 20) carries the milk layer as a child but not the reference.
+            if (_milk == null && liquid != null && liquid.transform.parent != null)
+            {
+                var copied = liquid.transform.parent.Find("Milk");
+                if (copied != null) _milk = copied.GetComponent<SpriteRenderer>();
+            }
+
+            if (_milk != null) _milk.enabled = false;
             _portions = 0;
             if (spice != null) spice.enabled = false;
             if (_stir != null) StopCoroutine(_stir);

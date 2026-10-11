@@ -14,8 +14,8 @@ PlayerSettings:
   accelerometerFrequency: 60
   companyName: DefaultCompany
   productName: Until the First Snow
-  defaultCursor: {fileID: 0}
-  cursorHotspot: {x: 0, y: 0}
+  defaultCursor: {fileID: 2800000, guid: 448a43746df3c47c9b3e52176082d0fc, type: 3}
+  cursorHotspot: {x: 6, y: 3}
   m_SplashScreenBackgroundColor: {r: 0.10980392, g: 0.09019608, b: 0.078431375, a: 1}
   m_ShowUnitySplashScreen: 0
   m_ShowUnitySplashLogo: 1

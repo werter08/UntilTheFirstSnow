@@ -331,7 +331,7 @@ namespace Courtyard.Editor
                 // MiraVisit (knock at the door) sits between PourOver and SteamMilk so her lines follow the brief's order.
                 // At the door (MiraVisit) he takes her cup (TakeHerCup); milk and spices then go into her cup.
                 // Her cup: boil, pour the water, steam the milk, the spices — then it's handed to her at the door.
-                Steps = new[] { P.KettleBoil, P.PlaceV60, P.GrindBeans, P.PourOver, P.MiraVisit, P.TakeHerCup, P.KettleBoil, P.PourWater, P.SteamMilk, P.GuessHerDrink },
+                Steps = new[] { P.KettleBoil, P.PlaceV60, P.GrindBeans, P.PourOver, P.MiraVisit, P.TakeHerCup, P.KettleBoil, P.PourWater, P.SteamMilk, P.PourMilk, P.GuessHerDrink },
                 Beats = new[]
                 {
                     Start(thought, "Sunday. The light is different today."),
@@ -354,7 +354,7 @@ namespace Courtyard.Editor
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, brewMug = MugStyle.Yellow, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers }, // ChooseMug picks hers from here
                 // Her mug first (to the brewing spot), her drink, then his cup fills by itself beside it.
-                Steps = new[] { P.ReadHerWindow, P.KettleBoil, P.ChooseMug, P.PlaceV60, P.GrindBeans, P.PourOver, P.SteamMilk, P.AutoFillHisMug },
+                Steps = new[] { P.ReadHerWindow, P.KettleBoil, P.ChooseMug, P.PlaceV60, P.GrindBeans, P.PourOverLatte, P.SteamMilk, P.PourMilk, P.AutoFillHisMug },
                 Beats = new[]
                 {
                     // Her "heating broke" note is read from her window (ReadHerWindow); final copy lives in GameTexts.
@@ -375,7 +375,7 @@ namespace Courtyard.Editor
                 Palette = Palette(new Color(1f, 0.85f, 0.7f), 0.95f, new Color(1f, 0.72f, 0.42f), 1.1f),
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Hers, mugsOnSill = true, herMug = true, scarf = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Yellow, MugStyle.Green }, // hers is in use: her drink
-                Steps = new[] { P.KettleBoil, P.PourWater, P.SteamMilk, P.HerDrinkFromMemory },
+                Steps = new[] { P.KettleBoil, P.PourWater, P.SteamMilk, P.PourMilk, P.HerDrinkFromMemory },
                 Beats = new[]
                 {
                     Start(dialogue, "It's snowing! Make me the usual?", mira),

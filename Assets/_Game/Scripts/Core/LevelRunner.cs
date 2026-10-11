@@ -199,6 +199,7 @@ namespace Courtyard.Core
 
                     if (step.CountsTowardDrink) qualities[i] = quality;
                     var delta = _level.StepWarmthDelta(quality);
+                    if (!step.CanFreeze && delta < 0f) delta = Mathf.Min(0f, Mathf.Max(delta, 1f - LowestWarmth())); // chills, never freezes
                     if (delta < 0f) yield return Chill(); // frost first, then the meter drops (and may run out)
                     _chilledByDrink = delta < 0f;
                     _warmth.Apply(_level.TargetFor(step), delta); // two-meter days: her drink warms her, his cup him
@@ -211,7 +212,7 @@ namespace Courtyard.Core
 
                     // A bad drink isn't served: "It's bad, let's remake it", and it's made again from its first step
                     // (the cold it let in stays — remaking costs warmth, and the cold can still win).
-                    if (step.CountsTowardDrink && _level.IsBad(quality))
+                    if (step.CountsTowardDrink && step.RemakesWhenBad && _level.IsBad(quality))
                     {
                         var from = RemakeFrom(i);
                         if (early != null) Destroy(early.gameObject);
@@ -253,6 +254,13 @@ namespace Courtyard.Core
                 GameManager.Instance.CompleteLevel();
             else
                 SceneManager.LoadScene(SceneNames.Ending);
+        }
+
+        private float LowestWarmth()
+        {
+            var lowest = float.MaxValue;
+            foreach (var meter in _warmth.Meters) lowest = Mathf.Min(lowest, meter.Value);
+            return lowest == float.MaxValue ? 0f : lowest;
         }
 
         private MinigameStep StartStep(int index)

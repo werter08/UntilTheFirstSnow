@@ -46,6 +46,7 @@ MonoBehaviour:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
   - {fileID: 101021968709363197, guid: 53a24a4881c6040978e7cd94a70bf1ed, type: 3}
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
+  - {fileID: 5476417905725845940, guid: 9c773f568bc96461a83fd4c979c7f06e, type: 3}
   - {fileID: 2765580805240901084, guid: c580eaac07a1846d8871d83eb51df363, type: 3}
   storyBeats:
   - trigger: 0
@@ -57,7 +58,7 @@ MonoBehaviour:
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
-    stepIndex: 2
+    stepIndex: 3
     condition: 0
     style: 0
     speaker: 
@@ -98,7 +99,8 @@ MonoBehaviour:
   recipeCardText: "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour
     to the line\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind
     to the green\n3) slow circles, keep the flow green, fill to the line\n\n<b>Milk</b>
-    \u2014 hold to steam, let go in the green\n\nTwo mugs tonight. Hers first."
+    \u2014 steam it, then pour it in. Stop in the green.\n\nTwo mugs tonight. Hers
+    first."
   coldDrinkText: Hmm. Not quite how she likes it.
   failText: 
   drinkResults:

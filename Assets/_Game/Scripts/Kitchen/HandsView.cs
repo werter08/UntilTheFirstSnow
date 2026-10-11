@@ -41,6 +41,20 @@ namespace Courtyard.Kitchen
 
         public void Detach() => _attached = null;
 
+        private int _rightHandUsers;
+
+        /// <summary>
+        /// The drawn hand mirrored: his right hand, reaching in from the lower right (the milk is on the right). Counted,
+        /// so back-to-back steps (steam, then pour) never flip it back in between.
+        /// </summary>
+        public void UseRightHand(bool right)
+        {
+            _rightHandUsers = Mathf.Max(0, _rightHandUsers + (right ? 1 : -1));
+            var scale = transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * (_rightHandUsers > 0 ? -1f : 1f);
+            transform.localScale = scale;
+        }
+
         /// <summary>
         /// A second hand that holds something still (e.g. the grinder over the cup while the player's hand turns the
         /// crank): a copy of the hand in <paramref name="pose"/>, parented to <paramref name="holder"/> at

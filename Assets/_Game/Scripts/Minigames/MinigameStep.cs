@@ -48,6 +48,12 @@ namespace Courtyard.Minigames
         /// <summary>A step whose result is always the same (no input), e.g. his auto-filled cup; null = played.</summary>
         public virtual float? FixedQuality => null;
 
+        /// <summary>A bad result makes the drink again from its first step (false: it only chills, the drink goes on).</summary>
+        public virtual bool RemakesWhenBad => true;
+
+        /// <summary>A bad result here may chill, but never empties a warmth meter (the day can't be lost on it).</summary>
+        public virtual bool CanFreeze => true;
+
         /// <summary>Where this step's result shows ("Perfect!", the warm puff): its own tool. Null = the cup.</summary>
         public Renderer ResultAt { get; protected set; }
 

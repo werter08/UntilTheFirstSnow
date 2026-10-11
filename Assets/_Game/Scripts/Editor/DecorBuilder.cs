@@ -1621,6 +1621,7 @@ namespace Courtyard.Editor
             SetOrder(kitchen, "Shelf", 2);
             SetOrder(kitchen, "WallPicture", 2);
             foreach (var name in new[] { "Clock", "Calendar", "CeilingLamp", "Shelf", "WallPicture" }) Drop(kitchen, name);
+            Drop(kitchen, "Scarf"); // Day 30: her scarf on the fridge handle casts a soft shadow on the door
             for (var i = 0; i < 5; i++)
             {
                 if (Find(kitchen, $"FridgeNote{i}", false) == null) continue;

@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4434350046326794732
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5528547750606890009}
+  - component: {fileID: 5476417905725845940}
+  m_Layer: 0
+  m_Name: PourMilk
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5528547750606890009
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4434350046326794732}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5476417905725845940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4434350046326794732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 674f2b6e10f314be8bac80d288ac0862, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Courtyard::Courtyard.Minigames.PourMilkStep
+  hintText: Pour the milk in. Stop in the green.
+  scored: 1
+  warmthTarget: 0
+  zone: 4
+  alwaysShowHint: 0
+  startsWithPrevious: 0
+  explainBelow: 0.6
+  gaugeIcon: {fileID: 21300000, guid: dd018d4d43ba64926aeb3cd4493aa4c9, type: 3}
+  greenMin: 0.75
+  greenMax: 0.9
+  overflowAt: 0.95
+  okBelow: 0.15
+  pourPerSecond: 0.2
+  minPourToFinish: 0.05
+  greenEdgeQuality: 0.8
+  underQuality: 0.6
+  farUnderQuality: 0.45
+  overQuality: 0.7
+  spilledQuality: 0.3
+  pourReach: 0.6
+  follow: 14
+  tiltDegrees: 35
+  tiltSpeed: 10
+  returnSeconds: 0.25
+  milkColour: {r: 0.957, g: 0.929, b: 0.886, a: 1}
+  spoutInSprite: {x: 0.03, y: 0.95}
+  dropSprite: {fileID: 21300000, guid: 3d0f7eab1c2c2462ba09eb7b1d63e185, type: 3}
+  dropSize: {x: 0.07, y: 0.12}
+  foamLeft: 0.35
+  pourPitch: 1.2
+  pourVolume: 0.6
+  tooLittleText: "Needs more milk \u2014 fill to the green."
+  tooMuchText: A bit too much milk.
+  spilledText: "Too much \u2014 the milk spilled over."

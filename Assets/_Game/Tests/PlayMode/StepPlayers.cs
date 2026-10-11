@@ -123,6 +123,8 @@ namespace Courtyard.Tests
         protected IEnumerator PlayPourOver()
         {
             yield return AdvanceTo<PourOverStep>();
+            var step = Object.FindAnyObjectByType<PourOverStep>();
+            var target = GetField<float>(step, "targetFill"); // Day 20 (her latte): half a cup
             // Grab the kettle on its base, carry it above the cup (V60), then pour in circles.
             var from = Counter.KettleTarget.transform.position;
             var centre = Counter.MugTop + new Vector3(0f, 0.9f, 0f);
@@ -135,7 +137,7 @@ namespace Courtyard.Tests
 
             var deadline = Time.realtimeSinceStartup + 25f;
             var angle = 0f;
-            while (Counter.MugLevel < 0.8f && Time.realtimeSinceStartup < deadline)
+            while (!step.IsComplete && Counter.MugLevel < target && Time.realtimeSinceStartup < deadline)
             {
                 angle += 7f * Time.deltaTime; // ~1.1 turn/s (game time) at 0.45 units ≈ 3 units/s: steady circles
                 Move(Mouse.position, ToScreen(centre + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle)) * 0.45f));
@@ -178,6 +180,29 @@ namespace Courtyard.Tests
             Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.9f), "SteamMilk quality");
         }
 
+        /// <summary>Carry the milk jug over the cup (spout above the opening), pour until <paramref name="stopAt"/>, let go.</summary>
+        protected IEnumerator PlayPourMilk(float stopAt = 0.82f, float minQuality = 0.8f)
+        {
+            yield return AdvanceTo<PourMilkStep>();
+            var step = Object.FindAnyObjectByType<PourMilkStep>();
+            var jug = Counter.MilkJug.transform;
+            var from = jug.position;
+            var spoutOffset = jug.TransformPoint(GetField<Vector3>(step, "_spoutLocal")) - jug.position;
+            var over = Counter.MugTop + new Vector3(0f, 0.6f, 0f) - spoutOffset;
+            yield return Press(from);
+            for (var t = 1; t <= 20; t++)
+            {
+                Move(Mouse.position, ToScreen(Vector3.Lerp(from, over, t / 20f)));
+                yield return null;
+            }
+
+            var deadline = Time.realtimeSinceStartup + 20f;
+            while (!step.IsComplete && Counter.MugLevel < stopAt && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return ReleaseMouse();
+            yield return WaitForCompletion();
+            Assert.That(LastQuality, Is.GreaterThanOrEqualTo(minQuality), "PourMilk quality");
+        }
+
         protected IEnumerator PlayPickToppings<T>(params Topping[] toppings) where T : MinigameStep
         {
             yield return AdvanceTo<PickToppingsStep>();
@@ -215,7 +240,7 @@ namespace Courtyard.Tests
             yield return Drag(step.transform.Find("Spoon").position, step.transform.Find("Jar").position, Counter.Mug.transform.position + Vector3.up * 0.2f);
             yield return Wait(0.5f);
             Assert.That(GetField<int>(step, "_spoons"), Is.EqualTo(1), "One spoon should have landed in her cup.");
-            yield return CarryKettleAndPour(0.85f);
+            yield return CarryKettleAndPour(GetField<float>(step, "targetFill")); // half a cup on milk days
             yield return WaitForCompletion();
             Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.85f), "PourWater quality");
         }

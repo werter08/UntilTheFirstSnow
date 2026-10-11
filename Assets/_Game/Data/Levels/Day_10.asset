@@ -52,6 +52,7 @@ MonoBehaviour:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
   - {fileID: 101021968709363197, guid: 53a24a4881c6040978e7cd94a70bf1ed, type: 3}
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
+  - {fileID: 5476417905725845940, guid: 9c773f568bc96461a83fd4c979c7f06e, type: 3}
   - {fileID: 7175227584742457043, guid: cbeeab98e4bdc40cdbee94abbb2e6547, type: 3}
   storyBeats:
   - trigger: 0
@@ -121,7 +122,7 @@ MonoBehaviour:
   recipeCardText: "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour
     to the line\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind
     to the green\n3) slow circles, keep the flow green, fill to the line\n\n<b>Milk</b>
-    \u2014 hold to steam, let go in the green"
+    \u2014 steam it, then pour it in. Stop in the green."
   coldDrinkText: Ugh. Cold and bitter.
   failText: Too cold. Let's try that again.
   drinkResults:
@@ -138,3 +139,13 @@ MonoBehaviour:
   finale: 0
   remakeText: It's bad. Let's remake it.
   serveAtDoor: 1
+  foggyWindow: 0
+  perfectStepQuality: 0.9
+  epiloguePalette:
+    globalLightColor: {r: 1, g: 1, b: 1, a: 1}
+    globalLightIntensity: 1
+    lampColor: {r: 1, g: 1, b: 1, a: 1}
+    lampIntensity: 1
+    miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
+    vignetteTint: {r: 0, g: 0, b: 0, a: 0}
+  epilogueSky: {r: 0.86, g: 0.9, b: 0.96, a: 1}

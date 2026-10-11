@@ -7,7 +7,7 @@ namespace Courtyard.Minigames
     /// <summary>
     /// Hold the counter milk jug to steam: temperature and foam rise. Release inside the green zone.
     /// Holding too long makes the milk squeal (the jug flashes) and ends the step at the maximum.
-    /// The finished foam goes onto the mug. Owns only the thermometer.
+    /// The steamed milk then goes into the cup by hand (<see cref="PourMilkStep"/>). Owns only the thermometer.
     /// </summary>
     public sealed class SteamMilkStep : MinigameStep
     {
@@ -37,11 +37,14 @@ namespace Courtyard.Minigames
         private FeedbackFx _fx;
         private UI.MinigameGauge _gauge;
         private float _temperature;
+        private HandsView _hands;
 
         public override void Begin(MinigameContext ctx)
         {
             _counter = ctx.Counter;
             _fx = ctx.Fx;
+            _hands = ctx.Hands;
+            if (_hands != null) _hands.UseRightHand(true); // the milk is worked with the right hand
             _temperature = startTemperature;
             _counter.MilkJug.Pressed += OnPressed;
             _counter.MilkJug.Released += OnReleased;
@@ -60,6 +63,7 @@ namespace Courtyard.Minigames
 
         private void OnDestroy()
         {
+            if (_hands != null) _hands.UseRightHand(false);
             if (_counter == null) return;
             _counter.MilkJug.Pressed -= OnPressed;
             _counter.MilkJug.Released -= OnReleased;
@@ -99,12 +103,9 @@ namespace Courtyard.Minigames
         private void Finish()
         {
             _counter.MilkJug.Interactable = false;
-            _counter.MugFoam.SetActive(true);
-            _counter.SetMugDrink(MugDrink.Latte, Color.white);
-            if (_counter.MugLevel < 0.85f) _counter.SetMugLevel(0.85f); // the milk tops the mug up
             StopSounds();
             _fx.Punch(_counter.MilkJugBody.transform);
-            _fx.Burst(_counter.Mug.transform.position + Vector3.up * 0.65f, new Color(0.98f, 0.95f, 0.88f), 10, 0.8f, 0.07f, 0.4f);
+            _fx.Burst(_counter.MilkJugBody.bounds.center + Vector3.up * 0.6f, new Color(0.98f, 0.95f, 0.88f), 8, 0.6f, 0.06f, 0.4f);
             if (_gauge != null) _gauge.Release();
             var centre = (bandMin + bandMax) * 0.5f;
             var quality = 1f - Mathf.Abs(_temperature - centre) / qualityFalloff;

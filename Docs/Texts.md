@@ -66,7 +66,8 @@ _Assets/_Game/Data/Levels/Day_10.asset_
 6. KettleBoil — Turn the kettle on. Turn it off when it boils.
 7. PourWater — One spoon of coffee into her cup. Then pour water to the line.
 8. SteamMilk — Hold to steam the milk. Let go in the green.
-9. GuessHerDrink — Add two spices to her cup, one at a time. Then click the cup.
+9. PourMilk — Pour the milk in. Stop in the green.
+10. GuessHerDrink — Add two spices to her cup, one at a time. Then click the cup.
 
 **Story**
 
@@ -94,16 +95,17 @@ _Assets/_Game/Data/Levels/Day_20.asset_
 2. ChooseMug — Her mug first. Which one is hers?
 3. PlaceV60 — Put the V60 on the cup.
 4. GrindBeans — Hold the handle and stir in circles. Stop in the green.
-5. PourOver — Pour slowly, in circles. Keep it in the green. Fill to the line.
+5. PourOverLatte — Pour slowly, in circles. Fill to the line — leave room for milk.
 6. SteamMilk — Hold to steam the milk. Let go in the green.
-7. AutoFillHisMug — _(empty)_
+7. PourMilk — Pour the milk in. Stop in the green.
+8. AutoFillHisMug — _(empty)_
 
 **Story**
 
 | When | Style | Who | Text |
 |---|---|---|---|
 | AfterStep(0) | Note |  | hang on. making coffee. |
-| AfterStep(7) | Thought |  | Two mugs. Hers first. |
+| AfterStep(8) | Thought |  | Two mugs. Hers first. |
 | LevelEnd | Thought |  | Three weeks ago I could barely make coffee for myself. |
 
 ## Day 30 — 17:00
@@ -119,14 +121,15 @@ _Assets/_Game/Data/Levels/Day_30.asset_
 0. KettleBoil — Turn the kettle on. Turn it off when it boils.
 1. PourWater — One spoon of coffee into her cup. Then pour water to the line.
 2. SteamMilk — Hold to steam the milk. Let go in the green.
-3. HerDrinkFromMemory — Make her usual.
+3. PourMilk — Pour the milk in. Stop in the green.
+4. HerDrinkFromMemory — Make her usual.
 
 **Story**
 
 | When | Style | Who | Text |
 |---|---|---|---|
 | LevelStart | Dialogue | Mira | It's snowing!! Make me the usual? |
-| AfterStep(2) | Thought |  | Cinnamon, honey. Don't even have to think about it. |
+| AfterStep(3) | Thought |  | Cinnamon, honey. Don't even have to think about it. |
 | LevelEnd | Thought |  | Autumn's over. |
 | LevelEnd | Thought |  | It's freezing outside. Weird. I'm not cold at all. |
 

@@ -14,7 +14,7 @@ namespace Courtyard.Editor
     /// <summary>
     /// Every player-facing text of the game in one table (the team's final copy), written into the level assets, the
     /// step prefabs, the fridge notes, the ending and the scenes' fixed labels. Structure (triggers, steps) stays; only
-    /// the strings change — except Day 20's "Two cups tonight" beat, which follows his auto-filled cup (step 5).
+    /// the strings change — except Day 20's "Two cups tonight" beat, which follows his auto-filled cup (step 8).
     /// Run it after editing this table; it re-exports Docs/Texts.md for checking.
     /// </summary>
     internal static class GameTexts
@@ -61,6 +61,8 @@ namespace Courtyard.Editor
             (P.MiraVisit, "", false),
             (P.TakeHerCup, "Take the jar.", true),
             (P.SteamMilk, "Hold to steam the milk. Let go in the green.", false),
+            (P.PourMilk, "Pour the milk in. Stop in the green.", false), // first time only (Day 10)
+            (P.PourOverLatte, "Pour slowly, in circles. Fill to the line — leave room for milk.", false),
             (P.GuessHerDrink, "Add two spices to her cup, one at a time. Then click the cup.", true),
             (P.ChooseMug, "Her mug first. Which one is hers?", true),
             (P.HerDrinkFromMemory, "Make her usual.", true),
@@ -74,7 +76,7 @@ namespace Courtyard.Editor
 
         private const string RecipeInstant = "<b>Instant coffee</b>\n1) boil water   2) two spoons   3) pour to the line";
         private const string RecipePourOver = "\n\n<b>Pour-over</b>\n1) boil, switch off when it boils   2) grind to the green\n3) slow circles, keep the flow green, fill to the line";
-        private const string RecipeMilk = "\n\n<b>Milk</b> — hold to steam, let go in the green";
+        private const string RecipeMilk = "\n\n<b>Milk</b> — steam it, then pour it in. Stop in the green.";
         private const string RecipeTwoMugs = "\n\nTwo mugs tonight. Hers first.";
 
         // ---------------------------------------------------------------- the days
@@ -132,7 +134,7 @@ namespace Courtyard.Editor
                 Beats = new[]
                 {
                     After(0, note, "hang on. making coffee."), // his reply, after reading her window
-                    After(7, thought, "Two mugs. Hers first."), // after his cup fills beside hers
+                    After(8, thought, "Two mugs. Hers first."), // after his cup fills beside hers
                     End(thought, "Three weeks ago I could barely make coffee for myself."),
                 },
             };
@@ -143,7 +145,7 @@ namespace Courtyard.Editor
                 Beats = new[]
                 {
                     Start(dialogue, "It's snowing!! Make me the usual?", "Mira"),
-                    After(2, thought, "Cinnamon, honey. Don't even have to think about it."),
+                    After(3, thought, "Cinnamon, honey. Don't even have to think about it."), // after the milk, before the spices
                     End(thought, "Autumn's over."),
                     End(thought, "It's freezing outside. Weird. I'm not cold at all."),
                 },

@@ -201,7 +201,7 @@ MonoBehaviour:
   hideCoffeeBag: 1
   targetSpoons: 1
   pourPerSecond: 0.35
-  targetFill: 0.85
+  targetFill: 0.5
   fillTolerance: 0.3
   minFillToFinish: 0.15
   pourReach: 0.55
