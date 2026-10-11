@@ -78,23 +78,7 @@ namespace Courtyard.Editor
         private static void BuildBackdrop(Scene boot, Transform kitchen)
         {
             foreach (var old in boot.GetRootGameObjects().Where(g => g.name is BackdropName or "TitleDecor")) Object.DestroyImmediate(old);
-            var backdrop = new GameObject(BackdropName).transform;
-            SceneManager.MoveGameObjectToScene(backdrop.gameObject, boot);
-
-            foreach (var name in WindowParts)
-            {
-                var source = kitchen.Find(name);
-                if (source == null)
-                {
-                    Debug.LogWarning($"MenuBuilder: '{name}' not found in the kitchen — left out of the menu.");
-                    continue;
-                }
-
-                var copy = Object.Instantiate(source.gameObject, backdrop, true);
-                copy.name = name;
-                copy.SetActive(true);
-                StripGameplay(copy);
-            }
+            var backdrop = CopyWindow(boot, kitchen, BackdropName, WindowParts);
 
             var steam = kitchen.GetComponentsInChildren<ParticleSystem>(true).FirstOrDefault(p => p.name == "Steam");
             Dress(backdrop, steam);
@@ -103,6 +87,32 @@ namespace Courtyard.Editor
             camera.transform.position = CameraPosition;
             camera.orthographicSize = CameraSize;
             camera.backgroundColor = EveningSky;
+        }
+
+        /// <summary>
+        /// Copies kitchen objects (the window view, the sill…) into <paramref name="target"/> under a new root, stripped
+        /// of gameplay — for the title screen and the ending.
+        /// </summary>
+        internal static Transform CopyWindow(Scene target, Transform kitchen, string rootName, string[] parts)
+        {
+            var root = new GameObject(rootName).transform;
+            SceneManager.MoveGameObjectToScene(root.gameObject, target);
+            foreach (var name in parts)
+            {
+                var source = kitchen.Find(name);
+                if (source == null)
+                {
+                    Debug.LogWarning($"MenuBuilder: '{name}' not found in the kitchen — left out of {rootName}.");
+                    continue;
+                }
+
+                var copy = Object.Instantiate(source.gameObject, root, true);
+                copy.name = name;
+                copy.SetActive(true);
+                StripGameplay(copy);
+            }
+
+            return root;
         }
 
         /// <summary>Only looks and idle motion stay: no clicks, colliders or kitchen logic.</summary>
@@ -192,7 +202,7 @@ namespace Courtyard.Editor
             }
         }
 
-        private static void Motion(Transform target, float sway = 0f, float bob = 0f, float stretch = 0f, float speed = 0.6f)
+        internal static void Motion(Transform target, float sway = 0f, float bob = 0f, float stretch = 0f, float speed = 0.6f)
         {
             if (target == null) return;
             var motion = target.GetComponent<AmbientMotion>() ?? target.gameObject.AddComponent<AmbientMotion>();
@@ -207,7 +217,7 @@ namespace Courtyard.Editor
         }
 
         /// <summary>The kitchen mug's own steam, rising from a mug on the sill (always on, already rising at start).</summary>
-        private static void Steam(SpriteRenderer mug, ParticleSystem source)
+        internal static void Steam(SpriteRenderer mug, ParticleSystem source)
         {
             var steam = Object.Instantiate(source.gameObject, mug.transform).GetComponent<ParticleSystem>();
             steam.name = "Steam";

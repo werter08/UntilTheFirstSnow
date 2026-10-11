@@ -1221,7 +1221,7 @@ namespace Courtyard.Editor
             var sill = Find(kitchen, "SillMugs", false);
             if (sill == null) return;
             DrinkInside(sill.Find("SillMugHis")?.GetComponent<SpriteRenderer>(), "drink_black");
-            DrinkInside(sill.Find("SillMugHers")?.GetComponent<SpriteRenderer>(), "drink_latte");
+            DrinkInside(sill.Find("SillMugHers")?.GetComponent<SpriteRenderer>(), "drink_latte_heart"); // her cappuccino, with a heart
         }
 
         /// <summary>
@@ -1949,7 +1949,7 @@ namespace Courtyard.Editor
             var glow = SpriteChild(root, "Glow");
             PlaceAtScreenScale(glow, AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png"), new Vector2(0f, 0.4f), "Props", -1);
             DrinkInside(root.Find("HisMug").GetComponent<SpriteRenderer>(), "drink_black");  // his americano
-            DrinkInside(root.Find("HerMug").GetComponent<SpriteRenderer>(), "drink_latte");  // her cappuccino
+            DrinkInside(root.Find("HerMug").GetComponent<SpriteRenderer>(), "drink_latte_heart");  // her cappuccino, with a heart
             glow.localScale = new Vector3(2.4f, 1.6f, 1f);
             glow.GetComponent<SpriteRenderer>().color = new Color(1f, 0.75f, 0.45f, 0.35f);
             SoftParticles(root, "SteamHis", new Vector2(-1.2f, 1.35f), 0.4f, new Vector2(0f, 0.55f), new Color(1f, 1f, 1f, 0.3f), 0.3f, 2f, 4f, "FX");
