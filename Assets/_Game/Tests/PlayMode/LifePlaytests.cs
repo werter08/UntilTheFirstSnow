@@ -38,7 +38,7 @@ namespace Courtyard.Tests
             yield return Click(note);
             yield return Wait(0.3f);
             Assert.That(director.NoteCard.IsOpen, Is.True, "Clicking the note should open it.");
-            StringAssert.Contains("coffee", director.NoteCard.GetComponentInChildren<TMPro.TMP_Text>().text);
+            StringAssert.Contains("coffee", director.NoteCard.GetComponentInChildren<TMPro.TMP_Text>().text.ToLowerInvariant());
 
             yield return ClickScreen(new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
             yield return Wait(0.3f);

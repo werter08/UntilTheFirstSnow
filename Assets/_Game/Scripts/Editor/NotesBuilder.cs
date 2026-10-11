@@ -18,7 +18,7 @@ namespace Courtyard.Editor
     internal static class NotesBuilder
     {
         private const string NotesPath = "Assets/_Game/Data/Story/FridgeNotes.asset";
-        private const int Slots = 5;
+        private const int Slots = 6; // five days, plus the note the morning after the credits
 
         /// <summary>Draft notes (≤ 12 words a line). Day 10's note quietly records her usual for Day 30.</summary>
         private static readonly (int day, string from, string text)[] Drafts =
@@ -31,7 +31,7 @@ namespace Courtyard.Editor
         };
 
         /// <summary>Extra slots next to the team's three notes (world units, on the fridge door).</summary>
-        private static readonly Vector2[] NewSlotPositions = { new(8.6f, 0.55f), new(8.15f, -2.55f) };
+        private static readonly Vector2[] NewSlotPositions = { new(8.6f, 0.55f), new(8.15f, -2.55f), new(9.2f, -3.05f) };
 
         public static NotesBook EnsureNotes()
         {
@@ -61,7 +61,7 @@ namespace Courtyard.Editor
         {
             var book = EnsureNotes();
 
-            // Five slots: the team's three notes, plus copies of the third for days 20 and 30.
+            // Six slots: the team's three notes, plus copies of the third for days 20 and 30 and the morning after.
             var slots = new GameObject[Slots];
             for (var i = 0; i < Slots; i++)
             {

@@ -377,13 +377,13 @@ namespace Courtyard.Editor
             // Day 1: spoon the coffee in while the kettle heats.
             Patch(Folder + InstantCoffee + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "startsWithPrevious", true));
 
-            // The spoon counter sits on the light counter: dark ink, small, just "0/2".
+            // The spoon counter under the cup: white, small, just "0/2" (green when right, red when too many).
             foreach (var name in new[] { InstantCoffee, PourWater })
                 Patch(Folder + name + ".prefab", root => Edit(root.GetComponent<InstantCoffeeStep>(), so =>
                 {
-                    Property(so, "countColour").colorValue = new Color(0.24f, 0.16f, 0.12f);
-                    Property(so, "countDoneColour").colorValue = new Color(0.16f, 0.45f, 0.14f);
-                    Property(so, "countOverColour").colorValue = new Color(0.7f, 0.16f, 0.1f);
+                    Property(so, "countColour").colorValue = Color.white;
+                    Property(so, "countDoneColour").colorValue = new Color(0.72f, 0.95f, 0.6f);
+                    Property(so, "countOverColour").colorValue = new Color(1f, 0.55f, 0.45f);
                     Property(so, "spoonCountText").stringValue = "{0}/{1}"; // just the count: 0/2
                     Property(so, "countScale").floatValue = 0.45f;
                 }));

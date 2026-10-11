@@ -87,6 +87,15 @@ namespace Courtyard.Core
             kitchen.Apply(_level);
             counter.Prepare(_level);
             hands.SetSweater(_level.Props.sweater);
+            var fog = kitchen.Fog;
+            if (fog != null) fog.CanWipe = () => _activeStep == null && !kitchen.NoteCard.IsOpen; // never during a step
+
+            if (GameManager.Instance != null && GameManager.Instance.Epilogue)
+            {
+                _run = StartCoroutine(Epilogue());
+                return;
+            }
+
             CreateMeters();
             story.BeatRead += OnBeatRead;
             if (recipeCard != null) recipeCard.Set(_level.RecipeCardText, kitchen.NoteCard);
@@ -131,6 +140,8 @@ namespace Courtyard.Core
             var beatsShown = new HashSet<int>();
             MinigameStep early = null; // a step that started with the previous one (Day 1: spoons while the kettle heats)
             var remaking = false;
+            var perfect = true;   // every step the player made was "perfect": a gold star on the calendar
+            var anyPlayed = false;
             for (var i = 0; i < _level.Steps.Count; i++)
             {
                 if (remaking && _level.Steps[i].SkipOnRemake(counter)) continue; // e.g. her mug is already chosen
@@ -180,6 +191,12 @@ namespace Courtyard.Core
 
                 if (step.Scored)
                 {
+                    if (!step.FixedQuality.HasValue)
+                    {
+                        anyPlayed = true;
+                        if (quality < _level.PerfectStepQuality) perfect = false;
+                    }
+
                     if (step.CountsTowardDrink) qualities[i] = quality;
                     var delta = _level.StepWarmthDelta(quality);
                     if (delta < 0f) yield return Chill(); // frost first, then the meter drops (and may run out)
@@ -226,6 +243,7 @@ namespace Courtyard.Core
             yield return fx.ServeDrink(counter.Mug.transform, counter.MugTop, counter.MugSteam);
             if (_level.ServeAtDoor) yield return ServeAtDoor(lastGood);
             else yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
+            if (perfect && anyPlayed) yield return PerfectDay();
             yield return NewNote();
             if (_level.Finale) yield return Finale();
 
@@ -320,6 +338,64 @@ namespace Courtyard.Core
                 if (hudGroup != null) hudGroup.alpha = 1f - t;
             });
             yield return new WaitForSeconds(1.5f);
+        }
+
+        /// <summary>Every step perfect: remembered, and a gold star sticker pops onto today's calendar page.</summary>
+        private IEnumerator PerfectDay()
+        {
+            PerfectDays.Mark(_level.DayNumber);
+            fx.Burst(kitchen.CalendarStarPosition, new Color(1f, 0.85f, 0.35f), 12, 1.3f, 0.07f, -0.2f);
+            yield return kitchen.PopCalendarStar();
+            yield return new WaitForSeconds(0.8f);
+        }
+
+        [Header("After the credits: the morning after")]
+        [Tooltip("Hidden while the morning-after kitchen plays (corner buttons, the cold vignette…).")]
+        [SerializeField] private GameObject[] hiddenInEpilogue;
+        [SerializeField, Min(0f)] private float epilogueHoldSeconds = 4f;
+        [SerializeField] private string epiloguePrompt = "click to return to the title";
+
+        /// <summary>
+        /// Post-credits: the last day's kitchen the next morning, no UI. A new note pops onto the fridge and opens;
+        /// after a while the music fades out and a click goes back to the title.
+        /// </summary>
+        private IEnumerator Epilogue()
+        {
+            hint.Hide();
+            if (hiddenInEpilogue != null)
+                foreach (var part in hiddenInEpilogue)
+                    if (part != null) part.SetActive(false);
+            foreach (var view in meterViews) view.Bind(null); // no meters (the HUD itself stays: it carries the hint line)
+            kitchen.ApplyEpilogue(_level);
+            counter.SetAllInteractable(false);
+            counter.Mug.gameObject.SetActive(false); // both mugs stand on the sill
+            AudioManager.SetAmbience(_level.Ambience, _level.AmbienceVolume); // the ending's music plays on
+            yield return fader.FadeIn(fadeDuration * 2f);
+            yield return new WaitForSeconds(1.2f);
+
+            var card = kitchen.NoteCard;
+            var note = kitchen.EpilogueNote;
+            var slot = kitchen.PinEpilogueNote();
+            if (slot != null && card != null && note != null)
+            {
+                fx.Burst(slot.position, new Color(1f, 0.92f, 0.6f), 10, 1.2f, 0.07f, -0.2f);
+                yield return new WaitForSeconds(0.9f);
+                card.Open(note, NotePaper.Pink);
+            }
+
+            yield return new WaitForSeconds(epilogueHoldSeconds);
+            if (card != null) card.Close();
+            AudioManager.SetMusic(null); // the music fades out
+            yield return new WaitForSeconds(2f);
+
+            hint.Show(epiloguePrompt);
+            var shownAt = Time.frameCount;
+            while (!(Time.frameCount > shownAt && Pointer.current != null && Pointer.current.press.wasPressedThisFrame)) yield return null;
+            AudioManager.Play(SfxId.UiClick);
+            hint.Hide();
+            yield return fader.FadeOut(Color.black, fadeDuration);
+            if (GameManager.Instance != null) GameManager.Instance.ReturnToTitle();
+            else SceneManager.LoadScene(SceneNames.Boot);
         }
 
         /// <summary>Optional beat over black, e.g. Day 20's footsteps across the courtyard.</summary>

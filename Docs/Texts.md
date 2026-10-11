@@ -175,12 +175,12 @@ Title screen prompt, HUD labels, hints set on components, the ending's credits, 
 - `FeedbackFx.perfectText`: Perfect!
 - `FeedbackFx.chillText`: Brr... cold.
 - `ContinueHint`: click to continue
-- `Tooltip`: Hints: on
 - `Tooltip`: Restart day
 - `CloseHint`: click to close
 - `Label`: DAY
 - `Question`: Start this day over?
 - `Label`: [ yes ]
+- `LevelRunner.epiloguePrompt`: click to return to the title
 - `LevelRunner.newNoteHint`: New note on the fridge. Click it to read.
 
 ### Ending

@@ -159,6 +159,9 @@ namespace Courtyard.Editor
             (30, "", "First snow. Two mugs on the sill."),
         };
 
+        /// <summary>The note on the fridge the morning after the credits (from, text).</summary>
+        private static readonly (string from, string text) EpilogueNote = ("M", "Same time tomorrow?");
+
         /// <summary>Credits as in CREDITS.md (art, music, decor, fonts) plus the sound sources named by the team.</summary>
         private static readonly (BeatStyle style, string text)[] Ending =
         {
@@ -265,6 +268,11 @@ namespace Courtyard.Editor
                     note.FindPropertyRelative("from").stringValue = FridgeNotes[i].from;
                     note.FindPropertyRelative("text").stringValue = FridgeNotes[i].text;
                 }
+
+                var epilogue = so.FindProperty("epilogue");
+                epilogue.FindPropertyRelative("afterDay").intValue = 0;
+                epilogue.FindPropertyRelative("from").stringValue = EpilogueNote.from;
+                epilogue.FindPropertyRelative("text").stringValue = EpilogueNote.text;
             });
         }
 

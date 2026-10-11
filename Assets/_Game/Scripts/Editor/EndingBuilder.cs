@@ -127,7 +127,7 @@ namespace Courtyard.Editor
         private static void BuildUi(Scene ending, Camera camera)
         {
             var canvas = ending.GetRootGameObjects().Select(g => g.GetComponentInChildren<Canvas>(true)).First(c => c != null).transform;
-            foreach (var old in new[] { "EndingTitle", "EndingDim", "EndingCredits", "EndingThanks", "EndingPrompt" })
+            foreach (var old in new[] { "EndingTitle", "EndingDim", "EndingCredits", "EndingThanks", "EndingPrompt", "EndingStars" })
             {
                 var t = canvas.Find(old);
                 if (t != null) Object.DestroyImmediate(t.gameObject);
@@ -171,6 +171,17 @@ namespace Courtyard.Editor
             creditsRect.offsetMin = new Vector2(40f, creditsRect.offsetMin.y); // side margins so no line touches the mask
             creditsRect.offsetMax = new Vector2(-40f, creditsRect.offsetMax.y);
 
+            // "★ x/5" under the credits text (days played perfectly); hangs from the text's top and rolls with it.
+            var stars = UiObject("EndingStars", creditsRect);
+            Place(stars, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -900f), new Vector2(260f, 72f));
+            var starIcon = UiObject("Star", stars);
+            Place(starIcon, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(30f, 0f), new Vector2(66f, 64f));
+            var starImage = Img(starIcon, Color.white);
+            starImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/UI/gauge_star.png");
+            starImage.preserveAspect = true;
+            var starsCount = Label(stars, "Count", "0/5", 48f, TextAlignmentOptions.Left, Cream);
+            starsCount.rectTransform.offsetMin = new Vector2(112f, 0f);
+
             var thanksRect = UiObject("EndingThanks", root);
             Stretch(thanksRect);
             var thanksGroup = thanksRect.gameObject.AddComponent<CanvasGroup>();
@@ -203,6 +214,8 @@ namespace Courtyard.Editor
             Wire(screen, "thanksGroup", thanksGroup);
             Wire(screen, "thanks", thanks);
             Wire(screen, "prompt", prompt);
+            Wire(screen, "stars", stars);
+            Wire(screen, "starsCount", starsCount);
         }
     }
 }

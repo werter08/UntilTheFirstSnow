@@ -25,7 +25,15 @@ namespace Courtyard.Core
         public static GameManager Instance { get; private set; }
 
         public LevelDefinition CurrentLevel =>
-            _currentIndex >= 0 && _currentIndex < levels.Length ? levels[_currentIndex] : null;
+            Epilogue ? EpilogueLevel : _currentIndex >= 0 && _currentIndex < levels.Length ? levels[_currentIndex] : null;
+
+        /// <summary>All days in order.</summary>
+        public System.Collections.Generic.IReadOnlyList<LevelDefinition> Levels => levels;
+
+        /// <summary>True while the post-credits morning plays in the kitchen (the last day's kitchen, nothing to make).</summary>
+        public bool Epilogue { get; private set; }
+
+        private LevelDefinition EpilogueLevel => levels != null && levels.Length > 0 ? levels[levels.Length - 1] : null;
 
         private void Awake()
         {
@@ -66,6 +74,7 @@ namespace Courtyard.Core
 
             _currentIndex = 0;
             _restarting = false;
+            Epilogue = false;
             SceneManager.LoadScene(SceneNames.Kitchen);
         }
 
@@ -89,8 +98,16 @@ namespace Courtyard.Core
             SceneManager.LoadScene(SceneNames.Kitchen);
         }
 
+        /// <summary>After the credits: the kitchen the morning after the last day.</summary>
+        public void PlayEpilogue()
+        {
+            Epilogue = true;
+            SceneManager.LoadScene(SceneNames.Kitchen);
+        }
+
         public void ReturnToTitle()
         {
+            Epilogue = false;
             _currentIndex = -1;
             SceneManager.LoadScene(SceneNames.Boot);
         }

@@ -113,3 +113,13 @@ MonoBehaviour:
   finale: 0
   remakeText: It's bad. Let's remake it.
   serveAtDoor: 0
+  foggyWindow: 1
+  perfectStepQuality: 0.9
+  epiloguePalette:
+    globalLightColor: {r: 1, g: 1, b: 1, a: 1}
+    globalLightIntensity: 1
+    lampColor: {r: 1, g: 1, b: 1, a: 1}
+    lampIntensity: 1
+    miraWindowColor: {r: 1, g: 0.85, b: 0.55, a: 1}
+    vignetteTint: {r: 0, g: 0, b: 0, a: 0}
+  epilogueSky: {r: 0.86, g: 0.9, b: 0.96, a: 1}

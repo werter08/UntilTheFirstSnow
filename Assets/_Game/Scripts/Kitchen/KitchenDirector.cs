@@ -91,6 +91,12 @@ namespace Courtyard.Kitchen
         [SerializeField] private UI.NoteCard noteCard;
         [Tooltip("Day 30: his and her mugs side by side on the window sill.")]
         [SerializeField] private GameObject sillMugs;
+        [Tooltip("Fog on the window glass, on days that have it (wiped by the player between steps).")]
+        [SerializeField] private WindowFog windowFog;
+        [Tooltip("Gold star sticker on the calendar page: the day was played perfectly.")]
+        [SerializeField] private SpriteRenderer calendarStar;
+        [Tooltip("Drink and steam inside the sill mugs (hidden when the mugs stand empty, the morning after).")]
+        [SerializeField] private GameObject[] sillMugContents;
         [Tooltip("Wall rack slots, left to right; filled with earlier days' mugs.")]
         [SerializeField] private SpriteRenderer[] rackSlots;
         [Tooltip("Mug art per MugStyle (Chipped, His, Hers, Yellow, Green).")]
@@ -182,7 +188,75 @@ namespace Courtyard.Kitchen
             };
             SetMiraAtDoor(false);
             SetMiraWindow(level.MiraWindow);
+            if (windowFog != null) windowFog.gameObject.SetActive(level.FoggyWindow);
+            if (calendarStar != null) calendarStar.gameObject.SetActive(false);
         }
+
+        public WindowFog Fog => windowFog != null && windowFog.gameObject.activeSelf ? windowFog : null;
+
+        // ---------------------------------------------------------------- perfect day
+
+        /// <summary>A perfect day: the gold star sticker slaps onto today's calendar page, tilted a little.</summary>
+        public System.Collections.IEnumerator PopCalendarStar()
+        {
+            if (calendarStar == null) yield break;
+            var star = calendarStar.transform;
+            var size = star.localScale;
+            star.localRotation = Quaternion.Euler(0f, 0f, Random.Range(-14f, 14f));
+            calendarStar.gameObject.SetActive(true);
+            Audio.AudioManager.Play(Audio.SfxId.Perfect);
+            yield return Tweens.RunLinear(0.3f, t =>
+            {
+                var overshoot = 1f + Mathf.Sin(t * Mathf.PI) * 0.35f;
+                star.localScale = size * (t * overshoot);
+            });
+            star.localScale = size;
+        }
+
+        public Vector3 CalendarStarPosition => calendarStar != null ? calendarStar.transform.position : transform.position;
+
+        // ---------------------------------------------------------------- the morning after (post-credits)
+
+        /// <summary>
+        /// The last day's kitchen the next morning: soft morning light, every note on the fridge, the two mugs on the
+        /// sill — empty now.
+        /// </summary>
+        public void ApplyEpilogue(LevelDefinition level)
+        {
+            var palette = level.EpiloguePalette;
+            globalLight.color = palette.globalLightColor;
+            globalLight.intensity = palette.globalLightIntensity;
+            lampLight.color = palette.lampColor;
+            lampLight.intensity = palette.lampIntensity;
+            ApplyLamp(true, palette.lampColor); // daylight: the lamp is off
+            if (level.EpilogueSky.a > 0f) courtyard.color = level.EpilogueSky;
+            if (outsideShaded != null && _outsideBase != null)
+                for (var i = 0; i < outsideShaded.Length; i++)
+                    if (outsideShaded[i] != null && outsideShaded[i] != treeCrown) outsideShaded[i].color = _outsideBase[i] * morningOutside;
+
+            if (notesBook != null)
+            {
+                var all = notesBook.All;
+                _pinned = Mathf.Min(all.Count, fridgeNotes.Length);
+                for (var i = 0; i < fridgeNotes.Length; i++)
+                {
+                    var has = i < _pinned;
+                    fridgeNotes[i].SetActive(has);
+                    if (has && fridgeNotes[i].TryGetComponent<ReadableNote>(out var readable)) readable.Set(all[i], noteCard);
+                }
+            }
+
+            SetSillMugs(true);
+            if (sillMugContents != null)
+                foreach (var part in sillMugContents)
+                    if (part != null) part.SetActive(false);
+            if (windowFog != null) windowFog.gameObject.SetActive(level.FoggyWindow);
+        }
+
+        /// <summary>The morning-after note pops onto the fridge (null when there is none or no free slot).</summary>
+        public Story.FridgeNote EpilogueNote => notesBook != null ? notesBook.Epilogue : null;
+
+        public Transform PinEpilogueNote() => notesBook != null ? Pin(notesBook.Epilogue) : null;
 
         public void SetMiraWindow(MiraWindowState state)
         {
@@ -228,10 +302,11 @@ namespace Courtyard.Kitchen
         /// End of the day: the note written today pops onto the fridge (paper sound, a little sparkle) in the next free
         /// slot. Returns that slot, or null when there is no note for today (or no room).
         /// </summary>
-        public Transform PinNoteAfter(int day)
+        public Transform PinNoteAfter(int day) => Pin(notesBook != null ? notesBook.WrittenAfter(day) : null);
+
+        private Transform Pin(Story.FridgeNote note)
         {
-            var note = notesBook != null ? notesBook.WrittenAfter(day) : null;
-            if (note == null || _pinned >= fridgeNotes.Length) return null;
+            if (note == null || string.IsNullOrEmpty(note.Text) || _pinned >= fridgeNotes.Length) return null;
 
             var slot = fridgeNotes[_pinned++];
             slot.SetActive(true);

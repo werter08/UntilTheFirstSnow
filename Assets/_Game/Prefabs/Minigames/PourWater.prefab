@@ -211,9 +211,9 @@ MonoBehaviour:
   waterColor: {r: 0.75, g: 0.85, b: 0.95, a: 1}
   coffeeColor: {r: 0.35, g: 0.2, b: 0.1, a: 1}
   spoonCountText: '{0}/{1}'
-  countColour: {r: 0.24, g: 0.16, b: 0.12, a: 1}
-  countDoneColour: {r: 0.16, g: 0.45, b: 0.14, a: 1}
-  countOverColour: {r: 0.7, g: 0.16, b: 0.1, a: 1}
+  countColour: {r: 1, g: 1, b: 1, a: 1}
+  countDoneColour: {r: 0.72, g: 0.95, b: 0.6, a: 1}
+  countOverColour: {r: 1, g: 0.55, b: 0.45, a: 1}
   countScale: 0.45
   spoonReach: 0.9
   tooMuchCoffeeText: "Too much coffee \u2014 she takes just one spoon."

@@ -99,6 +99,7 @@ namespace Courtyard.Editor
             AssetDatabase.SaveAssets();
             HudBuilder.Apply(); // the hand-drawn meters and corner buttons
             PictureBuilder.Apply(); // the wall picture opens up close
+            ExtrasBuilder.Apply(); // window fog, perfect-day star, the morning after the credits
         }
 
         /// <summary>

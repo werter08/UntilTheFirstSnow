@@ -30,3 +30,7 @@ MonoBehaviour:
   - afterDay: 30
     from: 
     text: First snow. Two mugs on the sill.
+  epilogue:
+    afterDay: 0
+    from: M
+    text: Same time tomorrow?

@@ -92,6 +92,15 @@ namespace Courtyard.Core
         [Tooltip("Day 10: the finished drink is handed to her at the front door (the door scene with her and the cup).")]
         [SerializeField] private bool serveAtDoor;
 
+        [Header("Extras")]
+        [Tooltip("The window glass is fogged; between steps the player can wipe it with the mouse (Days 20 and 30).")]
+        [SerializeField] private bool foggyWindow;
+        [Tooltip("A step at or above this counts toward a perfect day (gold star on the calendar).")]
+        [SerializeField, Range(0f, 1f)] private float perfectStepQuality = 0.9f;
+        [Tooltip("Last day only: the morning after the credits — light and sky of the post-credits kitchen.")]
+        [SerializeField] private LevelPalette epiloguePalette = LevelPalette.Default;
+        [SerializeField] private Color epilogueSky = new(0.86f, 0.9f, 0.96f);
+
         public int DayNumber => dayNumber;
         public string ClockTime => clockTime;
         public TimeOfDay TimeOfDay => timeOfDay;
@@ -151,6 +160,10 @@ namespace Courtyard.Core
         public bool Finale => finale;
         public string RemakeText => remakeText;
         public bool ServeAtDoor => serveAtDoor;
+        public bool FoggyWindow => foggyWindow;
+        public float PerfectStepQuality => perfectStepQuality;
+        public LevelPalette EpiloguePalette => epiloguePalette;
+        public Color EpilogueSky => epilogueSky;
 
         /// <summary>A result this poor is a bad drink: it chills, then the drink is made again.</summary>
         public bool IsBad(float quality) => quality < badResultThreshold;

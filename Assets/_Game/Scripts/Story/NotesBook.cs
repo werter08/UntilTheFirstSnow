@@ -9,6 +9,13 @@ namespace Courtyard.Story
     public sealed class NotesBook : ScriptableObject
     {
         [SerializeField] private List<FridgeNote> notes = new();
+        [Tooltip("After the credits: the note that pops onto the fridge the morning after (its day is ignored).")]
+        [SerializeField] private FridgeNote epilogue;
+
+        public FridgeNote Epilogue => epilogue;
+
+        /// <summary>Every day's note, in story order.</summary>
+        public IReadOnlyList<FridgeNote> All => PinnedBefore(int.MaxValue);
 
         /// <summary>Notes already on the fridge when <paramref name="day"/> starts (written after earlier days).</summary>
         public IReadOnlyList<FridgeNote> PinnedBefore(int day) =>

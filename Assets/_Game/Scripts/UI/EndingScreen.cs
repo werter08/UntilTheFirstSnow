@@ -39,6 +39,13 @@ namespace Courtyard.UI
         [SerializeField] private CanvasGroup prompt;
         [SerializeField, Min(10f)] private float creditsSpeed = 70f;
         [SerializeField, Min(1f)] private float fastForward = 4f;
+        [Tooltip("\"★ x/5\" under the credits: days played perfectly. Hangs from the credits text and rolls with it.")]
+        [SerializeField] private RectTransform stars;
+        [SerializeField] private TMP_Text starsCount;
+        [Tooltip("Days counted when there is no GameManager (the Ending scene played directly).")]
+        [SerializeField] private int[] days = { 1, 5, 10, 20, 30 };
+        [Tooltip("After the thanks: the morning-after kitchen, then back to the title from there.")]
+        [SerializeField] private bool playEpilogue = true;
 
         private bool Cinematic => titleGroup != null && credits != null && thanksGroup != null && worldCamera != null;
 
@@ -70,9 +77,10 @@ namespace Courtyard.UI
             yield return Tweens.Run(0.8f, t => dim.alpha = t);
             Canvas.ForceUpdateCanvases();
             var rect = credits.rectTransform;
+            var starsHeight = PlaceStars();
             // The text hangs from its top edge, anchored to the viewport's bottom: it has left the viewport once its top
-            // is a viewport and a text height above.
-            var end = creditsViewport.rect.height + credits.preferredHeight + 20f;
+            // is a viewport and a text height (plus the stars under it) above.
+            var end = creditsViewport.rect.height + credits.preferredHeight + starsHeight + 20f;
             while (rect.anchoredPosition.y < end)
             {
                 var speed = creditsSpeed * (Pointer.current != null && Pointer.current.press.isPressed ? fastForward : 1f);
@@ -86,6 +94,16 @@ namespace Courtyard.UI
             // Thanks, then back to the title on a click.
             yield return Tweens.Run(1.2f, t => thanksGroup.alpha = t);
             yield return new WaitForSeconds(1.5f);
+
+            // The morning after, in the kitchen (it ends with its own "back to the title").
+            if (playEpilogue && GameManager.Instance != null)
+            {
+                yield return new WaitForSeconds(1.5f);
+                yield return fader.FadeOut(Color.black, fadeDuration * 1.5f);
+                GameManager.Instance.PlayEpilogue();
+                yield break;
+            }
+
             while (!(Pointer.current != null && Pointer.current.press.wasPressedThisFrame))
             {
                 prompt.alpha = 0.55f + 0.45f * Mathf.Sin(Time.time * 1.6f);
@@ -116,6 +134,18 @@ namespace Courtyard.UI
             }
 
             credits.text = text.ToString().TrimEnd();
+        }
+
+        /// <summary>"x/5" beside a gold star, just under the credits text. Returns the height it adds to the roll.</summary>
+        private float PlaceStars()
+        {
+            if (stars == null) return 0f;
+            var dayNumbers = GameManager.Instance != null && GameManager.Instance.Levels != null
+                ? GameManager.Instance.Levels.Where(l => l != null).Select(l => l.DayNumber).ToArray()
+                : days;
+            if (starsCount != null) starsCount.text = $"{PerfectDays.Count(dayNumbers)}/{dayNumbers.Length}";
+            stars.anchoredPosition = new Vector2(0f, -credits.preferredHeight - 50f);
+            return stars.rect.height + 50f;
         }
 
         /// <summary>The camera eases toward the two mugs on the sill.</summary>
