@@ -56,6 +56,9 @@ namespace Courtyard.Kitchen
         [Tooltip("Drink tiles per MugDrink (Instant, Black, Latte).")]
         [SerializeField] private Sprite[] mugDrinkSprites;
 
+        [Tooltip("Closes the cup's opening while the V60 sits on it (follows the V60's fade).")]
+        [SerializeField] private SpriteRenderer cupCover;
+
         [Tooltip("Steam above the mug while there is a hot drink in it.")]
         [SerializeField] private ParticleSystem mugSteam;
         [Tooltip("Steam rate for a badly made (cold) drink and a perfect (hot) one.")]
@@ -168,6 +171,20 @@ namespace Courtyard.Kitchen
 
         public bool HasDrink => mugFill.Value > 0.05f || mugFoam.activeSelf;
 
+        /// <summary>The V60 is on the brewing mug (not lifted, not over his cup).</summary>
+        private bool CupCovered => dripper.activeInHierarchy && mug.gameObject.activeInHierarchy &&
+                                   Mathf.Abs(dripper.transform.position.x - mug.transform.position.x) < 0.6f;
+
+        private void UpdateCupCover()
+        {
+            if (cupCover == null) return;
+            cupCover.enabled = CupCovered;
+            if (!cupCover.enabled || dripperRenderer == null) return;
+            var c = cupCover.color;
+            c.a = dripperRenderer.color.a; // lifts off with the V60's fade
+            cupCover.color = c;
+        }
+
         private void Awake()
         {
             _kettleRest = kettle.position;
@@ -178,7 +195,8 @@ namespace Courtyard.Kitchen
         private void Update()
         {
             var emission = mugSteam.emission;
-            emission.enabled = HasDrink;
+            emission.enabled = HasDrink && !CupCovered;
+            UpdateCupCover();
 
             if (frother != null)
             {

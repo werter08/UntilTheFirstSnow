@@ -51,7 +51,7 @@ MonoBehaviour:
   alwaysShowHint: 0
   startsWithPrevious: 0
   explainBelow: 0.6
-  gaugeIcon: {fileID: 0}
+  gaugeIcon: {fileID: 21300000, guid: dd018d4d43ba64926aeb3cd4493aa4c9, type: 3}
   startTemperature: 5
   maxTemperature: 80
   bandMin: 60

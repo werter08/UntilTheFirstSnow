@@ -51,7 +51,7 @@ MonoBehaviour:
   alwaysShowHint: 0
   startsWithPrevious: 0
   explainBelow: 0.6
-  gaugeIcon: {fileID: 0}
+  gaugeIcon: {fileID: 21300000, guid: 5569d257d2ea84e2090e7ec0931db1c1, type: 3}
   targetLevel: 0.55
   zoneHalfWidth: 0.1
   fillPerTurn: 0.12

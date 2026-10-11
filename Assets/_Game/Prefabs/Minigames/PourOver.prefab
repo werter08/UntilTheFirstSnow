@@ -53,7 +53,7 @@ MonoBehaviour:
   startsWithPrevious: 0
   explainBelow: 0.6
   pourZone: {fileID: 4250179583806582046}
-  gaugeIcon: {fileID: 0}
+  gaugeIcon: {fileID: 21300000, guid: b0b7fa7494cc84d9bb52a882be118208, type: 3}
   tooFastFlow: 0.8
   fillPerSecond: 0.12
   targetFill: 0.8

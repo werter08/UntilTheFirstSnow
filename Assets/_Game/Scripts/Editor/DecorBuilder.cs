@@ -530,6 +530,26 @@ namespace Courtyard.Editor
             Wire(mugContents, "regionHeight", region);
             Wire(mugContents, "regionWidth", 1.2f);
             Wire(counter, "mugContents", mugContents);
+
+            // While the V60 sits on the cup, the team's cover tile closes the cup's opening completely (in front of the
+            // drink tiles, behind the mug body and its rim); it lifts off with the V60.
+            var coverArt = AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "v60_cup_cover.png");
+            var emptyCap = Find(contents, "EmptyCap").GetComponent<SpriteRenderer>();
+            if (coverArt != null && emptyCap.sprite != null)
+            {
+                var cover = SpriteChild(contents, "CupCover");
+                cover.localPosition = emptyCap.transform.localPosition;
+                var renderer = cover.GetComponent<SpriteRenderer>();
+                renderer.sprite = coverArt;
+                renderer.drawMode = SpriteDrawMode.Simple;
+                renderer.sortingLayerName = "Props";
+                renderer.sortingOrder = 0;
+                var need = Vector3.Scale(emptyCap.sprite.bounds.size, emptyCap.transform.localScale) * 1.04f; // a hair bigger: no gaps
+                cover.localScale = new Vector3(need.x / coverArt.bounds.size.x, need.y / coverArt.bounds.size.y, 1f);
+                renderer.enabled = false;
+                Wire(counter, "cupCover", renderer);
+            }
+            else Debug.LogWarning("DecorBuilder: v60_cup_cover.png missing — the cup's inside shows under the V60.");
             WireArray(mugContents, "roundTiles", System.Array.Empty<Object>()); // one tile set: the rim does the masking
             WireArray(mugContents, "chippedTiles", System.Array.Empty<Object>());
             Edit(counter, so =>

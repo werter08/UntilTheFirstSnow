@@ -215,6 +215,8 @@ namespace Courtyard.Editor
                 (P.GrindBeans, "icon_grind", new[] { "GrindMeter", "GrindMeterBack" }),
                 (P.PourOver, "icon_flow", new[] { "FlowMeter", "FlowMeterBack" }),
                 (P.SteamMilk, "icon_milk", new[] { "Thermometer" }),
+                (P.InstantCoffee, "icon_flow", System.Array.Empty<string>()), // the fill gauge while pouring
+                (P.PourWater, "icon_flow", System.Array.Empty<string>()),
             };
 
             foreach (var (prefab, icon, oldMeters) in steps)
