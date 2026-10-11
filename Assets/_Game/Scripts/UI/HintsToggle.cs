@@ -33,6 +33,12 @@ namespace Courtyard.UI
         private void Refresh()
         {
             if (label != null) label.text = HintSettings.Enabled ? onText : offText;
+            // Round icon button: the bulb dims when hints are off; the tooltip says which way it is.
+            if (TryGetComponent<RoundButton>(out var round))
+            {
+                round.Dimmed = !HintSettings.Enabled;
+                round.Tooltip = HintSettings.Enabled ? onText : offText;
+            }
         }
     }
 }

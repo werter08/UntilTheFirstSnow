@@ -97,6 +97,7 @@ namespace Courtyard.Editor
             EditScene(BuildScript.Scenes[0], ApplyToBoot);
             EditScene(BuildScript.Scenes[2], ApplyToEnding);
             AssetDatabase.SaveAssets();
+            HudBuilder.Apply(); // the hand-drawn meters and corner buttons
         }
 
         /// <summary>
@@ -200,7 +201,7 @@ namespace Courtyard.Editor
             ApplyClickables(kitchen);
             ApplyInteractionFeedback(scene);
             ApplyRecipeCard(scene, kitchen);
-            ApplyHintsToggle(scene);
+            // The corner buttons and the meters are HudBuilder's (hand-drawn HUD); it runs after this pass.
             ApplyDayCard(scene);
             var counterStation = kitchen.GetComponentInChildren<CounterStation>(true);
             if (counterStation != null) Wire(counterStation, "hisMugSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "mug_his.png"));

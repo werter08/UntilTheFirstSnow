@@ -6,13 +6,23 @@ using UnityEngine.UI;
 
 namespace Courtyard.UI
 {
-    /// <summary>"Restart day": starts the current day over (no calendar tearing — it's the same day).</summary>
+    /// <summary>"Restart day": asks first, then starts the current day over (no calendar tearing — it's the same day).</summary>
     [RequireComponent(typeof(Button))]
     public sealed class RestartDayButton : MonoBehaviour
     {
+        [SerializeField] private ConfirmPopup confirm;
+        [SerializeField] private string question = "Start this day over?";
+
         private bool _restarting;
 
-        private void Awake() => GetComponent<Button>().onClick.AddListener(Restart);
+        private void Awake() => GetComponent<Button>().onClick.AddListener(Ask);
+
+        private void Ask()
+        {
+            if (_restarting) return;
+            if (confirm == null) Restart();
+            else confirm.Ask(question, Restart);
+        }
 
         private void Restart()
         {
