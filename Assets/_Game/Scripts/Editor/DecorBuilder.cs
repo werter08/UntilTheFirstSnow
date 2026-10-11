@@ -98,6 +98,7 @@ namespace Courtyard.Editor
             EditScene(BuildScript.Scenes[2], ApplyToEnding);
             AssetDatabase.SaveAssets();
             HudBuilder.Apply(); // the hand-drawn meters and corner buttons
+            PictureBuilder.Apply(); // the wall picture opens up close
         }
 
         /// <summary>
