@@ -344,9 +344,11 @@ namespace Courtyard.Editor
         }
 
         /// <summary>
-        /// "Pour the hot water to the line" (Days 10 and 30): the instant-coffee step without spoon or jar. Copied once
-        /// from InstantCoffee (same kettle handling), then its own settings are kept in sync here.
+        /// Her coffee (Days 10 and 30): one spoon of coffee into her cup — while the kettle heats, like Day 1 — then the
+        /// hot water to the line. Copied once from InstantCoffee (same spoon and kettle handling), settings kept here.
         /// </summary>
+        private const float HerJarShiftX = 1.45f; // into the coffee bag's spot (the bag steps aside)
+
         private static void EnsurePourWater()
         {
             var path = Folder + PourWater + ".prefab";
@@ -356,10 +358,19 @@ namespace Courtyard.Editor
             {
                 root.name = PourWater;
                 var step = root.GetComponent<InstantCoffeeStep>();
-                Wire(step, "useSpoon", false);
-                Wire(step, "targetSpoons", 0);
-                Wire(step, "startsWithPrevious", false);
-                Wire(step, "hintText", "Pour the hot water to the line.");
+                Wire(step, "useSpoon", true);
+                Wire(step, "targetSpoons", 1);
+                Wire(step, "startsWithPrevious", true);
+                Wire(step, "hintText", "One spoon of coffee into her cup. Then pour water to the line.");
+                Wire(step, "tooMuchCoffeeText", "Too much coffee — she takes just one spoon.");
+                Wire(step, "tooLittleCoffeeText", "No coffee in it — one spoon.");
+                Wire(step, "hideCoffeeBag", true);
+
+                // Days 10 and 30 have the grinder where Day 1's jar stands: her jar goes in the gap between the
+                // grinder and the coffee bag (always measured from the Day 1 jar, so re-running doesn't drift).
+                var day1Jar = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(Folder + InstantCoffee + ".prefab").transform.Find("Jar");
+                var jar = root.transform.Find("Jar");
+                if (day1Jar != null && jar != null) jar.localPosition = day1Jar.localPosition + new Vector3(HerJarShiftX, 0f, 0f);
             });
             // Day 1: spoon the coffee in while the kettle heats.
             Patch(Folder + InstantCoffee + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "startsWithPrevious", true));

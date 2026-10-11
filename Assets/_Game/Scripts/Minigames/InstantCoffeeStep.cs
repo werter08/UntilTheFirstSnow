@@ -29,6 +29,8 @@ namespace Courtyard.Minigames
         [Tooltip("Off: no spoon or jar — only pour the hot water to the line.")]
         [SerializeField] private bool useSpoon = true;
         [SerializeField] private Sprite gaugeIcon;
+        [Tooltip("The bag of beans steps aside while this runs (her coffee: the jar stands in its spot).")]
+        [SerializeField] private bool hideCoffeeBag;
 
         [Header("Tuning")]
         [SerializeField, Min(0)] private int targetSpoons = 2;
@@ -73,6 +75,7 @@ namespace Courtyard.Minigames
         {
             _ctx = ctx;
             _counter = ctx.Counter;
+            if (hideCoffeeBag) _counter.SetCoffeeBagVisible(false);
             _fx = ctx.Fx;
             _camera = ctx.WorldCamera;
             if (!useSpoon)
@@ -133,6 +136,7 @@ namespace Courtyard.Minigames
             }
 
             if (_counter == null) return;
+            if (hideCoffeeBag) _counter.SetCoffeeBagVisible(true);
             _counter.KettleTarget.Pressed -= OnKettlePressed;
             _counter.KettleTarget.Released -= OnKettleReleased;
             _counter.HideFillLine();

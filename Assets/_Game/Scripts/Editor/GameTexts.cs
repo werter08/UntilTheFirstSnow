@@ -65,7 +65,7 @@ namespace Courtyard.Editor
             (P.ChooseMug, "First, her mug. Which one is hers?", true),
             (P.HerDrinkFromMemory, "Make her usual. You know it by now.", true),
             (P.AutoFillHisMug, "", false),
-            (P.PourWater, "Pour the hot water to the line.", false),
+            (P.PourWater, "One spoon of coffee into her cup. Then pour water to the line.", false), // her coffee
             (P.ReadHerWindow, "Something's on her window. Tap it.", true),
         };
 

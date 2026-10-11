@@ -176,10 +176,14 @@ namespace Courtyard.Tests
             yield return WaitForCompletion();
         }
 
-        /// <summary>"Pour the hot water to the line" (PourWater: the instant-coffee step without the spoon).</summary>
+        /// <summary>Her coffee (PourWater): one spoon of coffee into her cup, then the water to the line.</summary>
         protected IEnumerator PlayPourWater()
         {
             yield return AdvanceTo<InstantCoffeeStep>();
+            var step = Object.FindAnyObjectByType<InstantCoffeeStep>();
+            yield return Drag(step.transform.Find("Spoon").position, step.transform.Find("Jar").position, Counter.Mug.transform.position + Vector3.up * 0.2f);
+            yield return Wait(0.5f);
+            Assert.That(GetField<int>(step, "_spoons"), Is.EqualTo(1), "One spoon should have landed in her cup.");
             yield return CarryKettleAndPour(0.85f);
             yield return WaitForCompletion();
             Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.85f), "PourWater quality");

@@ -471,6 +471,12 @@ namespace Courtyard.Kitchen
             return copy;
         }
 
+        /// <summary>Takes the bag of beans off the counter (its spot is used by the instant-coffee jar) or puts it back.</summary>
+        public void SetCoffeeBagVisible(bool visible)
+        {
+            if (coffeeBag != null) coffeeBag.gameObject.SetActive(visible);
+        }
+
         /// <summary>The bag of beans is open while grinding (no-op without the drawn bag).</summary>
         public void SetCoffeeBagOpen(bool open)
         {

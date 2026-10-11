@@ -62,7 +62,7 @@ _Assets/_Game/Data/Levels/Day_10.asset_
 3. MiraVisit — _(empty)_
 4. TakeHerCup — Take the jar from her.
 5. KettleBoil — Turn the kettle on. Turn it off when it boils.
-6. PourWater — Pour the hot water to the line.
+6. PourWater — One spoon of coffee into her cup. Then pour water to the line.
 7. SteamMilk — Hold to steam the milk. Let go in the green.
 8. GuessHerDrink — Add two spices to her cup, one at a time. Then click the cup.
 
@@ -114,7 +114,7 @@ _Assets/_Game/Data/Levels/Day_30.asset_
 **Steps and their hints**
 
 0. KettleBoil — Turn the kettle on. Turn it off when it boils.
-1. PourWater — Pour the hot water to the line.
+1. PourWater — One spoon of coffee into her cup. Then pour water to the line.
 2. SteamMilk — Hold to steam the milk. Let go in the green.
 3. HerDrinkFromMemory — Make her usual. You know it by now.
 

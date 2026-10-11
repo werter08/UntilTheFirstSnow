@@ -198,6 +198,7 @@ MonoBehaviour:
   spoonFull: {fileID: 21300000, guid: 5b659e170a54e4d4882e570463d9a6a4, type: 3}
   useSpoon: 1
   gaugeIcon: {fileID: 0}
+  hideCoffeeBag: 0
   targetSpoons: 2
   pourPerSecond: 0.35
   targetFill: 0.85
