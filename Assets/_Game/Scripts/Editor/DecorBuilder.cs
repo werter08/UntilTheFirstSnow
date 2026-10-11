@@ -57,6 +57,7 @@ namespace Courtyard.Editor
         private const float FrameHeight = 4.8f;
         private static readonly Vector2 GlassSize = new(5.8f, 4.4f);
         private static readonly Vector2 ShadowOffset = new(0.07f, -0.09f);
+        private static readonly Vector2 SpoonShadowOffset = new(0.035f, -0.045f);
         private static readonly Color WallColour = new(0.86f, 0.83f, 0.8f);
 
         [MenuItem("Courtyard/Setup/Apply Pack Decor")]
@@ -1622,6 +1623,7 @@ namespace Courtyard.Editor
             SetOrder(kitchen, "WallPicture", 2);
             foreach (var name in new[] { "Clock", "Calendar", "CeilingLamp", "Shelf", "WallPicture" }) Drop(kitchen, name);
             Drop(kitchen, "Scarf"); // Day 30: her scarf on the fridge handle casts a soft shadow on the door
+            Drop(kitchen, "RestingSpoon", SpoonShadowOffset); // lies flat on the counter: a short, close shadow
             for (var i = 0; i < 5; i++)
             {
                 if (Find(kitchen, $"FridgeNote{i}", false) == null) continue;
@@ -1831,7 +1833,7 @@ namespace Courtyard.Editor
         }
 
         /// <summary>A silhouette drop shadow behind <paramref name="casterName"/> (child: it swings and swaps with it).</summary>
-        private static void Drop(Transform kitchen, string casterName)
+        private static void Drop(Transform kitchen, string casterName, Vector2? worldOffset = null)
         {
             var caster = Find(kitchen, casterName, false);
             var renderer = caster != null ? caster.GetComponent<SpriteRenderer>() : null;
@@ -1852,6 +1854,7 @@ namespace Courtyard.Editor
             shadowRenderer.sortingOrder = renderer.sortingOrder - 1;
             var scale = caster.lossyScale;
             transform.localPosition = new Vector3(ShadowOffset.x / scale.x, ShadowOffset.y / scale.y, 0f);
+            if (worldOffset is { } offset) transform.position = caster.position + (Vector3)offset; // screen-down-right even if the caster is turned
             transform.localRotation = Quaternion.identity;
             transform.localScale = Vector3.one;
             Wire(GetOrAdd<DropShadow>(transform), "caster", renderer);
