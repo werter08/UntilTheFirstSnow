@@ -20,9 +20,9 @@ namespace Courtyard.Minigames
         [SerializeField] private Sprite gaugeIcon;
         [Tooltip("Icon on the water gauge.")]
         [SerializeField] private Sprite waterIcon;
-        [Tooltip("Where the two gauges sit, from the cup's top (reference px): flow, then water above it.")]
-        [SerializeField] private Vector2 flowGaugeOffset = new(450f, 110f);
-        [SerializeField] private Vector2 waterGaugeOffset = new(450f, 190f);
+        [Tooltip("Where the two gauges sit, from the cup's top (reference px): flow, then water under it.")]
+        [SerializeField] private Vector2 flowGaugeOffset = new(0f, -245f);
+        [SerializeField] private Vector2 waterGaugeOffset = new(0f, -325f);
         [Tooltip("The pour finishes by itself once the water reaches the line while the flow is green (and has mostly been).")]
         [SerializeField, Range(0f, 1f)] private float passBandShare = 0.5f;
         [Tooltip("Flow this fast reads as too fast (red on the gauge).")]

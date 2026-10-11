@@ -181,8 +181,6 @@ Title screen prompt, HUD labels, hints set on components, the ending's credits, 
 - `Label`: DAY
 - `Question`: Start this day over?
 - `Label`: [ yes ]
-- `HintsToggle.onText`: Hints: on
-- `HintsToggle.offText`: Hints: off
 - `LevelRunner.newNoteHint`: New note on the fridge. Click it to read.
 
 ### Ending

@@ -52,12 +52,12 @@ namespace Courtyard.Minigames
 
         [Header("Spoon counter beside the cup")]
         [Tooltip("{0} = spoons in, {1} = spoons needed.")]
-        [SerializeField] private string spoonCountText = "Coffee: {0} / {1} spoons";
+        [SerializeField] private string spoonCountText = "{0}/{1}";
         [Tooltip("Dark ink: the label sits on the light counter.")]
         [SerializeField] private Color countColour = new(0.24f, 0.16f, 0.12f);
         [SerializeField] private Color countDoneColour = new(0.16f, 0.45f, 0.14f);
         [SerializeField] private Color countOverColour = new(0.7f, 0.16f, 0.1f);
-        [SerializeField, Min(0.1f)] private float countScale = 0.7f;
+        [SerializeField, Min(0.1f)] private float countScale = 0.45f;
         [Tooltip("How far (sideways) from the cup a loaded spoon tips its coffee in — as soon as it gets there.")]
         [SerializeField, Min(0.1f)] private float spoonReach = 0.9f;
 

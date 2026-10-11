@@ -109,13 +109,17 @@ namespace Courtyard.Minigames
         {
             if (_busy || IsComplete) return;
             jar.transform.position = world + _grabOffset;
+            if (OverCup(jar, world)) StartCoroutine(ShakeIn(jar)); // reached the cup: in it goes, no need to let go
         }
+
+        /// <summary>Forgiving: the jar or the hand holding it over the cup counts.</summary>
+        private bool OverCup(ToppingJar jar, Vector2 world) =>
+            _counter.IsAboveMug(jar.transform.position, 0.8f) || _counter.IsAboveMug(world, 0.8f) || _counter.IsOverMug(world);
 
         private void OnJarDragEnded(ToppingJar jar, Vector2 world)
         {
             if (_busy || IsComplete) return;
-            // Forgiving drop: the jar or the hand holding it over the cup counts.
-            if (_counter.IsAboveMug(jar.transform.position, 0.8f) || _counter.IsAboveMug(world, 0.8f) || _counter.IsOverMug(world))
+            if (OverCup(jar, world))
                 StartCoroutine(ShakeIn(jar));
             else
                 StartCoroutine(ReturnJar(jar));

@@ -219,6 +219,8 @@ namespace Courtyard.Editor
         /// <summary>The kitchen mug's own steam, rising from a mug on the sill (always on, already rising at start).</summary>
         internal static void Steam(SpriteRenderer mug, ParticleSystem source)
         {
+            var old = mug.transform.Find("Steam");
+            if (old != null) Object.DestroyImmediate(old.gameObject); // re-runs (and copies of the kitchen's sill) keep one
             var steam = Object.Instantiate(source.gameObject, mug.transform).GetComponent<ParticleSystem>();
             steam.name = "Steam";
             steam.gameObject.SetActive(true);

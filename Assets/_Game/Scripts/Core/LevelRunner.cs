@@ -45,8 +45,8 @@ namespace Courtyard.Core
         [SerializeField] private Color failColor = new(0.55f, 0.7f, 0.9f);
         [SerializeField, Min(0f)] private float failHoldSeconds = 2.5f;
         [Header("Idle nudge (no text): the right tool bounces if the player does nothing for a while")]
-        [SerializeField, Min(1f)] private float nudgeAfterSeconds = 7f;
-        [SerializeField, Min(0.5f)] private float nudgeRepeatSeconds = 4f;
+        [SerializeField, Min(1f)] private float nudgeAfterSeconds = 5f;
+        [SerializeField, Min(0.5f)] private float nudgeRepeatSeconds = 5f;
 
         [Header("Hints")]
         [Tooltip("After the tutorial day, a minigame's hint shows only the first time it appears, for this long.")]
@@ -89,7 +89,6 @@ namespace Courtyard.Core
             hands.SetSweater(_level.Props.sweater);
             CreateMeters();
             story.BeatRead += OnBeatRead;
-            HintSettings.Changed += OnHintSettingChanged;
             if (recipeCard != null) recipeCard.Set(_level.RecipeCardText, kitchen.NoteCard);
             _run = StartCoroutine(Run());
         }
@@ -105,7 +104,6 @@ namespace Courtyard.Core
         {
             if (_warmth != null) _warmth.Depleted -= OnMeterDepleted;
             if (story != null) story.BeatRead -= OnBeatRead;
-            HintSettings.Changed -= OnHintSettingChanged;
         }
 
         private void CreateMeters()
@@ -452,19 +450,19 @@ namespace Courtyard.Core
 
         /// <summary>
         /// Story prompts always show. Other hints: the whole step on the tutorial day, else only the first time that
-        /// minigame appears in the game, for a few seconds — and never when the player switched hints off.
+        /// minigame appears in the game, for a few seconds.
         /// </summary>
         private void ShowHint(MinigameStep prefab)
         {
             HideHint();
             if (string.IsNullOrWhiteSpace(prefab.HintText)) return;
-            if (prefab.AlwaysShowHint || (HintSettings.Enabled && _level.TutorialHints))
+            if (prefab.AlwaysShowHint || _level.TutorialHints)
             {
                 hint.Show(prefab.HintText);
                 return;
             }
 
-            if (!HintSettings.Enabled || !IsFirstAppearance(prefab)) return;
+            if (!IsFirstAppearance(prefab)) return;
             hint.Show(prefab.HintText);
             _hintTimer = StartCoroutine(HideHintAfter(firstTimeHintSeconds));
         }
@@ -495,12 +493,6 @@ namespace Courtyard.Core
             }
 
             return true;
-        }
-
-        private void OnHintSettingChanged()
-        {
-            if (HintSettings.Enabled || _activeStep == null || _activeStep.AlwaysShowHint) return;
-            HideHint();
         }
 
         private void OnBeatRead(Story.StoryBeat beat)

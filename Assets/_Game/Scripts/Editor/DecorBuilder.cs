@@ -1223,6 +1223,15 @@ namespace Courtyard.Editor
             if (sill == null) return;
             DrinkInside(sill.Find("SillMugHis")?.GetComponent<SpriteRenderer>(), "drink_black");
             DrinkInside(sill.Find("SillMugHers")?.GetComponent<SpriteRenderer>(), "drink_latte_heart"); // her cappuccino, with a heart
+
+            // Both hot: the counter mug's steam rises from each.
+            var steam = kitchen.GetComponentsInChildren<ParticleSystem>(true).FirstOrDefault(p => p.name == "Steam" && !p.transform.IsChildOf(sill));
+            if (steam == null) return;
+            foreach (var name in new[] { "SillMugHis", "SillMugHers" })
+            {
+                var mug = sill.Find(name)?.GetComponent<SpriteRenderer>();
+                if (mug != null) MenuBuilder.Steam(mug, steam);
+            }
         }
 
         /// <summary>
@@ -1817,43 +1826,6 @@ namespace Courtyard.Editor
 
             var clock = page.Find("Clock") as RectTransform;
             if (clock != null) clock.offsetMin = new Vector2(0f, tornHeight + 5f);
-        }
-
-        /// <summary>"Hints: on/off" in the top-right corner (remembered between sessions).</summary>
-        private static void ApplyHintsToggle(Scene scene)
-        {
-            var canvas = scene.GetRootGameObjects().First(g => g.name == "Canvas").transform;
-            var old = canvas.Find("HintsToggle");
-            if (old != null) Object.DestroyImmediate(old.gameObject);
-            var font = canvas.GetComponentsInChildren<TMPro.TMP_Text>(true).Select(t => t.font).FirstOrDefault(f => f != null);
-
-            var rect = UiObject("HintsToggle", canvas);
-            Place(rect, Vector2.one, Vector2.one, Vector2.one, new Vector2(-28f, -24f), new Vector2(190f, 52f));
-            var image = Img(rect, new Color(0.15f, 0.11f, 0.09f, 0.45f), true);
-            var label = Label(rect, "Label", "Hints: on", 28f, TMPro.TextAlignmentOptions.Center, new Color(1f, 0.96f, 0.88f));
-            if (font != null) label.font = font;
-            var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
-            button.targetGraphic = image;
-            var toggle = rect.gameObject.AddComponent<UI.HintsToggle>();
-            Wire(toggle, "label", label);
-            // "Restart day" beside it.
-            var oldRestart = canvas.Find("RestartDay");
-            if (oldRestart != null) Object.DestroyImmediate(oldRestart.gameObject);
-            var restart = UiObject("RestartDay", canvas);
-            Place(restart, Vector2.one, Vector2.one, Vector2.one, new Vector2(-232f, -24f), new Vector2(210f, 52f));
-            var restartImage = Img(restart, new Color(0.15f, 0.11f, 0.09f, 0.45f), true);
-            var restartLabel = Label(restart, "Label", "Restart day", 28f, TMPro.TextAlignmentOptions.Center, new Color(1f, 0.96f, 0.88f));
-            if (font != null) restartLabel.font = font;
-            restart.gameObject.AddComponent<UnityEngine.UI.Button>().targetGraphic = restartImage;
-            restart.gameObject.AddComponent<UI.RestartDayButton>();
-
-            // Below the note card and the screen fade.
-            var card = canvas.GetComponentInChildren<UI.NoteCard>(true);
-            if (card != null)
-            {
-                rect.SetSiblingIndex(card.transform.GetSiblingIndex());
-                restart.SetSiblingIndex(card.transform.GetSiblingIndex());
-            }
         }
 
         /// <summary>A silhouette drop shadow behind <paramref name="casterName"/> (child: it swings and swaps with it).</summary>

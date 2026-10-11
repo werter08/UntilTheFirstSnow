@@ -10,8 +10,8 @@ namespace Courtyard.Editor
 {
     /// <summary>
     /// The top HUD in the game's hand-drawn style (the team's sheet, sliced 1:1): warmth meters as a mug + drawn bar with a
-    /// cold-blue → warm-orange fill (Mira's under his on Day 20), and round icon buttons top-right (restart with a paper
-    /// "are you sure?", hints on/off) with handwritten tooltips. No plain rectangles, no "You"/"Mira" labels.
+    /// cold-blue → warm-orange fill (Mira's under his on Day 20), and a round restart button top-right (with a paper
+    /// "are you sure?"; hints are always on) with handwritten tooltips. No plain rectangles, no "You"/"Mira" labels.
     /// </summary>
     internal static class HudBuilder
     {
@@ -26,8 +26,7 @@ namespace Courtyard.Editor
             Import("hud_bar_warm", new Vector4(18f, 14f, 18f, 14f));
             Import("hud_mug_him", Vector4.zero);
             Import("ui_button_restart", Vector4.zero);
-            Import("ui_button_hint", Vector4.zero);
-            if (Load(Ui + "hud_bar_cold") == null || Load(Ui + "ui_button_hint") == null)
+            if (Load(Ui + "hud_bar_cold") == null || Load(Ui + "ui_button_restart") == null)
             {
                 Debug.LogWarning("HudBuilder: HUD art missing in Art/UI — nothing changed.");
                 return;
@@ -139,9 +138,8 @@ namespace Courtyard.Editor
             Stretch(corner);
             var cornerGroup = corner.gameObject.AddComponent<CanvasGroup>();
             cornerGroup.blocksRaycasts = true;
-            var hint = Round(corner, "Hints", Load(Ui + "ui_button_hint"), 0, "Hints: on", hand);
-            hint.gameObject.AddComponent<HintsToggle>();
-            var restart = Round(corner, "Restart", Load(Ui + "ui_button_restart"), 1, "Restart day", hand);
+            // Hints are always on: the restart button alone in the corner.
+            var restart = Round(corner, "Restart", Load(Ui + "ui_button_restart"), 0, "Restart day", hand);
             var restartButton = restart.gameObject.AddComponent<RestartDayButton>();
             Wire(restartButton, "confirm", Confirm(canvas, hand));
 

@@ -55,8 +55,8 @@ MonoBehaviour:
   pourZone: {fileID: 4250179583806582046}
   gaugeIcon: {fileID: 0}
   waterIcon: {fileID: 21300000, guid: b0b7fa7494cc84d9bb52a882be118208, type: 3}
-  flowGaugeOffset: {x: 450, y: 110}
-  waterGaugeOffset: {x: 450, y: 190}
+  flowGaugeOffset: {x: 0, y: -245}
+  waterGaugeOffset: {x: 0, y: -325}
   passBandShare: 0.5
   tooFastFlow: 0.8
   fillPerSecond: 0.12

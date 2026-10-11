@@ -108,15 +108,20 @@ namespace Courtyard.Minigames
             if (_overCup) return;
             var t = _counter.Grinder;
             t.position = new Vector3(world.x + _grab.x, world.y + _grab.y, t.position.z);
+            if (NearCup()) _carry = StartCoroutine(SettleOverCup()); // over the V60: it settles there by itself
         }
 
         private void OnGrinderDropped(Vector2 world)
         {
             if (_overCup) return;
+            _carry = StartCoroutine(NearCup() ? SettleOverCup() : _counter.ReturnGrinder(returnSeconds));
+        }
+
+        private bool NearCup()
+        {
             var outlet = _counter.GrinderOutlet;
             var top = _counter.DripperTop;
-            var near = Mathf.Abs(outlet.x - top.x) <= settleReach && outlet.y >= top.y - 0.6f;
-            _carry = StartCoroutine(near ? SettleOverCup() : _counter.ReturnGrinder(returnSeconds));
+            return Mathf.Abs(outlet.x - top.x) <= settleReach && outlet.y >= top.y - 0.6f;
         }
 
         /// <summary>Over the V60, tilted; a hand holds it still while the other turns the crank.</summary>
