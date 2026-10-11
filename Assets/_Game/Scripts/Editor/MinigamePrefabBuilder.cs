@@ -28,6 +28,8 @@ namespace Courtyard.Editor
         public const string MiraVisit = "MiraVisit";
         public const string TakeHerCup = "TakeHerCup";
         public const string AutoFillHisMug = "AutoFillHisMug";
+        public const string PourWater = "PourWater";
+        public const string ReadHerWindow = "ReadHerWindow";
 
         private static readonly Color Coffee = new(0.35f, 0.2f, 0.1f);
         private static readonly Color Water = new(0.75f, 0.85f, 0.95f);
@@ -205,6 +207,7 @@ namespace Courtyard.Editor
         public static Dictionary<string, MinigameStep> BuildAll(Recipe miraUsual, bool overwrite)
         {
             _miraUsual = miraUsual;
+            EnsurePourWater();
             var builders = new (string name, System.Func<GameObject> build)[]
             {
                 (KettleBoil, BuildKettleBoil),
@@ -219,6 +222,8 @@ namespace Courtyard.Editor
                 (MiraVisit, BuildMiraVisit),
                 (TakeHerCup, BuildTakeHerCup),
                 (AutoFillHisMug, BuildAutoFillHisMug),
+                (PourWater, () => throw new System.InvalidOperationException("PourWater is copied from InstantCoffee")),
+                (ReadHerWindow, BuildReadHerWindow),
             };
 
             return builders.ToDictionary(
@@ -335,6 +340,39 @@ namespace Courtyard.Editor
             var step = root.AddComponent<TakeHerCupStep>();
             Wire(step, "hintText", "Take her cup.");
             Wire(step, "scored", false);
+            return root;
+        }
+
+        /// <summary>
+        /// "Pour the hot water to the line" (Days 10 and 30): the instant-coffee step without spoon or jar. Copied once
+        /// from InstantCoffee (same kettle handling), then its own settings are kept in sync here.
+        /// </summary>
+        private static void EnsurePourWater()
+        {
+            var path = Folder + PourWater + ".prefab";
+            if (UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(path) == null)
+                UnityEditor.AssetDatabase.CopyAsset(Folder + InstantCoffee + ".prefab", path);
+            Patch(path, root =>
+            {
+                root.name = PourWater;
+                var step = root.GetComponent<InstantCoffeeStep>();
+                Wire(step, "useSpoon", false);
+                Wire(step, "targetSpoons", 0);
+                Wire(step, "startsWithPrevious", false);
+                Wire(step, "hintText", "Pour the hot water to the line.");
+            });
+            // Day 1: spoon the coffee in while the kettle heats.
+            Patch(Folder + InstantCoffee + ".prefab", root => Wire(root.GetComponent<MinigameStep>(), "startsWithPrevious", true));
+        }
+
+        /// <summary>Day 20: her note on the window — tap it to read (unscored).</summary>
+        private static GameObject BuildReadHerWindow()
+        {
+            var root = new GameObject(ReadHerWindow);
+            var step = root.AddComponent<ReadHerWindowStep>();
+            Wire(step, "hintText", "Something's on her window. Tap it.");
+            Wire(step, "scored", false);
+            Wire(step, "alwaysShowHint", true);
             return root;
         }
 

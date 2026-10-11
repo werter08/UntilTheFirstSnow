@@ -49,6 +49,7 @@ MonoBehaviour:
   warmthTarget: 0
   zone: 1
   alwaysShowHint: 0
+  startsWithPrevious: 0
   explainBelow: 0.6
   startTemperature: 20
   trembleFrom: 75

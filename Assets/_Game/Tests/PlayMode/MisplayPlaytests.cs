@@ -28,9 +28,9 @@ namespace Courtyard.Tests
             Assert.That(step.IsComplete, Is.False, "Picking up and putting down the kettle ended the step.");
         }
 
-        /// <summary>Three spoons: too strong — the cup is spoiled (cold drink) but the day goes on.</summary>
+        /// <summary>Three spoons: too strong — "it's bad, let's remake it": the reason shows and the drink starts again.</summary>
         [UnityTest, Timeout(240000)]
-        public IEnumerator InstantCoffee_ThreeSpoons_SpoilsTheCup()
+        public IEnumerator InstantCoffee_ThreeSpoons_IsRemade()
         {
             yield return LoadDay(1);
             yield return PlayKettleBoil();
@@ -45,13 +45,17 @@ namespace Courtyard.Tests
             yield return CarryKettleAndPour(0.85f);
             yield return WaitForCompletion();
             Assert.That(LastQuality, Is.EqualTo(0f), "Wrong amount of coffee: a spoiled (cold) cup.");
-            Assert.That(GetField<bool>(Runner, "_failed"), Is.False, "A spoiled drink doesn't restart the day.");
+            Assert.That(step.Mistake, Does.Contain("Too much coffee"), "The player is told why.");
+            Assert.That(GetField<bool>(Runner, "_failed"), Is.False, "A spoiled drink isn't a lost day.");
+            yield return ExpectRemake();
+            yield return PlayKettleBoil();
+            yield return PlayInstantCoffee();
             yield return FinishDay(60f);
         }
 
-        /// <summary>One spoon: too weak — the cup is spoiled (cold drink) but the day goes on.</summary>
+        /// <summary>One spoon: too weak — the reason shows and the drink is remade.</summary>
         [UnityTest, Timeout(240000)]
-        public IEnumerator InstantCoffee_OneSpoon_SpoilsTheCup()
+        public IEnumerator InstantCoffee_OneSpoon_IsRemade()
         {
             yield return LoadDay(1);
             yield return PlayKettleBoil();
@@ -66,8 +70,8 @@ namespace Courtyard.Tests
             yield return CarryKettleAndPour(0.85f);
             yield return WaitForCompletion();
             Assert.That(LastQuality, Is.EqualTo(0f), "Wrong amount of coffee: a spoiled (cold) cup.");
-            Assert.That(GetField<bool>(Runner, "_failed"), Is.False, "A spoiled drink doesn't restart the day.");
-            yield return FinishDay(60f);
+            Assert.That(step.Mistake, Does.Contain("Not enough coffee"), "The player is told why.");
+            yield return ExpectRemake();
         }
 
         /// <summary>Letting go of the grinder handle before the green zone should let the player keep grinding.</summary>
@@ -102,6 +106,7 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(30);
             yield return PlayKettleBoil();
+            yield return PlayPourWater();
             yield return AdvanceTo<SteamMilkStep>();
             var step = Object.FindAnyObjectByType<SteamMilkStep>();
             yield return Press(Counter.MilkJug.transform.position);
@@ -138,30 +143,37 @@ namespace Courtyard.Tests
             yield return Wait(2f); // frost + shiver, then the meter drops
             Assert.That(meter.Value, Is.LessThan(before - 5f), "A badly made step should chill.");
 
-            yield return AdvanceTo<InstantCoffeeStep>();
-            var step = Object.FindAnyObjectByType<InstantCoffeeStep>();
-            yield return Drag(step.transform.Find("Spoon").position, step.transform.Find("Jar").position, Counter.Mug.transform.position + Vector3.up * 0.2f);
-            yield return Wait(0.5f);
-            yield return CarryKettleAndPour(0.18f);
-            yield return WaitForCompletion();
+            // Remade: boiled dry again, and again — warmth stops at the floor; then made properly.
+            yield return ExpectRemake();
+            yield return Click(Counter.KettleSwitch.transform);
+            yield return WaitForCompletion(30f);
             yield return Wait(3f);
+            yield return PlayKettleBoil();
+            yield return PlayInstantCoffee();
             Assert.That(meter.Value, Is.GreaterThanOrEqualTo(LoadLevel(1).MinWarmth), "Day 1 never drops below its floor.");
             Assert.That(GetField<bool>(Runner, "_failed"), Is.False, "Day 1 (tutorial) can't be lost.");
             yield return FinishDay(60f);
         }
 
-        /// <summary>Day 10, wrong toppings: the gentle 'It's… nice' ending plays and the day still finishes.</summary>
-        [UnityTest, Timeout(300000)]
-        public IEnumerator Day10_WrongToppings_StillFinishes()
+        /// <summary>Day 10, wrong toppings: her drink is remade from its kettle step (her cup stays), then finished.</summary>
+        [UnityTest, Timeout(400000)]
+        public IEnumerator Day10_WrongToppings_AreRemade()
         {
             yield return LoadDay(10);
             yield return PlayKettleBoil();
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlayTakeHerCup();
+            yield return PlayKettleBoil();
+            yield return PlayPourWater();
             yield return PlaySteamMilk();
             yield return PlayPickToppings<PickToppingsStep>(Topping.Salt, Topping.Cocoa);
             Assert.That(LastQuality, Is.EqualTo(0f));
+            yield return ExpectRemake();
+            yield return PlayKettleBoil();
+            yield return PlayPourWater();
+            yield return PlaySteamMilk();
+            yield return PlayPickToppings<PickToppingsStep>(Topping.Cinnamon, Topping.Honey);
             yield return FinishDay();
         }
 
@@ -171,6 +183,7 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(30);
             yield return PlayKettleBoil();
+            yield return PlayPourWater();
             yield return PlaySteamMilk();
             yield return AdvanceTo<PickToppingsStep>();
             yield return AddSpice(Topping.Cinnamon);
@@ -180,6 +193,7 @@ namespace Courtyard.Tests
             yield return WaitForCompletion();
             Assert.That(LastQuality, Is.EqualTo(0f), "Two portions of cinnamon spoil the drink.");
             Assert.That(GetField<bool>(Runner, "_failed"), Is.False);
+            yield return ExpectRemake();
         }
 
         /// <summary>Serving with only one spice is too little: a spoiled drink, the day goes on.</summary>
@@ -188,13 +202,15 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(30);
             yield return PlayKettleBoil();
+            yield return PlayPourWater();
             yield return PlaySteamMilk();
             yield return AdvanceTo<PickToppingsStep>();
             yield return AddSpice(Topping.Honey);
             yield return Click(Counter.Mug.transform);
             yield return WaitForCompletion();
             Assert.That(LastQuality, Is.EqualTo(0f), "One spice is too little.");
-            Assert.That(GetField<bool>(Runner, "_failed"), Is.False, "A spoiled drink doesn't restart the day.");
+            Assert.That(GetField<bool>(Runner, "_failed"), Is.False, "A spoiled drink isn't a lost day.");
+            yield return ExpectRemake();
         }
 
         /// <summary>A spice jar dropped away from the cup just goes back to its place.</summary>
@@ -203,6 +219,7 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(30);
             yield return PlayKettleBoil();
+            yield return PlayPourWater();
             yield return PlaySteamMilk();
             yield return AdvanceTo<PickToppingsStep>();
             var jar = Counter.ToppingJars.First(j => j.Topping == Topping.Cocoa);
@@ -218,6 +235,7 @@ namespace Courtyard.Tests
         public IEnumerator Day20_WrongMug_IsGentle()
         {
             yield return LoadDay(20);
+            yield return PlayReadHerWindow();
             yield return PlayKettleBoil();
             yield return PlayChooseMug(hers: false);
             Assert.That(LastQuality, Is.EqualTo(0.6f).Within(0.001f));

@@ -8,9 +8,12 @@ namespace Courtyard.Minigames
 {
     /// <summary>
     /// Day 1 instant coffee, done by hand:
-    /// 1) carry spoonfuls from the jar into the cup one by one — the cup visibly fills with coffee;
-    /// 2) pick up the kettle, carry it to the cup and pour while the spout is over it; let go to put it back.
-    /// Too many or too few spoonfuls ruins the coffee and the day restarts. Quality = how close to the line.
+    /// 1) carry spoonfuls from the jar into the cup one by one — the cup visibly fills with coffee (this can start while
+    ///    the kettle is still heating: the step starts together with KettleBoil);
+    /// 2) once the water has boiled, pick up the kettle, carry it to the cup and pour while the spout is over it (a
+    ///    gauge shows how full the cup is); let go to put it back.
+    /// Without the spoon (<see cref="useSpoon"/> off) it is just "pour the hot water to the line" (Days 10 and 30).
+    /// Wrong spoonfuls spoil it. Quality = how close to the line.
     /// </summary>
     public sealed class InstantCoffeeStep : MinigameStep
     {
@@ -23,8 +26,12 @@ namespace Courtyard.Minigames
         [SerializeField] private Sprite spoonEmpty;
         [SerializeField] private Sprite spoonFull;
 
+        [Tooltip("Off: no spoon or jar — only pour the hot water to the line.")]
+        [SerializeField] private bool useSpoon = true;
+        [SerializeField] private Sprite gaugeIcon;
+
         [Header("Tuning")]
-        [SerializeField, Min(1)] private int targetSpoons = 2;
+        [SerializeField, Min(0)] private int targetSpoons = 2;
         [SerializeField, Min(0.01f)] private float pourPerSecond = 0.35f;
         [SerializeField, Range(0f, 1f)] private float targetFill = 0.85f;
         [Tooltip("Fill distance from the line at which quality reaches 0.")]
@@ -59,15 +66,24 @@ namespace Courtyard.Minigames
         private bool _holdingKettle;
         private bool _streamOn;
         private float _splashTimer;
+        private bool _kettleReady = true;
+        private MinigameContext _ctx;
 
         public override void Begin(MinigameContext ctx)
         {
+            _ctx = ctx;
             _counter = ctx.Counter;
             _fx = ctx.Fx;
             _camera = ctx.WorldCamera;
+            if (!useSpoon)
+            {
+                spoon.gameObject.SetActive(false);
+                jar.gameObject.SetActive(false);
+            }
+
             // The spoon lying on the counter becomes the one in the player's hand.
             var resting = _counter.RestingSpoon;
-            if (resting != null && resting.gameObject.activeInHierarchy)
+            if (useSpoon && resting != null && resting.gameObject.activeInHierarchy)
             {
                 spoon.transform.SetPositionAndRotation(resting.position, resting.rotation);
                 _counter.SetRestingSpoon(false);
@@ -79,14 +95,32 @@ namespace Courtyard.Minigames
             spoon.DragEnded += OnSpoonDragEnded;
             _counter.KettleTarget.Pressed += OnKettlePressed;
             _counter.KettleTarget.Released += OnKettleReleased;
-            _counter.KettleTarget.Interactable = true;
-
-            _counter.SetMugGauge(true);
-            _counter.ShowFillLine(targetFill);
-            _counter.SetMugDrink(MugDrink.Instant, coffeeColor);
+            _counter.SetMugDrink(useSpoon ? MugDrink.Instant : MugDrink.Black, coffeeColor);
             ShowLoad(false);
-            NudgeTarget = spoon.transform;
-            _counter.ShowSpoons(0);
+            if (useSpoon) _counter.ShowSpoons(0);
+            NudgeTarget = useSpoon ? spoon.transform : _counter.KettleTarget.transform;
+
+            // Started with the kettle step: spoon now, pour once the water has boiled (OnPreviousDone).
+            _kettleReady = !StartsWithPrevious;
+            if (_kettleReady) ReadyToPour();
+        }
+
+        public override void OnPreviousDone()
+        {
+            if (_kettleReady) return;
+            _kettleReady = true;
+            ReadyToPour();
+        }
+
+        /// <summary>The water is hot: the kettle can be picked up, and the gauge shows how full the cup is.</summary>
+        private void ReadyToPour()
+        {
+            _counter.KettleTarget.Interactable = true;
+            _counter.ShowFillLine(targetFill);
+            if (!useSpoon || _spoons >= targetSpoons) NudgeTarget = _counter.KettleTarget.transform;
+            var good = (1f - 0.6f) * fillTolerance; // the green: quality ≥ 0.6
+            _ctx.Gauge?.Show(_counter.MugBody, _ctx.WorldCamera, new Vector2(targetFill - good, Mathf.Min(1f, targetFill + good)),
+                RedAbove(targetFill, fillTolerance), gaugeIcon, _counter.MugLevel);
         }
 
         private void OnDestroy()
@@ -102,12 +136,12 @@ namespace Courtyard.Minigames
             _counter.KettleTarget.Pressed -= OnKettlePressed;
             _counter.KettleTarget.Released -= OnKettleReleased;
             _counter.HideFillLine();
-            _counter.SetMugGauge(false);
             _counter.KettleView.SetPouring(false);
+            if (_ctx?.Gauge != null) _ctx.Gauge.Hide();
             _counter.KettleStream.enabled = false;
             _counter.Kettle.position = _counter.KettleRest;
             AudioManager.StopTrack(SfxId.Pour);
-            _counter.SetRestingSpoon(_counter.RestingSpoon != null); // back on the counter
+            if (useSpoon) _counter.SetRestingSpoon(_counter.RestingSpoon != null); // back on the counter
         }
 
         // ---------------------------------------------------------------- spoon
@@ -143,7 +177,7 @@ namespace Courtyard.Minigames
                 _fx.Burst(_counter.MugTop, coffeeColor, 8, 0.9f, 0.06f);
 
                 // Too many spoons spoil it (judged when the water is poured); the player carries on either way.
-                if (_spoons >= targetSpoons) NudgeTarget = _counter.KettleTarget.transform;
+                if (_spoons >= targetSpoons && _kettleReady) NudgeTarget = _counter.KettleTarget.transform;
             }
 
             var from = spoon.transform.position;
@@ -162,7 +196,7 @@ namespace Courtyard.Minigames
 
         private void OnKettlePressed()
         {
-            if (IsComplete) return;
+            if (IsComplete || !_kettleReady) return; // still heating: the kettle stays on its base
             if (_kettleMove != null) StopCoroutine(_kettleMove);
             _holdingKettle = true;
             spoon.Interactable = false;
@@ -193,6 +227,7 @@ namespace Courtyard.Minigames
             if (!pouring) return;
 
             _counter.SetMugLevel(_counter.MugLevel + pourPerSecond * Time.deltaTime);
+            if (_ctx.Gauge != null) _ctx.Gauge.SetValue(_counter.MugLevel);
             _splashTimer -= Time.deltaTime;
             if (_splashTimer <= 0f)
             {
@@ -236,9 +271,10 @@ namespace Courtyard.Minigames
             ReturnKettle();
             _counter.KettleTarget.Interactable = false;
             spoon.Interactable = false;
+            if (_ctx.Gauge != null) _ctx.Gauge.Release();
 
             var mug = _counter.MugBody;
-            if (_spoons != targetSpoons)
+            if (useSpoon && _spoons != targetSpoons)
             {
                 Explain(_fx, _spoons > targetSpoons ? tooMuchCoffeeText : tooLittleCoffeeText, mug);
                 Ruin(); // too strong or too weak: a cold, bitter cup

@@ -52,6 +52,7 @@ MonoBehaviour:
   warmthTarget: 2
   zone: 5
   alwaysShowHint: 1
+  startsWithPrevious: 0
   explainBelow: 0.6
   mugs:
   - {fileID: 5290173502700370505}

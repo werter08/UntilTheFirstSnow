@@ -49,6 +49,7 @@ MonoBehaviour:
   warmthTarget: 1
   zone: 0
   alwaysShowHint: 0
+  startsWithPrevious: 0
   explainBelow: 0.6
   seconds: 1.6
   fixedQuality: 0.6

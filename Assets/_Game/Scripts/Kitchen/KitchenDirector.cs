@@ -321,8 +321,15 @@ namespace Courtyard.Kitchen
 
         private Coroutine _waveBack;
 
+        /// <summary>The player tapped Mira's window (Day 20 reads her note from it).</summary>
+        public event System.Action MiraWindowPoked;
+
+        /// <summary>Her window, to nudge the player toward it.</summary>
+        public Transform MiraWindowTarget => miraWindowFidget != null ? miraWindowFidget.transform : null;
+
         private void OnMiraWindowPoked()
         {
+            MiraWindowPoked?.Invoke();
             if (_level == null || _level.DayNumber < waveBackFromDay) return;
             // She's home (light on, or at the window): she comes to the window and waves.
             if (_windowState is not (MiraWindowState.Lit or MiraWindowState.Silhouette) || _waveBack != null) return;

@@ -82,7 +82,10 @@ namespace Courtyard.Tests
             while (Time.realtimeSinceStartup < deadline)
             {
                 var step = UnityEngine.Object.FindAnyObjectByType<T>();
-                if (step != null && !step.IsComplete)
+                // Its turn has come (a step can start early, e.g. Day 1's spoons while the kettle heats).
+                var runner = UnityEngine.Object.FindAnyObjectByType<LevelRunner>();
+                var active = runner != null ? GetField<MinigameStep>(runner, "_activeStep") : null;
+                if (step != null && !step.IsComplete && active == step)
                 {
                     LastQuality = -1f;
                     step.Completed += q => LastQuality = q;

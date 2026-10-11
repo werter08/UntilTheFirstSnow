@@ -115,18 +115,25 @@ namespace Courtyard.Editor
         /// Applies the art manifest's per-day mapping (mug, sill mugs, sleeve, served drinks) to existing level assets
         /// without touching tuning or story.
         /// </summary>
-        /// <summary>Day 20's step order (her mug first, his cup auto-filled at the end) on the existing asset.</summary>
-        public static void PatchDay20Steps(IReadOnlyDictionary<string, MinigameStep> steps)
+        /// <summary>
+        /// The step order of every day from the specs onto the existing assets (Day 10: her cup is boiled, poured,
+        /// steamed and spiced, then served at the door; Day 20: her window note first; Day 30: the water is poured).
+        /// </summary>
+        public static void PatchSteps(IReadOnlyDictionary<string, MinigameStep> steps)
         {
-            var spec = Specs().First(s => s.Day == 20);
-            var level = AssetDatabase.LoadAssetAtPath<LevelDefinition>($"{LevelsFolder}Day_20.asset");
-            if (level == null || spec.Steps.Any(n => !steps.ContainsKey(n))) return;
-            Edit(level, so =>
+            foreach (var spec in Specs())
             {
-                var list = so.FindProperty("steps");
-                list.arraySize = spec.Steps.Length;
-                for (var i = 0; i < spec.Steps.Length; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = steps[spec.Steps[i]];
-            });
+                var level = AssetDatabase.LoadAssetAtPath<LevelDefinition>($"{LevelsFolder}Day_{spec.Day:00}.asset");
+                if (level == null || spec.Steps.Any(n => !steps.ContainsKey(n))) continue;
+                Edit(level, so =>
+                {
+                    var list = so.FindProperty("steps");
+                    list.arraySize = spec.Steps.Length;
+                    for (var i = 0; i < spec.Steps.Length; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = steps[spec.Steps[i]];
+                    so.FindProperty("serveAtDoor").boolValue = spec.Day == 10;
+                });
+            }
+
             AssetDatabase.SaveAssets();
         }
 
@@ -314,7 +321,8 @@ namespace Courtyard.Editor
                 Rack = new[] { MugStyle.Chipped }, // he brews in his mug; her cup arrives at the door (and stays: Day 20's rack)
                 // MiraVisit (knock at the door) sits between PourOver and SteamMilk so her lines follow the brief's order.
                 // At the door (MiraVisit) he takes her cup (TakeHerCup); milk and spices then go into her cup.
-                Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.MiraVisit, P.TakeHerCup, P.SteamMilk, P.GuessHerDrink },
+                // Her cup: boil, pour the water, steam the milk, the spices — then it's handed to her at the door.
+                Steps = new[] { P.KettleBoil, P.GrindBeans, P.PourOver, P.MiraVisit, P.TakeHerCup, P.KettleBoil, P.PourWater, P.SteamMilk, P.GuessHerDrink },
                 Beats = new[]
                 {
                     Start(thought, "Sunday. The light is different today."),
@@ -337,13 +345,12 @@ namespace Courtyard.Editor
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, herMug = true, brewMug = MugStyle.Yellow, plantStage = PlantStage.Healthy, fridgeNotes = 2, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers }, // ChooseMug picks hers from here
                 // Her mug first (to the brewing spot), her drink, then his cup fills by itself beside it.
-                Steps = new[] { P.KettleBoil, P.ChooseMug, P.GrindBeans, P.PourOver, P.SteamMilk, P.AutoFillHisMug },
+                Steps = new[] { P.ReadHerWindow, P.KettleBoil, P.ChooseMug, P.GrindBeans, P.PourOver, P.SteamMilk, P.AutoFillHisMug },
                 Beats = new[]
                 {
-                    // The brief's 🥶 emoji isn't in the default font; add a hand-drawn TMP sprite in M3.
-                    Start(note, "Heating broke."),
+                    // Her "heating broke" note is read from her window (ReadHerWindow); final copy lives in GameTexts.
                     After(0, note, "Hold on."),
-                    After(5, thought, "Two cups tonight. Hers first."),
+                    After(6, thought, "Two cups tonight. Hers first."),
                     End(thought, "Funny. A month ago I couldn't keep myself warm."),
                 },
                 TwoMeters = true,
@@ -359,7 +366,7 @@ namespace Courtyard.Editor
                 Palette = Palette(new Color(1f, 0.85f, 0.7f), 0.95f, new Color(1f, 0.72f, 0.42f), 1.1f),
                 Props = new KitchenProps { beans = true, grinder = true, milk = true, cinnamon = true, toppings = true, brewMug = MugStyle.Green, mugsOnSill = true, herMug = true, scarf = true, plantStage = PlantStage.Blooming, fridgeNotes = 3, sweater = Sweater.Beige },
                 Rack = new[] { MugStyle.Chipped, MugStyle.His, MugStyle.Hers, MugStyle.Yellow },
-                Steps = new[] { P.KettleBoil, P.SteamMilk, P.HerDrinkFromMemory },
+                Steps = new[] { P.KettleBoil, P.PourWater, P.SteamMilk, P.HerDrinkFromMemory },
                 Beats = new[]
                 {
                     Start(dialogue, "It's snowing! Make me the usual?", mira),

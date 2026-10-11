@@ -48,6 +48,8 @@ MonoBehaviour:
   - {fileID: 6738547792549017874, guid: 61b9f335f46924425b3f7ffe28e6e34a, type: 3}
   - {fileID: 5262487450328234932, guid: 8b01d6c73ddfa4e92b1fd201f6a01f3c, type: 3}
   - {fileID: 3176449780106624447, guid: 231fa81c2de6d49dab19bab6cb8db21e, type: 3}
+  - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
+  - {fileID: 101021968709363197, guid: 53a24a4881c6040978e7cd94a70bf1ed, type: 3}
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
   - {fileID: 7175227584742457043, guid: cbeeab98e4bdc40cdbee94abbb2e6547, type: 3}
   storyBeats:
@@ -133,3 +135,5 @@ MonoBehaviour:
   outroHoldSeconds: 0
   outroWalkers: []
   finale: 0
+  remakeText: It's bad. Let's remake it.
+  serveAtDoor: 1

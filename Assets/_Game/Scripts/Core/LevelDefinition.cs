@@ -87,6 +87,10 @@ namespace Courtyard.Core
         [Header("Finale")]
         [Tooltip("Last day: after the final lines the camera drifts to the window sill before the ending.")]
         [SerializeField] private bool finale;
+        [Tooltip("A badly made drink: this line shows, then the drink is made again from its first step.")]
+        [SerializeField, TextArea] private string remakeText = "It's bad. Let's remake it.";
+        [Tooltip("Day 10: the finished drink is handed to her at the front door (the door scene with her and the cup).")]
+        [SerializeField] private bool serveAtDoor;
 
         public int DayNumber => dayNumber;
         public string ClockTime => clockTime;
@@ -145,6 +149,11 @@ namespace Courtyard.Core
         public float OutroHoldSeconds => outroHoldSeconds;
         public Sprite[] OutroWalkers => outroWalkers;
         public bool Finale => finale;
+        public string RemakeText => remakeText;
+        public bool ServeAtDoor => serveAtDoor;
+
+        /// <summary>A result this poor is a bad drink: it chills, then the drink is made again.</summary>
+        public bool IsBad(float quality) => quality < badResultThreshold;
 
         public List<StoryBeat> GetBeats(BeatTrigger trigger, int stepIndex = 0, bool goodResult = true) =>
             storyBeats.Where(b => b != null && b.Matches(trigger, stepIndex, goodResult)).ToList();

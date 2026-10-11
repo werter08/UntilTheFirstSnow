@@ -65,6 +65,8 @@ namespace Courtyard.Editor
             (P.ChooseMug, "First, her mug. Which one is hers?", true),
             (P.HerDrinkFromMemory, "Make her usual. You know it by now.", true),
             (P.AutoFillHisMug, "", false),
+            (P.PourWater, "Pour the hot water to the line.", false),
+            (P.ReadHerWindow, "Something's on her window. Tap it.", true),
         };
 
         // ---------------------------------------------------------------- the recipe card (grows over the autumn)
@@ -125,11 +127,11 @@ namespace Courtyard.Editor
                 Number = 20, Calendar = "Freezing tonight. Her window is still lit.",
                 BadDrink = "Cold and bitter… that won't warm anyone.", TooCold = TooCold,
                 Recipe = RecipeInstant + RecipePourOver + RecipeMilk + RecipeTwoMugs,
+                // "My heating broke :(" is read from her window (ReadHerWindow, step 0), not shown as a line.
                 Beats = new[]
                 {
-                    Start(note, "My heating broke :("),
                     After(0, note, "Hold on. Coffee's coming."),
-                    After(5, thought, "Two cups tonight. Hers first."), // after his cup fills beside hers
+                    After(6, thought, "Two cups tonight. Hers first."), // after his cup fills beside hers
                     End(thought, "Funny. A few weeks ago I couldn't even keep myself warm."),
                 },
             };
@@ -173,7 +175,7 @@ namespace Courtyard.Editor
         public static void Apply()
         {
             var steps = P.EnsureAll();
-            LevelDataBuilder.PatchDay20Steps(steps);
+            LevelDataBuilder.PatchSteps(steps);
             ApplyHints(steps);
             ApplyDays();
             ApplyNotes();
@@ -223,6 +225,7 @@ namespace Courtyard.Editor
                     so.FindProperty("tutorialHints").boolValue = day.Tutorial;
                     so.FindProperty("pulseRecipeCard").boolValue = day.PulseRecipe;
                     so.FindProperty("recipeCardText").stringValue = day.Recipe;
+                    so.FindProperty("remakeText").stringValue = "It's bad. Let's remake it.";
 
                     // Beats are updated in place (same order), so per-beat extras like "sets Mira's window" stay.
                     var beats = so.FindProperty("storyBeats");
@@ -299,7 +302,7 @@ namespace Courtyard.Editor
                 }
 
                 foreach (var runner in root.GetComponentsInChildren<LevelRunner>(true))
-                    Wire(runner, "newNoteHint", "New note on the fridge.");
+                    Wire(runner, "newNoteHint", "New note on the fridge. Click it to read.");
             }
 
             foreach (var guid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/_Game/Prefabs/UI" }))

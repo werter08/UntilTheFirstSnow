@@ -29,6 +29,9 @@ namespace Courtyard.Minigames
         private CounterStation _counter;
         private bool _pourOverNext;
 
+        /// <summary>Remaking the drink: her mug is already on the counter.</summary>
+        public override bool SkipOnRemake(CounterStation counter) => counter.MugPresent;
+
         public override void Begin(MinigameContext ctx)
         {
             _fx = ctx.Fx;

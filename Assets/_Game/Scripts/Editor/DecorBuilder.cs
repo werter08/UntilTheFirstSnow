@@ -203,6 +203,7 @@ namespace Courtyard.Editor
             var counterStation = kitchen.GetComponentInChildren<CounterStation>(true);
             if (counterStation != null) Wire(counterStation, "hisMugSprite", AssetDatabase.LoadAssetAtPath<Sprite>(PropsFolder + "mug_his.png"));
             ApplyShadows(kitchen); // last: props are in their final places
+            ApplySillDrinks(kitchen);
         }
 
         /// <summary>
@@ -1145,6 +1146,39 @@ namespace Courtyard.Editor
             Wire(GetOrAdd<InteractionFeedback>(fx.transform), "fx", fx);
         }
 
+        /// <summary>Day 30's finale: the two mugs on the sill are full — his americano, her cappuccino.</summary>
+        private static void ApplySillDrinks(Transform kitchen)
+        {
+            var sill = Find(kitchen, "SillMugs", false);
+            if (sill == null) return;
+            DrinkInside(sill.Find("SillMugHis")?.GetComponent<SpriteRenderer>(), "drink_black");
+            DrinkInside(sill.Find("SillMugHers")?.GetComponent<SpriteRenderer>(), "drink_latte");
+        }
+
+        /// <summary>
+        /// The drink inside a still mug, drawn like the counter mug's: the team's drink tile behind the mug, its
+        /// rounded top showing above the rim (bottom tucked behind it).
+        /// </summary>
+        private static void DrinkInside(SpriteRenderer mug, string drinkName)
+        {
+            var drink = AssetDatabase.LoadAssetAtPath<Sprite>(DrinksFolder + drinkName + ".png");
+            if (mug == null || mug.sprite == null || drink == null) return;
+            var t = mug.transform.Find("Drink") ?? new GameObject("Drink").transform;
+            t.SetParent(mug.transform, false);
+            var renderer = GetOrAdd<SpriteRenderer>(t);
+            renderer.sprite = drink;
+            renderer.color = Color.white;
+            renderer.sortingLayerID = mug.sortingLayerID;
+            renderer.sortingOrder = mug.sortingOrder - 1;
+            var bounds = mug.sprite.bounds;
+            const float tuck = 0.18f; // as on the counter mug
+            var rim = bounds.max.y - 0.02f;
+            var bodyCentreX = bounds.min.x + 0.02f + 0.55f; // body is 110 px wide from its left edge
+            t.localPosition = new Vector3(bodyCentreX, rim - tuck + drink.bounds.extents.y, 0f);
+            t.localRotation = Quaternion.identity;
+            t.localScale = Vector3.one;
+        }
+
         private static void ApplyScarf(Transform kitchen)
         {
             var blanket = kitchen.Find("Blanket");
@@ -1761,7 +1795,9 @@ namespace Courtyard.Editor
             FitMug(SpriteChild(root, "HisMug"), his, new Vector2(-0.95f, 0.4f), 1.3f, "Props", 1);
             FitMug(SpriteChild(root, "HerMug"), hers, new Vector2(0.95f, 0.4f), 1.3f, "Props", 1);
             var glow = SpriteChild(root, "Glow");
-            PlaceAtScreenScale(glow, AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png"), new Vector2(0f, 0.4f), "Props", 0);
+            PlaceAtScreenScale(glow, AssetDatabase.LoadAssetAtPath<Sprite>(FxFolder + "glow_radial.png"), new Vector2(0f, 0.4f), "Props", -1);
+            DrinkInside(root.Find("HisMug").GetComponent<SpriteRenderer>(), "drink_black");  // his americano
+            DrinkInside(root.Find("HerMug").GetComponent<SpriteRenderer>(), "drink_latte");  // her cappuccino
             glow.localScale = new Vector3(2.4f, 1.6f, 1f);
             glow.GetComponent<SpriteRenderer>().color = new Color(1f, 0.75f, 0.45f, 0.35f);
             SoftParticles(root, "SteamHis", new Vector2(-1.2f, 1.35f), 0.4f, new Vector2(0f, 0.55f), new Color(1f, 1f, 1f, 0.3f), 0.3f, 2f, 4f, "FX");

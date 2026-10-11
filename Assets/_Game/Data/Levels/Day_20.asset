@@ -43,6 +43,7 @@ MonoBehaviour:
     sweater: 1
     fridgeNotes: 2
   steps:
+  - {fileID: 1341194604355340700, guid: 882840575360146608a1e18f7a591c81, type: 3}
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
   - {fileID: 6987173642302428769, guid: dba18201d2f5e422891f48785c2142cd, type: 3}
   - {fileID: 104158219434757867, guid: dccb5e1aee3234a4484f894ced79da0d, type: 3}
@@ -50,14 +51,6 @@ MonoBehaviour:
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
   - {fileID: 6688862761830470276, guid: e5e35f9004e644912b1b1562f5b20015, type: 3}
   storyBeats:
-  - trigger: 0
-    stepIndex: 0
-    condition: 0
-    style: 1
-    speaker: 
-    text: My heating broke :(
-    setsMiraWindow: 0
-    miraWindowAfter: 0
   - trigger: 1
     stepIndex: 0
     condition: 0
@@ -67,7 +60,7 @@ MonoBehaviour:
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 1
-    stepIndex: 5
+    stepIndex: 6
     condition: 0
     style: 0
     speaker: 
@@ -117,3 +110,5 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5fb4acea0fa9b4a3dbeefbf16066ace5, type: 3}
   - {fileID: 21300000, guid: d1121a822fa814454821d33b911bbc53, type: 3}
   finale: 0
+  remakeText: It's bad. Let's remake it.
+  serveAtDoor: 0

@@ -127,17 +127,39 @@ namespace Courtyard.Core
             if (_level.PulseRecipeCard && recipeCard != null) recipeCard.Pulse();
             yield return story.Play(_level.GetBeats(BeatTrigger.LevelStart));
 
-            var qualities = new List<float>(_level.Steps.Count);
+            var qualities = new SortedDictionary<int, float>(); // step index → result, for the drink being made
+            var beatsShown = new HashSet<int>();
+            MinigameStep early = null; // a step that started with the previous one (Day 1: spoons while the kettle heats)
+            var remaking = false;
             for (var i = 0; i < _level.Steps.Count; i++)
             {
+                if (remaking && _level.Steps[i].SkipOnRemake(counter)) continue; // e.g. her mug is already chosen
+
                 var quality = -1f;
-                _activeStep = Instantiate(_level.Steps[i], stepRoot);
-                _activeStep.transform.position += (Vector3)counter.ZoneShift(_activeStep.Zone);
-                _activeStep.Completed += q => quality = q;
+                if (early != null)
+                {
+                    _activeStep = early; // already on the counter: now it's its turn
+                    early = null;
+                    counter.SetAllInteractable(false);
+                    _activeStep.Completed += q => quality = q;
+                    _activeStep.OnPreviousDone();
+                }
+                else
+                {
+                    _activeStep = StartStep(i);
+                    _activeStep.Completed += q => quality = q;
+                    counter.SetAllInteractable(false);
+                    _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader, gauge));
+                    StartCoroutine(FadeStepParts(_activeStep.transform, 0f, 1f)); // its own tools fade in
+                }
+
                 ShowHint(_level.Steps[i]);
-                counter.SetAllInteractable(false);
-                _activeStep.Begin(new MinigameContext(_level, i, worldCamera, kitchen, counter, fx, hands, fader, gauge));
-                StartCoroutine(FadeStepParts(_activeStep.transform, 0f, 1f)); // its own tools fade in
+                if (i + 1 < _level.Steps.Count && _level.Steps[i + 1].StartsWithPrevious)
+                {
+                    early = StartStep(i + 1);
+                    early.Begin(new MinigameContext(_level, i + 1, worldCamera, kitchen, counter, fx, hands, fader, gauge));
+                    StartCoroutine(FadeStepParts(early.transform, 0f, 1f));
+                }
 
                 _draining = true;
                 yield return new WaitUntil(() => quality >= 0f);
@@ -145,17 +167,18 @@ namespace Courtyard.Core
 
                 // Let the result land (the last pour, the meter, the punch) before the step's tools fade away.
                 HideHint();
-                counter.SetAllInteractable(false);
+                if (gauge != null) gauge.Hide();
+                if (early == null) counter.SetAllInteractable(false);
                 var step = _activeStep;
                 _activeStep = null;
                 yield return new WaitForSeconds(stepHoldSeconds);
                 yield return FadeStepParts(step.transform, 1f, 0f);
                 Destroy(step.gameObject);
-                AudioManager.StopAllLoops();
+                if (early == null) AudioManager.StopAllLoops();
 
                 if (step.Scored)
                 {
-                    if (step.CountsTowardDrink) qualities.Add(quality);
+                    if (step.CountsTowardDrink) qualities[i] = quality;
                     var delta = _level.StepWarmthDelta(quality);
                     if (delta < 0f) yield return Chill(); // frost first, then the meter drops (and may run out)
                     _chilledByDrink = delta < 0f;
@@ -165,25 +188,41 @@ namespace Courtyard.Core
                     fx.Punch(counter.Mug.transform);
                     if (delta >= 0f) fx.CelebrateQuality(quality, counter.Mug.transform.position + Vector3.up * 1.2f);
                     counter.SetSteam(quality);
+
+                    // A bad drink isn't served: "It's bad, let's remake it", and it's made again from its first step
+                    // (the cold it let in stays — remaking costs warmth, and the cold can still win).
+                    if (step.CountsTowardDrink && _level.IsBad(quality))
+                    {
+                        var from = RemakeFrom(i);
+                        if (early != null) Destroy(early.gameObject);
+                        early = null;
+                        yield return Remake(from);
+                        foreach (var later in qualities.Keys.Where(k => k >= from).ToList()) qualities.Remove(later);
+                        remaking = true;
+                        i = from - 1; // the loop's ++ lands on it
+                        continue;
+                    }
                 }
 
                 yield return new WaitForSeconds(stepGapSeconds); // a breath before the next line or step
-                yield return story.Play(_level.GetBeats(BeatTrigger.AfterStep, i, IsGood(quality)));
+                if (beatsShown.Add(i)) yield return story.Play(_level.GetBeats(BeatTrigger.AfterStep, i, IsGood(quality)));
             }
 
+            var drinkQualities = qualities.Values.ToList();
             // Serve the drink.
-            var finalQuality = qualities.Count > 0 ? qualities.Average() : 1f;
+            var finalQuality = drinkQualities.Count > 0 ? drinkQualities.Average() : 1f;
             var drinkDelta = _level.DrinkWarmthDelta(finalQuality);
             if (drinkDelta < 0f) yield return Chill();
             _chilledByDrink = drinkDelta < 0f;
             _warmth.Apply(_level.DrinkTarget, drinkDelta);
             _chilledByDrink = false; // Depleted fires inside Apply; later drain-outs are plain cold
             if (_failed) yield break;
-            var lastGood = qualities.Count == 0 || IsGood(qualities[qualities.Count - 1]);
+            var lastGood = drinkQualities.Count == 0 || IsGood(drinkQualities[drinkQualities.Count - 1]);
             var drinks = _level.DrinkResults.Where(d => d != null && d.icon != null && d.Shows(lastGood)).Select(d => d.icon).ToList();
             if (drinks.Count > 0) counter.ShowServedDrink(drinks[drinks.Count - 1]);
             yield return fx.ServeDrink(counter.Mug.transform, counter.MugTop, counter.MugSteam);
-            yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
+            if (_level.ServeAtDoor) yield return ServeAtDoor(lastGood);
+            else yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, lastGood));
             yield return NewNote();
             if (_level.Finale) yield return Finale();
 
@@ -193,6 +232,59 @@ namespace Courtyard.Core
                 GameManager.Instance.CompleteLevel();
             else
                 SceneManager.LoadScene(SceneNames.Ending);
+        }
+
+        private MinigameStep StartStep(int index)
+        {
+            var step = Instantiate(_level.Steps[index], stepRoot);
+            step.transform.position += (Vector3)counter.ZoneShift(step.Zone);
+            return step;
+        }
+
+        [Header("Remaking a bad drink")]
+        [SerializeField] private Color remakeColour = new(0.22f, 0.16f, 0.13f);
+        [SerializeField, Min(0f)] private float remakeHoldSeconds = 1.6f;
+
+        /// <summary>The drink starts again from its first step: the latest kettle boil at or before <paramref name="badStep"/>.</summary>
+        private int RemakeFrom(int badStep)
+        {
+            for (var j = badStep; j >= 0; j--)
+                if (_level.Steps[j] is KettleBoilStep) return j;
+            for (var j = 0; j <= badStep; j++)
+                if (_level.Steps[j].Scored) return j;
+            return badStep;
+        }
+
+        /// <summary>"It's bad. Let's remake it." over a warm dark fade; the mug is emptied and the tools go back.</summary>
+        private IEnumerator Remake(int fromStep)
+        {
+            HideHint();
+            if (gauge != null) gauge.Hide();
+            AudioManager.StopAllLoops();
+            yield return fader.FadeOut(remakeColour, fadeDuration * 0.7f, _level.RemakeText);
+            counter.ResetDrink(_level, fromStep);
+            yield return new WaitForSeconds(remakeHoldSeconds);
+            yield return fader.FadeIn(fadeDuration * 0.7f);
+        }
+
+        [Header("Day 10: her drink at the door")]
+        [SerializeField, Min(0f)] private float doorFadeSeconds = 0.7f;
+
+        /// <summary>Day 10: the finished cup goes to her at the front door — her lines there — then back to the kitchen.</summary>
+        private IEnumerator ServeAtDoor(bool good)
+        {
+            yield return fader.FadeOut(Color.black, doorFadeSeconds);
+            AudioManager.ResumeTrack(SfxId.Footsteps);
+            kitchen.ShowDoor(worldCamera, true);
+            yield return new WaitForSeconds(0.6f);
+            AudioManager.StopLoop(SfxId.Footsteps, 0.3f);
+            yield return fader.FadeIn(doorFadeSeconds);
+            var cup = kitchen.HerCupAtDoor;
+            if (cup != null) fx.Puff(cup.transform.position + Vector3.up * 0.5f, new Color(1f, 1f, 1f, 0.5f), 10, 0.5f, 0.4f, -0.2f); // her drink steams
+            yield return story.Play(_level.GetBeats(BeatTrigger.LevelEnd, 0, good));
+            yield return fader.FadeOut(Color.black, doorFadeSeconds);
+            kitchen.ShowDoor(worldCamera, false);
+            yield return fader.FadeIn(doorFadeSeconds);
         }
 
         [Header("Finale")]
@@ -308,10 +400,10 @@ namespace Courtyard.Core
 
         [Header("End-of-day note")]
         [SerializeField] private string newNoteHint = "A new note on the fridge. Click it to read.";
-        [Tooltip("How long the new note waits to be opened before the day moves on (it stays on the fridge).")]
-        [SerializeField, Min(0f)] private float newNoteWaitSeconds = 5f;
+        [Tooltip("Seconds between the new note's little nudges until it is read.")]
+        [SerializeField, Min(0.5f)] private float newNoteNudgeSeconds = 1.5f;
 
-        /// <summary>The day's note pops onto the fridge; if the player opens it, the day waits until it's put back.</summary>
+        /// <summary>The day's note pops onto the fridge; the day ends once the player has read it (hint and nudges until then).</summary>
         private IEnumerator NewNote()
         {
             var slot = kitchen.PinNoteAfter(_level.DayNumber);
@@ -321,18 +413,23 @@ namespace Courtyard.Core
             var opened = false;
             void OnOpened() => opened = true;
             card.Opened += OnOpened;
+            AwaitingNote = slot;
             hint.Show(newNoteHint);
             fx.Burst(slot.position, new Color(1f, 0.92f, 0.6f), 10, 1.2f, 0.07f, -0.2f);
-            for (var t = 0f; t < newNoteWaitSeconds && !opened; t += Time.deltaTime)
+            for (var t = 0f; !opened; t += Time.deltaTime)
             {
-                if (t > 1.5f && Mathf.Repeat(t, 1.5f) < Time.deltaTime) fx.Punch(slot, 0.6f); // a gentle nudge
+                if (t > 1.5f && Mathf.Repeat(t, newNoteNudgeSeconds) < Time.deltaTime) fx.Punch(slot, 0.6f); // like her window: "here"
                 yield return null;
             }
 
+            hint.Hide();
             while (card.IsOpen) yield return null;
             card.Opened -= OnOpened;
-            hint.Hide();
+            AwaitingNote = null;
         }
+
+        /// <summary>The new note waiting to be read (null when none).</summary>
+        public Transform AwaitingNote { get; private set; }
 
         // ---------------------------------------------------------------- hints
 

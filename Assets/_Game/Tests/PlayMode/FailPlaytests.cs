@@ -18,6 +18,7 @@ namespace Courtyard.Tests
         public IEnumerator Day20_CarelessDrinks_TheColdWins_AndDayRestarts()
         {
             yield return LoadDay(20);
+            yield return PlayReadHerWindow();
             yield return AdvanceTo<KettleBoilStep>();
             var firstRunner = Runner;
             var warmth = GetField<WarmthGroup>(firstRunner, "_warmth");

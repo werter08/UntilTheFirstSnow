@@ -235,6 +235,46 @@ namespace Courtyard.Kitchen
         public ParticleSystem MugSteam => mugSteam;
         public bool MugPresent => mug.gameObject.activeSelf;
 
+        /// <summary>
+        /// A bad drink is poured away: the same mug, empty again, and the tools back in place for the steps from
+        /// <paramref name="fromStep"/> on (V60 with no grounds if they pour over, the spoon if they spoon).
+        /// </summary>
+        public void ResetDrink(LevelDefinition level, int fromStep)
+        {
+            var later = level.Steps.Skip(fromStep).ToList();
+            SetMugLevel(0f);
+            mugFoam.SetActive(false);
+            SetMugDrink(MugDrink.Instant, Color.white);
+            if (mugContents != null) mugContents.ClearSpice();
+            ShowSpoons(0);
+            SetSteam(0.7f);
+            SetDripperGrounds(false);
+            if (later.Any(s => s is Minigames.PourOverStep) && MugPresent)
+            {
+                dripper.SetActive(true);
+                if (_dripperRest.HasValue) dripper.transform.localPosition = _dripperRest.Value;
+                SetDripperAlpha(1f);
+            }
+
+            if (restingSpoon != null) restingSpoon.gameObject.SetActive(later.Any(s => s is Minigames.InstantCoffeeStep));
+            SetCoffeeBagOpen(false);
+            kettle.position = _kettleRest;
+            kettleStream.enabled = false;
+            kettleView.SetPouring(false);
+            kettleView.SetHeating(false);
+            kettleView.SetBoil(0f);
+            HideFillLine();
+            SetMilkFoam(0f);
+            SetFrothing(false);
+            foreach (var jar in toppingJars)
+            {
+                jar.SetPicked(false);
+                jar.transform.localRotation = Quaternion.identity;
+            }
+
+            SetAllInteractable(false);
+        }
+
         /// <summary>The brewing mug (and the V60 over it) on the counter, or an empty spot.</summary>
         public void SetMugPresent(bool present)
         {

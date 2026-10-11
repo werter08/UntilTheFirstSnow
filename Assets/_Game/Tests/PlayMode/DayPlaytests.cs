@@ -36,6 +36,8 @@ namespace Courtyard.Tests
             yield return PlayGrindBeans();
             yield return PlayPourOver();
             yield return PlayTakeHerCup();
+            yield return PlayKettleBoil();   // her cup: boil, pour, milk, spices — then it's handed to her at the door
+            yield return PlayPourWater();
             yield return PlaySteamMilk();
             yield return PlayPickToppings<PickToppingsStep>(Topping.Cinnamon, Topping.Honey);
             Assert.That(LastQuality, Is.EqualTo(1f), "Cinnamon + honey is Mira's usual.");
@@ -47,6 +49,7 @@ namespace Courtyard.Tests
         {
             // Her mug first (it goes to the brewing spot), her drink, then his cup fills by itself beside it.
             yield return LoadDay(20);
+            yield return PlayReadHerWindow();
             yield return PlayKettleBoil();
             yield return PlayChooseMug();
             Assert.That(LastQuality, Is.EqualTo(1f), "Her mug is the right one.");
@@ -65,6 +68,7 @@ namespace Courtyard.Tests
         {
             yield return LoadDay(30);
             yield return PlayKettleBoil();
+            yield return PlayPourWater();
             yield return PlaySteamMilk();
             yield return PlayPickToppings<PickToppingsStep>(Topping.Honey, Topping.Cinnamon);
             yield return FinishDay();

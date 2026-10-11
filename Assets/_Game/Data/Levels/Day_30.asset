@@ -44,6 +44,7 @@ MonoBehaviour:
     fridgeNotes: 3
   steps:
   - {fileID: 4215760361698717689, guid: b5949d552248d4b93bcd9ce6548b1f87, type: 3}
+  - {fileID: 101021968709363197, guid: 53a24a4881c6040978e7cd94a70bf1ed, type: 3}
   - {fileID: 101561288074051688, guid: 8e2dc2b543f4541e7b31124f4497f82d, type: 3}
   - {fileID: 2765580805240901084, guid: c580eaac07a1846d8871d83eb51df363, type: 3}
   storyBeats:
@@ -110,3 +111,5 @@ MonoBehaviour:
   outroHoldSeconds: 0
   outroWalkers: []
   finale: 1
+  remakeText: It's bad. Let's remake it.
+  serveAtDoor: 0

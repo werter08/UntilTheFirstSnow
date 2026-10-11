@@ -72,22 +72,56 @@ namespace Courtyard.Kitchen
             mask.transform.localPosition = new Vector3(0f, -regionHeight * 0.5f + height * 0.5f, 0f);
         }
 
-        /// <summary>A portion of spice settles on top of the drink.</summary>
+        [Header("Spices tint the drink")]
+        [Tooltip("How much each portion of spice shifts the drink's colour toward the spice.")]
+        [SerializeField, Range(0f, 1f)] private float tintPerPortion = 0.3f;
+        [SerializeField, Min(0.05f)] private float stirSeconds = 0.6f;
+
+        private Coroutine _stir;
+
+        /// <summary>
+        /// A portion of spice stirs into the drink: no layer on top — the drink itself takes on the spice's colour
+        /// (each portion a bit more) with a little swirl and glow as it mixes in.
+        /// </summary>
         public void AddSpice(Color colour)
         {
-            if (spice == null) return;
             _portions++;
-            spice.enabled = true;
-            spice.color = _portions == 1 ? colour : Color.Lerp(spice.color, colour, 0.5f);
-            var height = spicePerPortion * _portions;
-            spice.size = new Vector2(spiceWidth, height);
-            spice.transform.localPosition = new Vector3(0f, regionHeight * 0.5f - 0.1f - height * 0.5f, 0f);
+            if (spice != null) spice.enabled = false;
+            var target = Color.Lerp(liquid.color, new Color(colour.r, colour.g, colour.b, 1f), tintPerPortion);
+            if (_stir != null) StopCoroutine(_stir);
+            _stir = isActiveAndEnabled ? StartCoroutine(Stir(target)) : null;
+            if (_stir == null) liquid.color = target;
+        }
+
+        private System.Collections.IEnumerator Stir(Color target)
+        {
+            var from = liquid.color;
+            var t = liquid.transform;
+            var baseScale = t.localScale;
+            var basePosition = t.localPosition;
+            for (var elapsed = 0f; elapsed < stirSeconds; elapsed += Time.deltaTime)
+            {
+                var k = elapsed / stirSeconds;
+                var swirl = Mathf.Sin(k * Mathf.PI * 4f) * (1f - k);
+                liquid.color = Color.Lerp(Color.Lerp(from, target, k), Color.white, Mathf.Sin(k * Mathf.PI) * 0.25f); // a glint
+                t.localPosition = basePosition + new Vector3(swirl * 0.04f, 0f, 0f);
+                t.localScale = new Vector3(baseScale.x * (1f + swirl * 0.03f), baseScale.y, baseScale.z);
+                yield return null;
+            }
+
+            liquid.color = target;
+            t.localPosition = basePosition;
+            t.localScale = baseScale;
+            _stir = null;
         }
 
         public void ClearSpice()
         {
             _portions = 0;
             if (spice != null) spice.enabled = false;
+            if (_stir != null) StopCoroutine(_stir);
+            _stir = null;
+            if (liquid != null) liquid.color = Color.white;
         }
     }
 }

@@ -20,6 +20,9 @@ namespace Courtyard.Minigames
         [Tooltip("Story prompts (wave back, which mug, her drink) are new every time: their hint always shows. Other hints " +
                  "show on the tutorial day and the first time a minigame appears.")]
         [SerializeField] private bool alwaysShowHint;
+        [Tooltip("Starts together with the previous step (Day 1: spoon the coffee in while the kettle heats); it is told " +
+                 "when the previous one is done.")]
+        [SerializeField] private bool startsWithPrevious;
         [Tooltip("Results below this explain what went wrong, above the tool (\"Too much water\"…).")]
         [SerializeField, Range(0f, 1f)] private float explainBelow = 0.6f;
 
@@ -31,6 +34,13 @@ namespace Courtyard.Minigames
         public WarmthTarget WarmthTarget => warmthTarget;
         public Kitchen.CounterZone Zone => zone;
         public bool AlwaysShowHint => alwaysShowHint;
+        public bool StartsWithPrevious => startsWithPrevious;
+
+        /// <summary>For steps that started early: the previous step has finished (e.g. the water has boiled).</summary>
+        public virtual void OnPreviousDone() { }
+
+        /// <summary>When a bad drink is made again, steps whose result still stands (her mug is already chosen) are skipped.</summary>
+        public virtual bool SkipOnRemake(Kitchen.CounterStation counter) => false;
 
         /// <summary>Whether the result counts toward the served drink (false for his auto-filled cup on Day 20).</summary>
         public virtual bool CountsTowardDrink => scored;

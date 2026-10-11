@@ -49,6 +49,7 @@ MonoBehaviour:
   warmthTarget: 0
   zone: 4
   alwaysShowHint: 0
+  startsWithPrevious: 0
   explainBelow: 0.6
   gaugeIcon: {fileID: 0}
   startTemperature: 5

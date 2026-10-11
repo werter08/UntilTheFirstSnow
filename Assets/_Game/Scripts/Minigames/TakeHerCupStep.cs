@@ -60,10 +60,11 @@ namespace Courtyard.Minigames
             }
 
             if (_ctx.Fader != null) yield return _ctx.Fader.FadeOut(Color.black, fadeOutSeconds);
-            AudioManager.Play(SfxId.Footsteps);
+            AudioManager.ResumeTrack(SfxId.Footsteps);
             _ctx.Kitchen.ShowDoor(_ctx.WorldCamera, false);
             _ctx.Counter.BringHerCup();
             yield return new WaitForSeconds(walkSeconds);
+            AudioManager.StopLoop(SfxId.Footsteps, 0.4f); // the steps stop as the kitchen fades back in
             if (_ctx.Fader != null) yield return _ctx.Fader.FadeIn(fadeInSeconds);
             Complete(1f);
         }

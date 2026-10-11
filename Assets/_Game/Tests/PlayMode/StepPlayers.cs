@@ -176,6 +176,38 @@ namespace Courtyard.Tests
             yield return WaitForCompletion();
         }
 
+        /// <summary>"Pour the hot water to the line" (PourWater: the instant-coffee step without the spoon).</summary>
+        protected IEnumerator PlayPourWater()
+        {
+            yield return AdvanceTo<InstantCoffeeStep>();
+            yield return CarryKettleAndPour(0.85f);
+            yield return WaitForCompletion();
+            Assert.That(LastQuality, Is.GreaterThanOrEqualTo(0.85f), "PourWater quality");
+        }
+
+        /// <summary>Day 20: tap her window, read her note, put it back.</summary>
+        protected IEnumerator PlayReadHerWindow()
+        {
+            yield return AdvanceTo<ReadHerWindowStep>();
+            var kitchen = Object.FindAnyObjectByType<KitchenDirector>();
+            for (var attempt = 0; attempt < 3 && !kitchen.NoteCard.IsOpen; attempt++)
+            {
+                yield return Click(kitchen.MiraWindowTarget);
+                yield return Wait(0.3f);
+            }
+
+            Assert.That(kitchen.NoteCard.IsOpen, Is.True, "Tapping her window should open her note.");
+            yield return ClickScreen(new Vector2(Screen.width * 0.5f, Screen.height * 0.25f));
+            yield return WaitForCompletion();
+        }
+
+        /// <summary>A bad drink is remade: the kettle step comes round again with an empty mug.</summary>
+        protected IEnumerator ExpectRemake()
+        {
+            yield return AdvanceTo<KettleBoilStep>();
+            Assert.That(Counter.MugLevel, Is.LessThan(0.01f), "The remade drink starts with an empty mug.");
+        }
+
         protected IEnumerator PlayChooseMug(bool hers = true)
         {
             yield return AdvanceTo<ChooseMugStep>();
@@ -191,6 +223,17 @@ namespace Courtyard.Tests
             var deadline = Time.realtimeSinceStartup + timeoutSeconds;
             while (SceneManager.GetActiveScene().name != SceneNames.Ending && Time.realtimeSinceStartup < deadline)
             {
+                // The day ends once the new note on the fridge has been read: open it (the next click puts it back).
+                var runner = Object.FindAnyObjectByType<LevelRunner>();
+                var kitchen = Object.FindAnyObjectByType<KitchenDirector>();
+                var note = runner != null ? runner.AwaitingNote : null;
+                if (note != null && kitchen != null && kitchen.NoteCard != null && !kitchen.NoteCard.IsOpen)
+                {
+                    yield return Click(note);
+                    yield return Wait(0.3f);
+                    continue;
+                }
+
                 yield return ClickScreen(new Vector2(Screen.width * 0.5f, Screen.height * 0.25f));
                 yield return Wait(0.2f);
             }

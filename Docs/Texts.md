@@ -61,8 +61,10 @@ _Assets/_Game/Data/Levels/Day_10.asset_
 2. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
 3. MiraVisit — _(empty)_
 4. TakeHerCup — Take the jar from her.
-5. SteamMilk — Hold to steam the milk. Let go in the green.
-6. GuessHerDrink — Add two spices to her cup, one at a time. Then click the cup.
+5. KettleBoil — Turn the kettle on. Turn it off when it boils.
+6. PourWater — Pour the hot water to the line.
+7. SteamMilk — Hold to steam the milk. Let go in the green.
+8. GuessHerDrink — Add two spices to her cup, one at a time. Then click the cup.
 
 **Story**
 
@@ -85,20 +87,20 @@ _Assets/_Game/Data/Levels/Day_20.asset_
 
 **Steps and their hints**
 
-0. KettleBoil — Turn the kettle on. Turn it off when it boils.
-1. ChooseMug — First, her mug. Which one is hers?
-2. GrindBeans — Turn the handle in circles. Stop in the green.
-3. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
-4. SteamMilk — Hold to steam the milk. Let go in the green.
-5. AutoFillHisMug — _(empty)_
+0. ReadHerWindow — Something's on her window. Tap it.
+1. KettleBoil — Turn the kettle on. Turn it off when it boils.
+2. ChooseMug — First, her mug. Which one is hers?
+3. GrindBeans — Turn the handle in circles. Stop in the green.
+4. PourOver — Pour in slow circles. Keep the flow in the green. Fill to the line.
+5. SteamMilk — Hold to steam the milk. Let go in the green.
+6. AutoFillHisMug — _(empty)_
 
 **Story**
 
 | When | Style | Who | Text |
 |---|---|---|---|
-| LevelStart | Note |  | My heating broke :( |
 | AfterStep(0) | Note |  | Hold on. Coffee's coming. |
-| AfterStep(5) | Thought |  | Two cups tonight. Hers first. |
+| AfterStep(6) | Thought |  | Two cups tonight. Hers first. |
 | LevelEnd | Thought |  | Funny. A few weeks ago I couldn't even keep myself warm. |
 
 ## Day 30 — 17:00
@@ -112,8 +114,9 @@ _Assets/_Game/Data/Levels/Day_30.asset_
 **Steps and their hints**
 
 0. KettleBoil — Turn the kettle on. Turn it off when it boils.
-1. SteamMilk — Hold to steam the milk. Let go in the green.
-2. HerDrinkFromMemory — Make her usual. You know it by now.
+1. PourWater — Pour the hot water to the line.
+2. SteamMilk — Hold to steam the milk. Let go in the green.
+3. HerDrinkFromMemory — Make her usual. You know it by now.
 
 **Story**
 
@@ -172,8 +175,11 @@ Title screen prompt, HUD labels, hints set on components, the ending's credits, 
 - `Caption`: Mira
 - `ContinueHint`: click to continue
 - `Label`: DAY
+- `Label`: Hints: on
 - `CloseHint`: click to close
-- `LevelRunner.newNoteHint`: New note on the fridge.
+- `HintsToggle.onText`: Hints: on
+- `HintsToggle.offText`: Hints: off
+- `LevelRunner.newNoteHint`: New note on the fridge. Click it to read.
 
 ### Ending
 
