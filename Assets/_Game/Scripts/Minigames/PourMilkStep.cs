@@ -52,6 +52,13 @@ namespace Courtyard.Minigames
         [Tooltip("A soft round drop for the milk (the kettle's drops are drawn water streaks).")]
         [SerializeField] private Sprite dropSprite;
         [SerializeField] private Vector2 dropSize = new(0.07f, 0.12f);
+        [Header("Carried: the team's drawing of his arm holding the jug")]
+        [Tooltip("Arm + jug drawing per sweater (Grey, Beige); drawn pouring to the right, mirrored for a cup on the left.")]
+        [SerializeField] private Sprite[] carrySprites;
+        [Tooltip("Jug centre and spout tip in the drawing (pixels from its top-left), and the jug's drawn height.")]
+        [SerializeField] private Vector2 artJugCentre = new(358f, 68f);
+        [SerializeField] private Vector2 artSpout = new(396f, 1f);
+        [SerializeField, Min(1f)] private float artJugHeight = 136f;
         [Tooltip("The foam on top of the jug shrinks to this as the milk pours out.")]
         [SerializeField, Range(0f, 1f)] private float foamLeft = 0.35f;
         [SerializeField, Min(0.1f)] private float pourPitch = 1.2f;
@@ -78,6 +85,9 @@ namespace Courtyard.Minigames
         private bool _streamOn;
         private float _splashTimer;
         private HandsView _hands;
+        private SpriteRenderer _carry;
+        private HandPose _jugPose;
+        private bool _blobWasShown;
         private Transform _blob;
         private Transform _blobParent;
         private Vector3 _blobLocalPosition;
@@ -102,13 +112,14 @@ namespace Courtyard.Minigames
             ResultAt = _counter.MugBody;
             NudgeTarget = _jug;
 
-            // The spout, as drawn: the jug's top corner that faces the cup.
+            // The spout: the counter jug's top corner that faces the cup (or the drawn spout of the carried jug, below).
             var body = _counter.MilkJugBody.bounds;
             var towardCup = _counter.MugTop.x < body.center.x ? -1f : 1f;
             var u = towardCup < 0f ? spoutInSprite.x : 1f - spoutInSprite.x;
             var spout = new Vector3(body.min.x + body.size.x * u, body.min.y + body.size.y * spoutInSprite.y, _jug.position.z);
-            _spoutLocal = _jug.InverseTransformPoint(spout);
             tiltDegrees = Mathf.Abs(tiltDegrees) * -towardCup; // tip toward the cup
+            if (CreateCarryArt(ctx.Level.Props.sweater, towardCup < 0f, out var drawnSpout)) spout = drawnSpout;
+            _spoutLocal = _jug.InverseTransformPoint(spout);
             CreateStream(spout);
             CarryFoam();
 
@@ -117,6 +128,60 @@ namespace Courtyard.Minigames
             _counter.MilkJug.Interactable = true;
             if (_gauge != null)
                 _gauge.Show(_counter.MugBody, _camera, new Vector2(greenMin, greenMax), new Vector2(overflowAt, 1f), gaugeIcon, _startLevel);
+        }
+
+        /// <summary>
+        /// While carried, the counter jug and the loose hand give way to the drawing of his arm holding the jug, lined up
+        /// on the jug. Returns where the drawn spout is.
+        /// </summary>
+        private bool CreateCarryArt(Sweater sweater, bool mirrored, out Vector3 spout)
+        {
+            spout = default;
+            var index = (int)sweater;
+            var sprite = carrySprites != null && index < carrySprites.Length ? carrySprites[index] : null;
+            if (sprite == null) return false;
+
+            var body = _counter.MilkJugBody;
+            _carry = new GameObject("CarriedJug", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
+            _carry.transform.SetParent(_jug, false);
+            _carry.sprite = sprite;
+            _carry.flipX = mirrored;
+            _carry.sortingLayerID = body.sortingLayerID;
+            _carry.sortingOrder = body.sortingOrder + 3;
+            _carry.enabled = false;
+
+            // Same jug size as on the counter; the drawn jug sits exactly where the counter jug is.
+            var ppu = sprite.pixelsPerUnit;
+            var k = body.bounds.size.y / (artJugHeight / ppu);
+            _carry.transform.localScale = Vector3.one * (k / Mathf.Max(0.0001f, _jug.lossyScale.y));
+            Vector3 FromCentre(Vector2 px)
+            {
+                var dx = px.x - sprite.rect.width * 0.5f;
+                var dy = sprite.rect.height * 0.5f - px.y;
+                return new Vector3(mirrored ? -dx : dx, dy, 0f) / ppu * k;
+            }
+
+            var centre = body.bounds.center;
+            _carry.transform.position = new Vector3(centre.x, centre.y, _jug.position.z) - FromCentre(artJugCentre);
+            spout = _carry.transform.position + FromCentre(artSpout);
+            _jugPose = _counter.MilkJug.HandPose;
+            _counter.MilkJug.HandPose = HandPose.Hidden; // the drawing has its own hand
+            return true;
+        }
+
+        /// <summary>Carried: the drawing shows; on the counter: the counter jug (and its foam) again.</summary>
+        private void ShowCarried(bool carried)
+        {
+            if (_carry == null) return;
+            _carry.enabled = carried;
+            _counter.MilkJugBody.enabled = !carried;
+            if (_blob == null) return;
+            if (carried)
+            {
+                _blobWasShown = _blob.gameObject.activeSelf;
+                _blob.gameObject.SetActive(false);
+            }
+            else if (!IsComplete) _blob.gameObject.SetActive(_blobWasShown);
         }
 
         /// <summary>The milk falls as drops, like the kettle's water: a copy of the kettle's stream, milk-white, at the spout.</summary>
@@ -173,6 +238,13 @@ namespace Courtyard.Minigames
         {
             if (_hands != null) _hands.UseRightHand(false);
             if (_counter == null) return;
+            if (_carry != null)
+            {
+                _counter.MilkJug.HandPose = _jugPose;
+                _counter.MilkJugBody.enabled = true;
+                Destroy(_carry.gameObject);
+            }
+
             _counter.MilkJug.Pressed -= OnPressed;
             _counter.MilkJug.Released -= OnReleased;
             SetStream(false);
@@ -190,6 +262,7 @@ namespace Courtyard.Minigames
             if (IsComplete) return;
             _holding = true;
             _grab = _jug.position - (Vector3)PointerWorld();
+            ShowCarried(true);
         }
 
         private void OnReleased()
@@ -199,7 +272,11 @@ namespace Courtyard.Minigames
             SetStream(false);
             if (IsComplete) return;
             if (_counter.MugLevel - _startLevel >= minPourToFinish) Finish(false);
-            else PutJugBack(returnSeconds);
+            else
+            {
+                ShowCarried(false);
+                PutJugBack(returnSeconds);
+            }
         }
 
         private void Update()
@@ -259,6 +336,7 @@ namespace Courtyard.Minigames
             _holding = false;
             SetStream(false);
             _counter.MilkJug.Interactable = false;
+            ShowCarried(false); // set down: the counter jug again
             PutJugBack(returnSeconds);
             if (_gauge != null) _gauge.Release();
 

@@ -17,6 +17,13 @@ namespace Courtyard.Core
 
         private Collider2D _collider;
 
+        /// <summary>The hand drawing shown while pressed (Hidden: a step draws its own hand).</summary>
+        public HandPose HandPose
+        {
+            get => handPose;
+            set => handPose = value;
+        }
+
         /// <summary>Raised for any target when it is pressed / released / hovered (used by the hands view).</summary>
         public static event Action<Transform, HandPose> AnyPressed;
         public static event Action<Transform> AnyReleased;

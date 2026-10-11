@@ -66,12 +66,19 @@ MonoBehaviour:
   pourReach: 0.6
   follow: 14
   tiltDegrees: 35
+  pourHeight: 0.55
   tiltSpeed: 10
   returnSeconds: 0.25
   milkColour: {r: 0.957, g: 0.929, b: 0.886, a: 1}
   spoutInSprite: {x: 0.03, y: 0.95}
   dropSprite: {fileID: 21300000, guid: 3d0f7eab1c2c2462ba09eb7b1d63e185, type: 3}
   dropSize: {x: 0.07, y: 0.12}
+  carrySprites:
+  - {fileID: 3449810739686773777, guid: c6d301948e2534a2c8a679c3e556d484, type: 3}
+  - {fileID: -187974465337424164, guid: df3880f38933f4005906fba9bd6f471d, type: 3}
+  artJugCentre: {x: 358, y: 68}
+  artSpout: {x: 396, y: 1}
+  artJugHeight: 136
   foamLeft: 0.35
   pourPitch: 1.2
   pourVolume: 0.6

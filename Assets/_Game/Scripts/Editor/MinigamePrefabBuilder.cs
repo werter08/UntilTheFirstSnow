@@ -236,9 +236,14 @@ namespace Courtyard.Editor
             var steps = builders.ToDictionary(
                 b => b.name,
                 b => LoadOrCreatePrefab(Folder + b.name + ".prefab", b.build, overwrite).GetComponent<MinigameStep>());
-            // Milk drops: soft white rounds, not the kettle's drawn water streaks.
+            // Milk drops: soft white rounds, not the kettle's drawn water streaks. Carried: the team's arm-and-jug drawing.
+            var carried = new[] { "Grey", "Beige" }.Select(CarriedJug).ToArray(); // indexed by Sweater
             Patch(Folder + PourMilk + ".prefab", root =>
-                Wire(root.GetComponent<PourMilkStep>(), "dropSprite", UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/FX/glow_radial.png")));
+            {
+                var step = root.GetComponent<PourMilkStep>();
+                Wire(step, "dropSprite", UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/FX/glow_radial.png"));
+                if (carried.All(c => c != null)) WireArray(step, "carrySprites", carried);
+            });
             return steps;
         }
 
@@ -397,6 +402,24 @@ namespace Courtyard.Editor
                     Property(so, "spoonCountText").stringValue = "{0}/{1}"; // just the count: 0/2
                     Property(so, "countScale").floatValue = 0.45f;
                 }));
+        }
+
+        /// <summary>The arm holding the milk jug, sliced 1:1 from the team's sheet (one per sleeve), imported as a sprite.</summary>
+        private static Object CarriedJug(string sleeve)
+        {
+            var path = $"Assets/_Game/Art/Sprites/Hands/Hand_MilkJug_{sleeve}.png";
+            if (UnityEditor.AssetImporter.GetAtPath(path) is UnityEditor.TextureImporter importer &&
+                (importer.textureType != UnityEditor.TextureImporterType.Sprite || importer.mipmapEnabled))
+            {
+                importer.textureType = UnityEditor.TextureImporterType.Sprite;
+                importer.spriteImportMode = UnityEditor.SpriteImportMode.Single;
+                importer.spritePixelsPerUnit = 100f;
+                importer.mipmapEnabled = false;
+                importer.alphaIsTransparency = true;
+                importer.SaveAndReimport();
+            }
+
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
         /// <summary>On milk days the coffee fills only part of the cup; the player pours the steamed milk on top.</summary>
