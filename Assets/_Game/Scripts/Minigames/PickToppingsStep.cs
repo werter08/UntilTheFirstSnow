@@ -138,6 +138,7 @@ namespace Courtyard.Minigames
             jar.SetPortions(_portions[jar.Topping]);
             _counter.AddSpice(jar.SprinkleColour);
             AudioManager.Play(SfxId.Topping);
+            CameraShake.Kick(0.02f, 0.15f);
             _fx.Burst(_counter.MugTop, jar.SprinkleColour, 10, 0.8f, 0.05f, 1f);
             _fx.Punch(_counter.Mug.transform, 0.5f);
 

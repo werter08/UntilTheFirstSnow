@@ -86,6 +86,7 @@ namespace Courtyard.Kitchen
 
             Popup(perfectText, worldPosition);
             Burst(worldPosition, perfectSparkle, 18, 2.2f, 0.12f, -0.2f);
+            CameraShake.Kick(0.05f, 0.3f);
         }
 
         /// <summary>A badly made drink: frost crystals and cold mist over the mug, "Brr…", the camera shivers.</summary>
@@ -95,7 +96,8 @@ namespace Courtyard.Kitchen
             Popup(chillText, top + Vector3.up * 0.5f, chillTextColour, 0.7f);
             Burst(top, frostColour, 40, 2.2f, 0.11f, 0.35f);
             Puff(top, mistColour, 16, 1f, 0.7f, -0.1f);
-            if (shakeTarget != null) yield return Shake(shakeTarget);
+            CameraShake.Kick(shakeAmount * 1.6f, shakeSeconds); // a cold shiver
+            yield return new WaitForSeconds(shakeSeconds);
             yield return new WaitForSeconds(chillHoldSeconds);
         }
 
@@ -142,6 +144,7 @@ namespace Courtyard.Kitchen
             if (steam != null) steam.Emit(12);
             AudioManager.Play(SfxId.MugClink);
             Punch(mug, 1.2f);
+            CameraShake.Kick(0.04f, 0.25f); // the cup set down: a soft thump
             Puff(mugTop, warmGlow, 8, 0.6f, 0.45f, -0.15f);
             yield return new WaitForSeconds(serveHoldSeconds);
         }

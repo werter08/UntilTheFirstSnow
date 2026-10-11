@@ -98,6 +98,7 @@ namespace Courtyard.Minigames
             AudioManager.StopLoop(SfxId.KettleBoil, 0.1f);
             AudioManager.Play(SfxId.KettleDone);
             _fx.Punch(_counter.KettleBody.transform);
+            CameraShake.Kick(0.03f, 0.18f);
 
             var distance = _heat < bandMin ? bandMin - _heat : _heat > bandMax ? _heat - bandMax : 0f;
             var quality = 1f - distance / qualityFalloff;

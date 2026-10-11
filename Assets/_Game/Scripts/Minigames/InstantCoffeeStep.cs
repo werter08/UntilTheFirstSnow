@@ -229,6 +229,7 @@ namespace Courtyard.Minigames
             UpdateSpoonCount();
             if (_spoonCount != null) _fx.Punch(_spoonCount.transform, 0.6f);
             AudioManager.Play(SfxId.SpoonTink);
+            CameraShake.Kick(0.015f, 0.12f);
             _fx.Punch(_counter.Mug.transform);
             _fx.Burst(_counter.MugTop, coffeeColor, 8, 0.9f, 0.06f);
 

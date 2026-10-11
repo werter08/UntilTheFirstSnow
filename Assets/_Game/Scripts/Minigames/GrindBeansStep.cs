@@ -267,6 +267,7 @@ namespace Courtyard.Minigames
                     if (_counter.DripperOnMug) _fx.Throw(_counter.GrinderOutlet, _counter.DripperTop, grounds, 3, 0.3f);
                     else _fx.Burst(_counter.GrinderArm.position + Vector3.down * 1.9f, grounds, 3, 0.6f, 0.05f);
                     _fx.Punch(_counter.GrinderArm.parent, 0.08f);
+                    CameraShake.Kick(0.012f, 0.12f); // the burr bites
                 }
 
                 // Grounds pile up in the V60 as soon as some have fallen in.

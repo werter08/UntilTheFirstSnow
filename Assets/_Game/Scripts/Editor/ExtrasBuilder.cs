@@ -31,6 +31,8 @@ namespace Courtyard.Editor
                 Star(kitchen, director);
                 SillContents(kitchen, director);
                 MorningNoteOrder(kitchen);
+                var camera = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<Camera>(true)).FirstOrDefault(c => c != null && c.CompareTag("MainCamera"));
+                if (camera != null && camera.GetComponent<CameraShake>() == null) camera.gameObject.AddComponent<CameraShake>();
                 var hands = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<HandsView>(true)).FirstOrDefault(h => h != null);
                 if (hands != null)
                     Edit(hands, so =>

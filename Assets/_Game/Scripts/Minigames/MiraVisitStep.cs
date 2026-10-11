@@ -22,7 +22,10 @@ namespace Courtyard.Minigames
         private IEnumerator Visit(MinigameContext ctx)
         {
             AudioManager.Play(SfxId.Knock);
-            yield return new WaitForSeconds(knockDelaySeconds);
+            Kitchen.CameraShake.Kick(0.09f, 0.18f); // took —
+            yield return new WaitForSeconds(0.28f);
+            Kitchen.CameraShake.Kick(0.09f, 0.22f); // — took
+            yield return new WaitForSeconds(Mathf.Max(0f, knockDelaySeconds - 0.28f));
             ctx.Kitchen.SetMiraWindow(MiraWindowState.Dark);
 
             if (ctx.Fader != null) yield return ctx.Fader.FadeOut(Color.black, fadeOutSeconds);

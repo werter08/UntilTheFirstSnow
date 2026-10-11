@@ -365,6 +365,7 @@ namespace Courtyard.Minigames
                 _fx.Burst(top + Vector3.left * half, milkColour, 6, 0.5f, 0.06f, 1.5f);
                 _fx.Burst(top + Vector3.right * half, milkColour, 6, 0.5f, 0.06f, 1.5f);
                 quality = spilledQuality;
+                CameraShake.Kick(0.07f, 0.35f);
                 Explain(_fx, spilledText, _counter.MugBody);
             }
             else if (level >= greenMin && level <= greenMax)
