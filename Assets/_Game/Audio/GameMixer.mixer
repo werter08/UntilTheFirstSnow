@@ -90,7 +90,14 @@ AudioMixerController:
     name: SfxVolume
   - guid: 3908dc603552a433c9e758de5295a9a4
     name: UiVolume
-  m_AudioMixerGroupViews: []
+  m_AudioMixerGroupViews:
+  - guids:
+    - 90cbf30b7df2a49bea67a2c6d699c4b3
+    - b5954db8983be4b9e899f2df779e03d9
+    - 248bb3337a46d414a8cbb26e45a364f5
+    - 6fb024ea77297466e8b524cccf9122a4
+    - 2f19e25fe4af245c694b6622a3eabb5d
+    name: View
   m_CurrentViewIndex: 0
   m_TargetSnapshot: {fileID: 24500006}
 --- !u!243 &24300002
@@ -140,7 +147,7 @@ AudioMixerSnapshotController:
   m_AudioMixer: {fileID: 24100000}
   m_SnapshotID: 38fdbdb7f66b440ddb8ae807d4e3379d
   m_FloatValues:
-    0c003cb4e2c954e8eb92d709084dd3f2: -80
+    0c003cb4e2c954e8eb92d709084dd3f2: 1
     2f2db8bc3a938483bbf5217ddda62761: 22000
   m_TransitionOverrides: {}
 --- !u!243 &1150290139741891243

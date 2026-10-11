@@ -58,13 +58,10 @@ MonoBehaviour:
     condition: 0
     style: 1
     speaker: 
-    text: 'Sound effects: Polarsound Productions, MorphCore, Kenney (CC0), Freesound
-      contributors
+    text: 'Sound effects: Freesound contributors
 
-      Decor: ODDBLOT
-
-      Fonts: Amaranth, Playpen Sans (SIL
-      OFL)'
+      Fonts: Amaranth, Playpen
+      Sans (SIL OFL)'
     setsMiraWindow: 0
     miraWindowAfter: 0
   - trigger: 2
