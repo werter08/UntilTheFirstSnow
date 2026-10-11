@@ -80,6 +80,8 @@ MonoBehaviour:
   artJugCentre: {x: 358, y: 68}
   artSpout: {x: 396, y: 1}
   artJugHeight: 136
+  carriedTiltDegrees: 10
+  sleeveBendDegrees: 0
   foamLeft: 0.35
   pourPitch: 1.2
   pourVolume: 0.6

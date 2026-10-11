@@ -62,9 +62,9 @@ namespace Courtyard.Minigames
         [SerializeField] private Vector2 artSpout = new(396f, 1f);
         [SerializeField, Min(1f)] private float artJugHeight = 136f;
         [Tooltip("Tilt while pouring with the drawing (the whole arm turns with it, so less than the bare jug's).")]
-        [SerializeField] private float carriedTiltDegrees = 18f;
-        [Tooltip("The continued sleeve bends down by this much, so the arm comes from the lower right like the other hands.")]
-        [SerializeField] private float sleeveBendDegrees = 28f;
+        [SerializeField] private float carriedTiltDegrees = 10f;
+        [Tooltip("Turns the continued sleeve off the drawn sleeve's line (0: it simply carries on, no visible joint).")]
+        [SerializeField] private float sleeveBendDegrees;
         [Tooltip("The foam on top of the jug shrinks to this as the milk pours out.")]
         [SerializeField, Range(0f, 1f)] private float foamLeft = 0.35f;
         [SerializeField, Min(0.1f)] private float pourPitch = 1.2f;

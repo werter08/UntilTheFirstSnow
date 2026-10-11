@@ -19,6 +19,9 @@ namespace Courtyard.Kitchen
         [SerializeField, Range(0f, 1f)] private float hoverAlpha = 0.85f;
         [SerializeField, Min(0.01f)] private float followSmoothing = 18f;
         [SerializeField, Min(0.01f)] private float fadeSpeed = 10f;
+        [Tooltip("The game's cursor, set again whenever it comes back (hiding it resets it to the system arrow).")]
+        [SerializeField] private Texture2D cursorTexture;
+        [SerializeField] private Vector2 cursorHotspot;
 
         private readonly HashSet<Transform> _hovered = new();
         private SpriteRenderer[] _renderers;
@@ -97,7 +100,7 @@ namespace Courtyard.Kitchen
 
         private void OnDisable()
         {
-            Cursor.visible = true;
+            ShowCursor(true);
             PointerTarget.AnyPressed -= OnGrab;
             PointerTarget.AnyReleased -= OnRelease;
             PointerTarget.AnyHoverStarted -= OnHoverStarted;
@@ -141,7 +144,17 @@ namespace Courtyard.Kitchen
 
             // Like most games with on-screen hands: the hand replaces the cursor while it's there (over something usable,
             // or holding something — including a step's own drawn hand); the cursor is back everywhere else.
-            Cursor.visible = !(holding || hovering);
+            ShowCursor(!(holding || hovering));
+        }
+
+        private bool? _cursorShown;
+
+        private void ShowCursor(bool shown)
+        {
+            if (_cursorShown == shown) return;
+            _cursorShown = shown;
+            if (shown && cursorTexture != null) Cursor.SetCursor(cursorTexture, cursorHotspot, CursorMode.Auto);
+            Cursor.visible = shown;
         }
 
         private void SetPose(HandPose pose)

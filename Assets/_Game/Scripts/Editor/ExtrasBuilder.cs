@@ -31,6 +31,13 @@ namespace Courtyard.Editor
                 Star(kitchen, director);
                 SillContents(kitchen, director);
                 MorningNoteOrder(kitchen);
+                var hands = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<HandsView>(true)).FirstOrDefault(h => h != null);
+                if (hands != null)
+                    Edit(hands, so =>
+                    {
+                        so.FindProperty("cursorTexture").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Game/Art/UI/cursor.png");
+                        so.FindProperty("cursorHotspot").vector2Value = CursorHotspot;
+                    });
 
                 var runner = scene.GetRootGameObjects().Select(g => g.GetComponentInChildren<LevelRunner>(true)).First(r => r != null);
                 var canvas = scene.GetRootGameObjects().First(g => g.name == "Canvas").transform;

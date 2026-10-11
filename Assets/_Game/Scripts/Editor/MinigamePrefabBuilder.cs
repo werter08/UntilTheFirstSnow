@@ -242,6 +242,8 @@ namespace Courtyard.Editor
             {
                 var step = root.GetComponent<PourMilkStep>();
                 Wire(step, "dropSprite", UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/FX/glow_radial.png"));
+                Wire(step, "carriedTiltDegrees", 10f); // the whole arm turns with the jug: keep it low
+                Wire(step, "sleeveBendDegrees", 0f);   // the sleeve carries straight on (a bend showed a joint)
                 Wire(step, "sleeves", UnityEditor.AssetDatabase.LoadAssetAtPath<Kitchen.SleeveLibrary>("Assets/_Game/Data/Art/SleeveLibrary.asset"));
                 if (carried.All(c => c != null)) WireArray(step, "carrySprites", carried);
             });

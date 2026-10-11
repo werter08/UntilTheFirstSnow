@@ -30,6 +30,11 @@ namespace Courtyard.UI
 
         public bool IsOpen { get; private set; }
 
+        /// <summary>The fridge note on the card right now (null for other pages: the calendar, the recipe).</summary>
+        public FridgeNote CurrentNote { get; private set; }
+
+        private FridgeNote _pendingNote;
+
         /// <summary>Raised when a note is opened (the end-of-day moment waits for the player to read it).</summary>
         public event Action Opened;
 
@@ -38,6 +43,7 @@ namespace Courtyard.UI
         public void Open(FridgeNote note, NotePaper paper = NotePaper.Yellow)
         {
             if (note == null) return;
+            _pendingNote = note;
             Open(note.Text, note.From, paper);
         }
 
@@ -45,6 +51,8 @@ namespace Courtyard.UI
         public void Open(string text, string from, NotePaper paper = NotePaper.Yellow)
         {
             UsePaper(paper);
+            CurrentNote = _pendingNote; // the fridge note being opened, or null for any other page
+            _pendingNote = null;
             body.text = text;
             signature.text = string.IsNullOrEmpty(from) ? string.Empty : "— " + from;
             IsOpen = true;

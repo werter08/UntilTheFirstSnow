@@ -509,8 +509,10 @@ namespace Courtyard.Core
             var card = kitchen.NoteCard;
             if (slot == null || card == null) yield break;
 
+            // Only the new note ends the day: reading an older note, the calendar or the recipe doesn't.
+            var newNote = slot.TryGetComponent<ReadableNote>(out var readable) ? readable.Note : null;
             var opened = false;
-            void OnOpened() => opened = true;
+            void OnOpened() => opened |= newNote == null || card.CurrentNote == newNote;
             card.Opened += OnOpened;
             AwaitingNote = slot;
             hint.Show(newNoteHint);
@@ -522,7 +524,7 @@ namespace Courtyard.Core
             }
 
             hint.Hide();
-            while (card.IsOpen) yield return null;
+            while (card.IsOpen && card.CurrentNote == newNote) yield return null;
             card.Opened -= OnOpened;
             AwaitingNote = null;
         }
